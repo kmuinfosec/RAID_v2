@@ -1,20 +1,24 @@
 import os
+import sys
 
 import pandas as pd
-
+import multiprocessing as mp
+import numpy as np
 
 from scapy.all import *
-import os
 from tqdm import tqdm
 
+from Utils import get_dir
 
-def make_pcap_payload(pcap_file):
-    if os.path.getsize(pcap_file) == 0:
-        return None
-    if not os.path.exists(folder_name):
-        os.mkdir(folder_name)
-    pkts = rdpcap(pcap_file)
-    for i, pkt in enumerate(pkts):
+
+def make_pcap_payload(pcap_path):
+    if os.path.getsize(pcap_path) == 0:
+        return []
+
+    pkts = rdpcap(pcap_path)
+    processed_pkts = []
+
+    for pkt in pkts:
         if pkt.haslayer('IP'):
             sip = pkt['IP'].src
             dip = pkt['IP'].dst
@@ -23,40 +27,47 @@ def make_pcap_payload(pcap_file):
             elif pkt.haslayer('UDP'):
                 protocol = 'UDP'
             else:
-                with open(rf"{folder_name}{os.sep}{i + 1}_{sip}_{dip}.txt", 'w', encoding='utf-8') as f:
-                    f.write(bytes(pkt['IP'].payload).hex() + '\n')
+                processed_pkts.append([pcap_path, sip, None, dip, None, bytes(pkt['IP'].payload).hex()])
                 continue
-            with open(rf"{folder_name}{os.sep}{i + 1}_{sip}_{pkt[protocol].sport}_{dip}_{pkt[protocol].dport}.txt",
-                        'w', encoding='utf-8') as f:
-                f.write(bytes(pkt[protocol].payload).hex() + '\n')
+            processed_pkts.append([pcap_path, sip, int(pkt[protocol].sport), dip, int(pkt[protocol].dport), bytes(pkt['IP'].payload).hex()])
         else:
             pass
+    return processed_pkts
 
+def get_parsed_packets(pcap_dir):
+    files = os.listdir(pcap_dir)
+    path_list = []
+
+    for file_name in files:
+        if os.path.splitext(file_name)[-1] == ".pcap":
+            path_list.append(os.path.join(pcap_dir, file_name))
+
+    process_count = os.cpu_count() // 2
+    data = []
+    with mp.Pool(process_count) as pool:    
+        for pkts_list in tqdm(pool.imap_unordered(make_pcap_payload, path_list), total=len(path_list)):
+            data += pkts_list
+
+    return data
+
+def preprocess(pcap_dir, csv_path=False):
+    data = get_parsed_packets(pcap_dir)
+
+    if csv_path:
+        df = pd.DataFrame(data=data, columns=['path', 'sip', 'sport', 'dip', 'dport', 'raw_payload'])
+        df.to_csv(os.path.join(csv_path, csv_path, "train_data.csv"), index=False)
+    
+    return data
 
 if __name__ == '__main__':
-    # pcap_path = r"test"
-    pcaps_path = r"C:\Lab\Project\KT\Data\20220419\211.216.98.60\Snort\result"
-    for pcap_file in tqdm(os.listdir(pcaps_path)):
-        pcap_path = os.path.join(pcaps_path, pcap_file)
-        make_pcap_payload(pcap_path, session=True) # PCAP 위치 넣어주기
+    if len(sys.argv) == 1:
+        pcap_dir = os.path.curdir
+    else:
+        pcap_dir = sys.argv[1]
 
-def get_packet_csv(path):
-    files = os.listdir(path)
-    flag = False
-    
-    df = pd.DataFrame()
+    if len(sys.argv) < 3:
+        csv_path = get_dir(os.path.curdir)
+    else:
+        csv_path = get_dir(sys.argv[2], sys.argv[3])
 
-    with open()
-    for fn in files:
-        if os.path.splitext(fn)[-1] == ".pcap":
-            flag = True
-            
-
-def preprocess(pcap_path, result_path, result_dname):
-    if not os.path.exists(os.path.join(result_path, result_dname)):
-        os.mkdir(os.path.join(result_path, result_dname))
-    
-    pass
-
-if __name__ == '__main__':
-    preprocess()
+    preprocess(pcap_dir, csv_path)

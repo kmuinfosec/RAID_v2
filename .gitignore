@@ -1,0 +1,7 @@
+*/result/
+*.csv
+*/__pycache__
+__pycache__/
+*/*.pyc
+*/*.csv
+

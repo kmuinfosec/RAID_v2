@@ -45,12 +45,12 @@ def main(args):
             X = i[1][1]
             row_key = i[0]
             raid(X, threshold, 256, 3, row_key, os.path.join(result_path, key_name[k] + i[0]))
-            with open(os.path.join(result_path, key_name[k]+row_key, "result_data_merge.pkl"), "rb") as f:
-                result_data = pickle.load(f)
-                for c in result_data:
-                    if len(result_data[c]):
-                        result = [[decode(raw_p), c, len(result_data[c])] for raw_p in X]
-                        print(result_data[c])
+            # with open(os.path.join(result_path, key_name[k]+row_key, "result_data_merge.pkl"), "rb") as f:
+            #     result_data = pickle.load(f)
+            #     for c in result_data:
+            #         if len(result_data[c]):
+            #             result = [[decode(raw_p), c, len(result_data[c])] for raw_p in X]
+            #             print(result_data[c])
 
     # for k in range(len(key[:1])):
     

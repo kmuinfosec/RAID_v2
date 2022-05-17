@@ -4,7 +4,6 @@ from sklearn.cluster import AgglomerativeClustering
 
 from .Cosine import getCosinePairwise, getAverageVector, getCosineSimilarity, getProxyDistance
 
-
 def prototypeClustering(x_data, th, opt1=True):
 
     ready_list = [i for i in range(0, len(x_data))]
@@ -41,6 +40,7 @@ def prototypeClustering(x_data, th, opt1=True):
 
         if cluster_count==1:
             label_list[src_idx] = -1
+            cluster_idx -= 1
 
         ready_list = temp_ready_list
         cluster_idx += 1
@@ -59,7 +59,9 @@ def hierarchicalClustering(x_data, prev_label_list, th):
         vectors = [x_data[i] for i in idxs]
         centroid_list.append(getAverageVector(vectors))
 
-    if len(centroid_list)==1:
+    if len(centroid_list)==0:
+        return prev_label_list
+    elif len(centroid_list)==1:
         labels = np.array([0])
     else:
         labels = AgglomerativeClustering(n_clusters=None, affinity=getProxyDistance, linkage='single',

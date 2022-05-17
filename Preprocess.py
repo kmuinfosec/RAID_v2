@@ -33,7 +33,7 @@ def make_pcap_payload(pcap_path):
             sport = int(pkt[protocol].sport)
             dport = int(pkt[protocol].dport)
             detect_type = pcap_path.rsplit('_', 2)[1]
-            processed_pkts.append([detect_type, detect_type+'_'+dip+'_'+str(dport), detect_type + '_'+sip+'_'+str(dport),sip, sport, dip, dport, bytes(pkt[protocol].payload).hex()])
+            processed_pkts.append([detect_type, dip+'_'+str(dport), sip+'_'+str(dport),sip, sport, dip, dport, bytes(pkt[protocol].payload).hex()])
         else:
             pass
     return processed_pkts
@@ -66,6 +66,18 @@ def filter_null_payload(data):
     
     return data
 
+def separate_by_detect(data):
+    index_dict = {}
+    for idx, detect_type in enumerate(data[:, 0]):
+        if not detect_type in index_dict:
+            index_dict[detect_type] = []
+        index_dict[detect_type].append(idx)
+    
+    data_dict = {}
+    for detect_type in index_dict.keys():
+        data_dict[detect_type] = data[index_dict[detect_type]]
+    return data_dict
+
 def preprocess(pcap_dir, csv_path=False):
     data = get_parsed_packets(pcap_dir)
     data = np.array(data)
@@ -77,7 +89,9 @@ def preprocess(pcap_dir, csv_path=False):
                     header=','.join(data_key),
                     delimiter=',',
                     fmt="%s")
-    return filter_null_payload(data)
+    data = filter_null_payload(data)
+
+    return separate_by_detect(data)
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:

@@ -9,15 +9,15 @@ from Raid import raid
 from Group import group
 from tqdm import tqdm
 
-def decode(x):
-    l=[]
-    for i in range(0, len(x),2):
-        f = int(x[i:i+2],16)
-        if (f>=32)&(f<=126):
-            l.append(chr(f))
-        else:
-            l.append(x[i:i+2])
-    return "".join(l)
+# def decode(x):
+#     l=[]
+#     for i in range(0, len(x),2):
+#         f = int(x[i:i+2],16)
+#         if (f>=32)&(f<=126):
+#             l.append(chr(f))
+#         else:
+#             l.append(x[i:i+2])
+#     return "".join(l)
 
 def main(args):
     if len(args) == 1:
@@ -33,7 +33,7 @@ def main(args):
         threshold = float(args[4])
 
     print("Preprocess pcap files")
-    data = preprocess(pcap_dir, csv_path=result_path)
+    data = preprocess(pcap_dir, csv_path=False)
 
     # (1, 3) means ('dip|dport', 'sip'), (2, 6) means('sip|dport', 'dip'), card_th == top_k cardinality
     key = [(1, 3), (2, 5)]

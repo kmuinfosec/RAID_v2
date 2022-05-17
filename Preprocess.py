@@ -28,11 +28,12 @@ def make_pcap_payload(pcap_path):
             elif pkt.haslayer('UDP'):
                 protocol = 'UDP'
             else:
-                # processed_pkts.append([pcap_path, sip, None, dip, None, bytes(pkt['IP'].payload).hex()])
+                # processed_pkts.append([detect_rule, sip, None, dip, None, bytes(pkt['IP'].payload).hex()])
                 continue
             sport = int(pkt[protocol].sport)
             dport = int(pkt[protocol].dport)
-            processed_pkts.append([pcap_path, dip+'_'+str(dport), sip+'_'+str(dport),sip, sport, dip, dport, bytes(pkt['IP'].payload).hex()])
+            detect_type = pcap_path.rsplit('_', 2)[1]
+            processed_pkts.append([detect_type, detect_type+'_'+dip+'_'+str(dport), detect_type + '_'+sip+'_'+str(dport),sip, sport, dip, dport, bytes(pkt[protocol].payload).hex()])
         else:
             pass
     return processed_pkts
@@ -53,6 +54,18 @@ def get_parsed_packets(pcap_dir):
 
     return data
 
+def filter_null_payload(data):
+    data_idx = []
+    defore_len = len(data)
+    print(f"total payloads : {len(data)}", end="")
+    for idx, p in enumerate(data[:,-1]):
+        if len(p) > 0:
+            data_idx.append(idx)
+    data = data[data_idx]
+    print(f"\tfiltered 0-size payloads : {len(data)}")
+    
+    return data
+
 def preprocess(pcap_dir, csv_path=False):
     data = get_parsed_packets(pcap_dir)
     data = np.array(data)
@@ -64,8 +77,7 @@ def preprocess(pcap_dir, csv_path=False):
                     header=','.join(data_key),
                     delimiter=',',
                     fmt="%s")
-    
-    return data
+    return filter_null_payload(data)
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:

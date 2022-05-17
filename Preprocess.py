@@ -56,7 +56,6 @@ def get_parsed_packets(pcap_dir):
 
 def filter_null_payload(data):
     data_idx = []
-    defore_len = len(data)
     print(f"total payloads : {len(data)}", end="")
     for idx, p in enumerate(data[:,-1]):
         if len(p) > 0:

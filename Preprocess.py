@@ -78,7 +78,12 @@ def separate_by_detect(data):
     return data_dict
 
 def preprocess(pcap_dir, csv_path=False):
-    data = get_parsed_packets(pcap_dir)
+    if type(pcap_dir) == list:
+        data = []
+        for dir in pcap_dir:
+            data += get_parsed_packets(dir)
+    else:
+        data = get_parsed_packets(pcap_dir)
     data = np.array(data)
 
     if csv_path:

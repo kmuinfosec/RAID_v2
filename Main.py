@@ -39,9 +39,9 @@ def main(args):
     print("Clustering")
     for detect_type in topn_data_dict.keys():
         topn_data = topn_data_dict[detect_type]
+        detect_dir = get_dir(result_path, detect_type)
         for k in range(len(key)):
             for i in tqdm(topn_data[k]):
-                detect_dir = get_dir(result_path, detect_type)
                 cluster_dir = get_dir(detect_dir, key_name[k] + i[0])
                 X = i[1][1]
                 # result_dict = raid(X, threshold, 256, 3, i[0], cluster_dir)

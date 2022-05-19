@@ -11,3 +11,11 @@ def get_dir(result_path, result_dir=False):
         os.mkdir(os.path.join(result_path, result_dir))
 
     return os.path.join(result_path, result_dir)
+
+def write_csv(result_path, header, data):
+    col_num = len(data[0])
+    format_str = str(['{'+ str(i) +'}' for i in range(col_num)])[1:-1]
+    with open(result_path, 'w') as f:
+        f.write(','.join(header)+ '\n')
+        for d in data:
+            f.write(format_str.format(*d) + '\n')

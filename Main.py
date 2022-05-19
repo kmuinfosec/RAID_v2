@@ -6,7 +6,7 @@ import csv
 from Preprocess import preprocess
 from tqdm import tqdm
 
-from Utils import get_dir
+from Utils import get_dir, write_csv
 from Raid import raid
 from Group import group
 # from Extract import extract
@@ -26,12 +26,12 @@ def main(args):
         threshold = float(args[4])
 
     print("Preprocessing pcap files")
-    data = preprocess(pcap_dir, csv_path="./")
+    data = preprocess(pcap_dir, csv_path=os.path.join(result_path, "train_data.csv"))
 
 
     # (1, 3) means ('dip|dport', 'sip'), (2, 6) means('sip|dport', 'dip'), card_th == top_k cardinality
     key = [(1, 3), (2, 5)]
-    key_name = {0:'dip_dport', 1:'sip_dport'}
+    key_name = ['dip_dport', 'sip_dport']
     print(f"Grouping packets by {[key_name[i] for i in range(len(key_name))]}")
     topn_data_dict = group(data, key=key, card_th=5)
 
@@ -48,11 +48,13 @@ def main(args):
                 result_dict = raid(X, threshold, 256, 3, cluster_dir)
                 for ci in list(result_dict.keys()):
                     c_dict = result_dict[ci]
-                    with open(os.path.join(cluster_dir, f"{ci}_result.csv"), 'w', newline="") as cf:
-                        writer = csv.writer(cf)
-                        writer.writerow(['common_string', 'decoded_AE', 'decoded_payload'])
-                        for i in range(len(c_dict['decoded AE'])):
-                            writer.writerow([list(c_dict['common string']), c_dict['decoded AE'][i], c_dict['decoded payload'][i]])
+                    csv_data = [[   str(list(c_dict['common string'])),
+                                    str(c_dict['decoded AE'][i]),
+                                    str(c_dict['decoded payload'][i])
+                                ] for i in range(len(c_dict['decoded AE']))]
+                    write_csv(  os.path.join(cluster_dir, f"{ci}_result.csv"),
+                                ['common_string', 'decoded_AE', 'decoded_payload'],
+                                csv_data)
             
     return 0
 

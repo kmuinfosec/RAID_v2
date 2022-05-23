@@ -6,13 +6,12 @@ from pycallgraph3 import Config
 from pycallgraph3 import GlobbingFilter
 from pycallgraph3.output import GraphvizOutput
 
-from Main import main
+from Experiment import experiment
 from Utils import get_dir
 
 def call_graph_filtered(
     
         function_,
-        args,
         output_png="./call_graph_png",
         custom_include=None
 
@@ -24,15 +23,13 @@ def call_graph_filtered(
     graphviz = GraphvizOutput(output_file=output_png)
 
     with PyCallGraph(output=graphviz, config=config):
-        function_(args)
+        function_()
 
 def Analysis(args):
     call_graph_filtered(
-        main,
-        args,
+        experiment(),
         os.path.join("graph.png")
     )
 
 if __name__ == "__main__":
-
-    Analysis(sys.argv)
+    Analysis()

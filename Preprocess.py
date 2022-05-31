@@ -7,17 +7,18 @@ import numpy as np
 
 from scapy.all import *
 from tqdm import tqdm
+from itertools import repeat
 
 from Utils import get_dir, write_csv
 
 
-def make_pcap_payload(pcap_path):
+def make_pcap_payload(input_data):
+    pcap_path, detect_type_flag = input_data
     if os.path.getsize(pcap_path) == 0:
         return []
 
     pkts = rdpcap(pcap_path)
     processed_pkts = []
-
     for pkt in pkts:
         if pkt.haslayer('IP'):
             sip = pkt['IP'].src
@@ -32,14 +33,16 @@ def make_pcap_payload(pcap_path):
                 continue
             sport = int(pkt[protocol].sport)
             dport = int(pkt[protocol].dport)
-            # detect_type = pcap_path.rsplit('_', 2)[1]
-            detect_type = "result"
+            if detect_type_flag:
+                detect_type = pcap_path.rsplit('_', 2)[1]
+            else:
+                detect_type = "result"
             processed_pkts.append([detect_type, dip+'_'+str(dport), sip+'_'+str(dport),sip, sport, dip, dport, pcap_path, bytes(pkt[protocol].payload).hex()])
         else:
             pass
     return processed_pkts
 
-def get_parsed_packets(pcap_dir):
+def get_parsed_packets(pcap_dir, detect_type_flag):
     files = os.listdir(pcap_dir)
     path_list = []
 
@@ -50,7 +53,7 @@ def get_parsed_packets(pcap_dir):
     process_count = os.cpu_count() // 2
     data = []
     with mp.Pool(process_count) as pool:    
-        for pkts_list in tqdm(pool.imap_unordered(make_pcap_payload, path_list, chunksize=1), total=len(path_list)):
+        for pkts_list in tqdm(pool.imap_unordered(make_pcap_payload, zip(path_list, repeat(detect_type_flag)), chunksize=10), total=len(path_list)):
             data += pkts_list
     return data
 
@@ -63,7 +66,7 @@ def filter_null_payload(data):
 
 def separate_by_detect(data):
     data_dict = {}
-    for idx, d in enumerate(data):
+    for d in data:
         detect_type = d[0]
         if not detect_type in data_dict:
             data_dict[detect_type] = []
@@ -71,14 +74,14 @@ def separate_by_detect(data):
 
     return data_dict
 
-def preprocess(pcap_dir, csv_path=False):
+def preprocess(pcap_dir, detect_type_flag, csv_path=False):
     mp.freeze_support()
     if isinstance(pcap_dir, list):
         data = []
         for dir in pcap_dir:
-            data += get_parsed_packets(dir)
+            data += get_parsed_packets(dir, detect_type_flag)
     else:
-        data = get_parsed_packets(pcap_dir)
+        data = get_parsed_packets(pcap_dir, detect_type_flag)
 
     if csv_path:
         data_key = ['data_type', 'dip_dport', 'sip_dport', 'sip', 'sport', 'dip', 'dport', 'path', 'raw_payload']

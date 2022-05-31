@@ -19,7 +19,8 @@ def experiment():
                 [os.path.join(pcap_path, dir) for dir in pcap_dir],
                 r"C:\Users\user\spectator05\RAID_IoT-DDoS\result",
                 f"4th_{i}_dataset_0.8",
-                0.8
+                0.8,
+                False
             ])
 
 

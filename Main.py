@@ -1,7 +1,5 @@
 import sys
 import os
-import pickle
-import csv
 
 from Preprocess import preprocess
 from tqdm import tqdm
@@ -37,27 +35,34 @@ def main(args):
 
 
     print("Clustering")
+    # per detect_type (if detect_type)
     for detect_type in topn_data_dict.keys():
-        if len(detect_type) <6:
+        if len(detect_type) < 7:
             topn_data = topn_data_dict[detect_type]
             detect_dir = get_dir(result_path, detect_type)
-            with open(os.path.join(detect_dir, "group_clustering_result.csv"), "w") as f:
-                f.write("group, key_card, group_packet, cluster, cluster_packet" + '\n')
-                for k in range(len(key)):
-                    for i in tqdm(topn_data[k]):
-                        cluster_dir = get_dir(detect_dir, key_name[k] + i[0])
-                        X = i[1][1]
-                        result_dict = raid(X, threshold, 256, 3, cluster_dir)
-                        for ci in list(result_dict.keys()):
-                            c_dict = result_dict[ci]
-                            csv_data = [[   str(list(c_dict['common string'])),
-                                            str(c_dict['decoded AE'][i]),
-                                            str(c_dict['decoded payload'][i])
-                                        ] for i in range(len(c_dict['decoded AE']))]
-                            write_csv(  os.path.join(cluster_dir, f"{ci}_result.tsv"),
-                                        ['common_string', 'decoded_AE', 'decoded_payload'],
-                                        csv_data)
-                            f.write(','.join([key_name[k] + str(i[0]), str(len(i[1][0])), str(len(i[1][1])), str(ci), str(len(c_dict['decoded AE'])), '\n']))
+            summary_list = []
+    # per key(DIP||DPORT, ...)
+            for k in range(len(key)):
+    # per group(top k)
+                for i in tqdm(topn_data[k]):
+                    cluster_dir = get_dir(detect_dir, key_name[k] + i[0])
+                    X = i[1][1]
+                    result_dict = raid(X, threshold, 256, 3, cluster_dir)
+    # per cluster
+                    for ci in list(result_dict.keys()):
+                        c_dict = result_dict[ci]
+                        csv_data = [[   str(list(c_dict['common string'])),
+                                        str(c_dict['decoded AE'][i]),
+                                        str(c_dict['decoded payload'][i])
+                                    ] for i in range(len(c_dict['decoded AE']))]
+                        write_csv(  os.path.join(cluster_dir, f"{ci}_result.csv"),
+                                    ['common_string', 'decoded_AE', 'decoded_payload'],
+                                    csv_data)
+                        summary_list.append([key_name[k] + str(i[0]), str(len(i[1][0])), str(len(i[1][1])), str(ci), str(len(c_dict['decoded AE']))])
+
+            write_csv(  os.path.join(detect_dir, "group_clustering_summary.csv"),
+                        ['group', 'key_card', 'group_packet', 'cluster', 'cluster_packet'],
+                        summary_list)
                 
     return 0
 

@@ -32,8 +32,8 @@ def make_pcap_payload(pcap_path):
                 continue
             sport = int(pkt[protocol].sport)
             dport = int(pkt[protocol].dport)
-            detect_type = pcap_path.rsplit('_', 2)[1]
-            # detect_type = "temp"
+            # detect_type = pcap_path.rsplit('_', 2)[1]
+            detect_type = "result"
             processed_pkts.append([detect_type, dip+'_'+str(dport), sip+'_'+str(dport),sip, sport, dip, dport, pcap_path, bytes(pkt[protocol].payload).hex()])
         else:
             pass

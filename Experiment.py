@@ -12,7 +12,7 @@ def experiment():
     #         0.8
     #     ])
     #example
-    for i in range(1, 5):
+    for i in range(1, 2):
         pcap_path = rf"C:\Users\user\Downloads\20220510_캡춰_20220518_전달\20220510_캡춰_20220518_전달\4_{i}"
         pcap_dir = os.listdir(pcap_path)
         main([  'secret moon is best',

@@ -56,14 +56,14 @@ def main(args):
     # per cluster
                 for ci in list(result_dict.keys()):
                     c_dict = result_dict[ci]
-                    csv_data = [[   str(list(c_dict['common string'])),
-                                    str(c_dict['decoded AE'][i]),
-                                    str(c_dict['decoded payload'][i])
+                    csv_data = [[   list(c_dict['common string']),
+                                    c_dict['decoded AE'][i],
+                                    c_dict['decoded payload'][i]
                                 ] for i in range(len(c_dict['decoded AE']))]
                     write_csv(  os.path.join(cluster_dir, f"{ci}_result.csv"),
                                 ['common_string', 'decoded_AE', 'decoded_payload'],
                                 csv_data)
-                    summary_list.append([key_name[k] + str(i[0]), str(len(i[1][0])), str(len(i[1][1])), str(ci), str(len(c_dict['decoded AE']))])
+                    summary_list.append([key_name[k] + i[0], len(i[1][0]), len(i[1][1]), ci, len(c_dict['decoded AE'])])
 
         write_csv(  os.path.join(detect_dir, "group_clustering_summary.csv"),
                     ['group', 'key_card', 'group_packet', 'cluster', 'cluster_packet'],

@@ -47,7 +47,7 @@ def get_parsed_packets(pcap_dir, detect_type_flag):
     path_list = []
 
     for file_name in files:
-        if os.path.splitext(file_name)[-1] == ".pcap" or ".done":
+        if (os.path.splitext(file_name)[-1] == ".pcap") or (os.path.splitext(file_name)[-1] ==".done"):
             path_list.append(os.path.join(pcap_dir, file_name))
 
     process_count = os.cpu_count() // 2

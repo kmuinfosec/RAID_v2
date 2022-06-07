@@ -58,7 +58,7 @@ def main(args):
                     c_dict = result_dict[ci]
                     csv_data = [[   list(c_dict['common string']),
                                     c_dict['decoded AE'][i],
-                                    c_dict['decoded payload'][i]
+                                    str(c_dict['decoded payload'][i])
                                 ] for i in range(len(c_dict['decoded AE']))]
                     write_csv(  os.path.join(cluster_dir, f"{ci}_result.csv"),
                                 ['common_string', 'decoded_AE', 'decoded_payload'],

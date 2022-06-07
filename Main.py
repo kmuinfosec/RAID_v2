@@ -63,10 +63,13 @@ def main(args):
                     write_csv(  os.path.join(cluster_dir, f"{ci}_result.csv"),
                                 ['common_string', 'decoded_AE', 'decoded_payload'],
                                 csv_data)
-                    summary_list.append([key_name[k] + i[0], len(i[1][0]), len(i[1][1]), ci, len(c_dict['decoded AE'])])
+                    key_card = set()
+                    for idx in c_dict['index']:
+                        key_card.add(i[1][0][idx])
+                    summary_list.append([key_name[k] + i[0], len(set(i[1][0])), len(i[1][1]), len(key_card) ,ci, len(c_dict['decoded AE'])])
 
         write_csv(  os.path.join(detect_dir, "group_clustering_summary.csv"),
-                    ['group', 'key_card', 'group_packet', 'cluster', 'cluster_packet'],
+                    ['group', 'key_card', 'group_packet', 'cluster_key_card', 'cluster', 'cluster_packet'],
                     summary_list)
 
 

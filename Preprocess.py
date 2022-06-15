@@ -17,7 +17,7 @@ def make_pcap_payload(input_data):
     if os.path.getsize(pcap_path) == 0:
         return []
 
-    pkts = rdpcap(pcap_path)
+    pkts = PcapReader(pcap_path)
     processed_pkts = []
     for pkt in pkts:
         if pkt.haslayer('IP'):

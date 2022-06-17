@@ -24,12 +24,14 @@ def raid(payloads, th, vec_size, win_size, save_path=False):
             ans[label] = {
                 'common string': set(chunks_list[idx]),
                 'decoded AE': [],
-                'decoded payload': []
+                'decoded payload': [],
+                'index' : []
             }
 
         ans[label]['common string'].intersection_update(chunks_list[idx])
         ans[label]['decoded AE'].append(chunks_list[idx])
         ans[label]['decoded payload'].append(decode(payloads[idx]))
+        ans[label]['index'].append(idx)
 
     if save_path:
         with open(os.path.join(save_path, 'result_data_merge.pkl'), 'wb') as f:

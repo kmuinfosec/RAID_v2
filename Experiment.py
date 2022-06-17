@@ -12,15 +12,17 @@ def experiment():
     #         0.8
     #     ])
     #example
-    for i in range(1, 2):
-        pcap_path = rf"C:\Users\user\Downloads\20220510_캡춰_20220518_전달\20220510_캡춰_20220518_전달\4_{i}"
+
+    for p in os.listdir(rf"C:\Workspace\kukmin_lab\KT\RAID_v2-main\RAID_v2\Dataset\no.6\Impossible_CVE_20220613/"):
+        pcap_path = rf"C:\Workspace\kukmin_lab\KT\RAID_v2-main\RAID_v2\Dataset\no.6\Impossible_CVE_20220613/{p}"
         pcap_dir = os.listdir(pcap_path)
         main([  'secret moon is best',
                 [os.path.join(pcap_path, dir) for dir in pcap_dir],
-                r"C:\Users\user\spectator05\RAID_IoT-DDoS\result",
-                f"4th_{i}_dataset_0.8",
-                0.8,
-                False
+                r"C:\Workspace\kukmin_lab\KT\RAID_v2-main\RAID_v2\res",
+                p,
+                0.6,
+                False,
+                True
             ])
 
 

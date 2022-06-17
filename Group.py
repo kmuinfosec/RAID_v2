@@ -26,10 +26,19 @@ def get_topn_key(data, key, card_th):
         
     return topn_data
 
-def group(data_dict, key, card_th):
+def all_keys(data):
+    payloads = [i[-1] for i in data]
+    
+    all_d = [[('all',[{'all'},payloads])]]
+    return all_d
+
+def group(data_dict, key, card_th,all=False):
     for detect_type in data_dict.keys():
         data = data_dict[detect_type]
-        data_dict[detect_type] = get_topn_key(data, key, card_th)
+        if all:
+            data_dict[detect_type] = all_keys(data)
+        else:
+            data_dict[detect_type] = get_topn_key(data, key, card_th)
 
     return data_dict
     

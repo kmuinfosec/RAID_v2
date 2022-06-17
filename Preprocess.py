@@ -43,7 +43,10 @@ def make_pcap_payload(input_data):
     return processed_pkts
 
 def get_parsed_packets(pcap_dir, detect_type_flag):
-    files = os.listdir(pcap_dir)
+    if os.path.isdir(pcap_dir):
+        files = os.listdir(pcap_dir)
+    else:
+        files = [pcap_dir]
     path_list = []
 
     for file_name in files:

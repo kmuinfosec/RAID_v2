@@ -87,6 +87,10 @@ def main(args):
                                 ['signature', 'frequency'],
                                 ret)
                     
+                    common_signature_result = [[x[0], list(x[1])] for x in common_signatures.items()]
+                    write_csv(   os.path.join(cluster_dir, "cluster_unique_signature_summary.csv"),
+                                    ['cluster', 'unique signature'],
+                                    common_signature_result)
                     
                     csv_data = [[   list(c_dict['common string']),
                                     c_dict['decoded AE'][i],
@@ -102,10 +106,7 @@ def main(args):
                     #     key_card.add(i[1][0][idx])
                     summary_list.append([key_name[k] + i[0], len(set(i[1][0])), len(i[1][1]), len(key_card) ,ci, len(c_dict['decoded AE'])])
 
-        ret = [[x[0], list(x[1])] for x in common_signatures.items()]
-        write_csv(   os.path.join(cluster_dir, "cluster_unique_signature_summary.csv"),
-                             ['cluster', 'unique signature'],
-                             ret)
+                
 
         write_csv(  os.path.join(detect_dir, "group_clustering_summary.csv"),
                     ['group', 'key_card', 'group_packet', 'cluster_key_card', 'cluster', 'cluster_packet'],

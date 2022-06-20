@@ -15,7 +15,7 @@ def experiment():
     #         0.8
     #     ])
     #example
-    pcap_path = rf"C:\Users\seclab\Downloads\6th_dataset\Impossible_CVE_20220613\DNSmasq_sort_rrset_Heap_OOB_Write_CVE-2020-25683"
+    pcap_path = rf"C:\Users\seclab\Downloads\6th_dataset\Possible_CVE_20220613\Elastic_Kibana_Timelion_Prototype_Pollution_Remote_Code_Execution_CVE-2019-7609"
     pcap_dir = os.listdir(pcap_path)
     main([  'secret moon is best',
             [os.path.join(pcap_path, dir) for dir in pcap_dir],
@@ -23,7 +23,7 @@ def experiment():
             get_dir(os.getcwd()),
             0.6,
             False,
-            True
+            False
         ])
 
 

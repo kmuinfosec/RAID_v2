@@ -73,9 +73,20 @@ def main(args):
                     # extracting signatures and writing on csv
                     dhh_result = doubleHeavyHitters(c_dict['decoded payload'], hh1_size=200, hh2_size=200, ratio=0.6)
                     ret = [list(x) for x in sorted(dhh_result.items(), key=lambda x:x[1], reverse=True)]
+
+                    ## finding common signature
+                    for x, _ in ret:
+                        flag = True
+                        for payload in c_dict['decoded payload']:
+                            if x not in payload:
+                                flag = False
+                                break
+                        if flag:
+                            common_signatures[ci].add(x)
                     write_csv(  os.path.join(dhh_dir, f"{ci}_result_ToN.csv"),
                                 ['signature', 'frequency'],
                                 ret)
+                    
                     
                     csv_data = [[   list(c_dict['common string']),
                                     c_dict['decoded AE'][i],

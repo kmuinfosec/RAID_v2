@@ -1,5 +1,8 @@
-from Main import main
 import os
+
+from Main import main
+from Utils import *
+
 
 def experiment():
 
@@ -12,18 +15,16 @@ def experiment():
     #         0.8
     #     ])
     #example
-
-    for p in os.listdir(rf"C:\Workspace\kukmin_lab\KT\RAID_v2-main\RAID_v2\Dataset\no.6\Impossible_CVE_20220613/"):
-        pcap_path = rf"C:\Workspace\kukmin_lab\KT\RAID_v2-main\RAID_v2\Dataset\no.6\Impossible_CVE_20220613/{p}"
-        pcap_dir = os.listdir(pcap_path)
-        main([  'secret moon is best',
-                [os.path.join(pcap_path, dir) for dir in pcap_dir],
-                r"C:\Workspace\kukmin_lab\KT\RAID_v2-main\RAID_v2\res",
-                p,
-                0.6,
-                False,
-                True
-            ])
+    pcap_path = rf"C:\Users\seclab\Downloads\6th_dataset\Impossible_CVE_20220613\DNSmasq_sort_rrset_Heap_OOB_Write_CVE-2020-25683"
+    pcap_dir = os.listdir(pcap_path)
+    main([  'secret moon is best',
+            [os.path.join(pcap_path, dir) for dir in pcap_dir],
+            os.getcwd(),
+            get_dir(os.getcwd()),
+            0.6,
+            False,
+            True
+        ])
 
 
 if __name__ == "__main__":

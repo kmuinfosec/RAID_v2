@@ -7,6 +7,7 @@ from tqdm import tqdm
 from Utils import get_dir, write_csv
 from Raid import raid
 from Group import group
+from ToNUtils import doubleHeavyHitters
 # from Extract import extract
 
 
@@ -47,6 +48,7 @@ def main(args):
     for detect_type in topn_data_dict.keys():
         topn_data = topn_data_dict[detect_type]
         detect_dir = get_dir(result_path, detect_type)
+        
         summary_list = []
 
     # per key(DIP||DPORT, ...)
@@ -55,12 +57,26 @@ def main(args):
     # per group(top k)
             for i in tqdm(topn_data[k]):
                 cluster_dir = get_dir(detect_dir, key_name[k] + i[0])
+                dhh_dir = get_dir(cluster_dir, "ToN_result")
+                
                 X = i[1][1]
                 result_dict = raid(X, threshold, 256, 3, cluster_dir)
 
+                # has common signatures for each cluster
+                common_signatures = dict()
     # per cluster
                 for ci in list(result_dict.keys()):
                     c_dict = result_dict[ci]
+                    common_signatures[ci] = set()
+
+
+                    # extracting signatures and writing on csv
+                    dhh_result = doubleHeavyHitters(c_dict['decoded payload'], hh1_size=200, hh2_size=200, ratio=0.6)
+                    ret = [list(x) for x in sorted(dhh_result.items(), key=lambda x:x[1], reverse=True)]
+                    write_csv(  os.path.join(dhh_dir, f"{ci}_result_ToN.csv"),
+                                ['signature', 'frequency'],
+                                ret)
+                    
                     csv_data = [[   list(c_dict['common string']),
                                     c_dict['decoded AE'][i],
                                     str(c_dict['decoded payload'][i])
@@ -74,6 +90,11 @@ def main(args):
                     # for idx in c_dict['index']:
                     #     key_card.add(i[1][0][idx])
                     summary_list.append([key_name[k] + i[0], len(set(i[1][0])), len(i[1][1]), len(key_card) ,ci, len(c_dict['decoded AE'])])
+
+        ret = [[x[0], list(x[1])] for x in common_signatures.items()]
+        write_csv(   os.path.join(cluster_dir, "cluster_unique_signature_summary.csv"),
+                             ['cluster', 'unique signature'],
+                             ret)
 
         write_csv(  os.path.join(detect_dir, "group_clustering_summary.csv"),
                     ['group', 'key_card', 'group_packet', 'cluster_key_card', 'cluster', 'cluster_packet'],

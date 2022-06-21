@@ -100,10 +100,9 @@ def main(args):
                                 ['common_string', 'decoded_AE', 'decoded_payload'],
                                 csv_data)
                     key_card = set()
-                    # print(c_dict)
-                    # exit()
-                    # for idx in c_dict['index']:
-                    #     key_card.add(i[1][0][idx])
+                    if not isall:
+                        for idx in c_dict['index']:
+                            key_card.add(i[1][0][idx])
                     summary_list.append([key_name[k] + i[0], len(set(i[1][0])), len(i[1][1]), len(key_card) ,ci, len(c_dict['decoded AE'])])
 
                 

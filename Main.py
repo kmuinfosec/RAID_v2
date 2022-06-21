@@ -89,7 +89,7 @@ def main(args):
                     
                     common_signature_result = [[x[0], list(x[1])] for x in common_signatures.items()]
                     write_csv(   os.path.join(cluster_dir, "cluster_unique_signature_summary.csv"),
-                                    ['cluster', 'common signature'],
+                                    ['cluster', 'common signatures'],
                                     common_signature_result)
                     
                     csv_data = [[   list(c_dict['common string']),
@@ -99,10 +99,12 @@ def main(args):
                     write_csv(  os.path.join(cluster_dir, f"{ci}_result.csv"),
                                 ['common_string', 'decoded_AE', 'decoded_payload'],
                                 csv_data)
+
                     key_card = set()
                     if not isall:
                         for idx in c_dict['index']:
                             key_card.add(i[1][0][idx])
+                            
                     summary_list.append([key_name[k] + i[0], len(set(i[1][0])), len(i[1][1]), len(key_card) ,ci, len(c_dict['decoded AE'])])
 
                 

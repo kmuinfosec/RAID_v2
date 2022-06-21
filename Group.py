@@ -15,8 +15,8 @@ def get_topn_key(data, key, card_th):
         for k in key:
             card_key = pkt[k[0]]
             if not card_key in key_dict[k[0]]:
-                key_dict[k[0]][card_key] = [set(), []]
-            key_dict[k[0]][card_key][0].add(pkt[k[1]])
+                key_dict[k[0]][card_key] = [[], []]
+            key_dict[k[0]][card_key][0].append(pkt[k[1]])
             key_dict[k[0]][card_key][1].append(pkt[-1])
 
     topn_data = [[] for _ in key]

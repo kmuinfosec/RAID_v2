@@ -9,6 +9,6 @@ result/
 *.ipynb
 *.pkl
 */*.pkl
-Experment.py
+Experiment.py
 ./Experiment.py
 /Dataset/*

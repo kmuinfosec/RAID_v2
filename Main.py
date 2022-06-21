@@ -89,7 +89,7 @@ def main(args):
                     
                     common_signature_result = [[x[0], list(x[1])] for x in common_signatures.items()]
                     write_csv(   os.path.join(cluster_dir, "cluster_unique_signature_summary.csv"),
-                                    ['cluster', 'unique signature'],
+                                    ['cluster', 'common signature'],
                                     common_signature_result)
                     
                     csv_data = [[   list(c_dict['common string']),

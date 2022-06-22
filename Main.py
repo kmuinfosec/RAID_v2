@@ -2,12 +2,14 @@ import sys
 import os
 
 from Preprocess import preprocess
+from SummaryGraph import SummaryGraph
 from tqdm import tqdm
 
 from Utils import get_dir, write_csv
 from Raid import raid
 from Group import group
 from ToNUtils import doubleHeavyHitters
+from SummaryGraph import SummaryGraph
 # from Extract import extract
 
 
@@ -112,6 +114,7 @@ def main(args):
         write_csv(  os.path.join(detect_dir, "group_clustering_summary.csv"),
                     ['group', 'key_card', 'group_packet', 'cluster_key_card', 'cluster', 'cluster_packet'],
                     summary_list)
+        SummaryGraph(os.path.join(result_dir, result_path))
 
 
 if __name__ == '__main__':

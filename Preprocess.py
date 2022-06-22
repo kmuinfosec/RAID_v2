@@ -1,9 +1,8 @@
 import os
 import sys
+import csv
 
-import pandas as pd
 import multiprocessing as mp
-import numpy as np
 
 from scapy.all import *
 from tqdm import tqdm

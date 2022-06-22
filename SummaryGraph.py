@@ -65,7 +65,7 @@ def SummaryGraph(dir):
         x = [float(i) for i in x]
         value = [int(remain['cluster_packet'])] + temp_df['cluster_packet'][:(10 if len(temp_df) > 10 else len(temp_df))].tolist()
         card = [int(remain['cluster_key_card'])] + temp_df['cluster_key_card'][:(10 if len(temp_df) > 10 else len(temp_df))].tolist()
-        color = ['y'] + ['b'] * len(temp_df)
+
         clusters = ['Remain'] + temp_df['cluster'].tolist()[:10]
         
         x2 = [i - bar_width/2 for i in x]
@@ -88,7 +88,7 @@ def SummaryGraph(dir):
         b2 = ax2.bar(x1, card, color='b', width=bar_width, alpha=alpha, label='Cardinality', edgecolor=['r'] + ['w'] * (len(x)-1))
         legend = plt.legend(handles=(b0, b4, b3))
         plt.yticks(range(max(card) + 1))
-        plt.title(temp_df['group'].tolist()[0])
-        plt.xlabel('Cluster Name')
+        plt.title(main_df['group'].tolist()[0])
+        # plt.xlabel('Cluster Name')
         plt.xticks(x, clusters)
         plt.savefig(os.path.join(dir, i, 'cluster_summary_graph'), dpi=300)

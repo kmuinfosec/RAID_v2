@@ -68,7 +68,6 @@ def SummaryGraph(dir):
         color = ['y'] + ['b'] * len(temp_df)
         clusters = ['Remain'] + temp_df['cluster'].tolist()[:10]
         
-        print(clusters)
         x2 = [i - bar_width/2 for i in x]
         x1 = [i + bar_width/2 for i in x]
         

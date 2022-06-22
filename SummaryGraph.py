@@ -68,8 +68,8 @@ def SummaryGraph(dir):
     plt.ylabel('Count')
     plt.yscale('log')
     plt.xticks(np.arange(bar_width, len(x) + bar_width, 1), x, fontsize = 8, rotation=25, ha='right', rotation_mode='anchor')
-    plt.savefig(os.path.join(dir, "group_summary_graph"), dpi=300, facecolor=fig.get_facecolor(),transparent=True,bbox_inches='tight')
-
+    plt.savefig(os.path.join(dir, "group_summary_graph"), dpi=300, facecolor='#eeeeee',transparent=True,bbox_inches='tight')
+    plt.clf()
     for i in group_key_df['group'].tolist()[:1]:
         temp_df = main_df[main_df['group'] == i]
         remain = temp_df[temp_df['cluster'] == -1]
@@ -111,4 +111,5 @@ def SummaryGraph(dir):
     #     plt.yticks(range(max(card) + 1))
         plt.title(temp_df['group'].tolist()[0])
         plt.xticks(x, clusters)
-        plt.savefig(os.path.join(dir, i, 'cluster_summary_graph'), dpi=300, facecolor=fig.get_facecolor(),transparent=True,bbox_inches='tight')
+        plt.savefig(os.path.join(dir, i, 'cluster_summary_graph'), dpi=300, facecolor='#eeeeee',transparent=True,bbox_inches='tight')
+        plt.clf()

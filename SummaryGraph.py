@@ -15,6 +15,7 @@ def SummaryGraph(dir):
     packet = []
     key_card = []
     cluster_count = []
+    cluster_packets = []
 
     for i in group_key_df['group'].tolist():
         temp_df = main_df[main_df['group'] == i]
@@ -23,17 +24,28 @@ def SummaryGraph(dir):
         packet.append(temp[0][2])
         key_card.append(temp[0][1])
         if len(temp_df) == len(temp_df[temp_df['cluster'] != -1]):
-            cluster_count.append(len(temp_df))
+            cluster_count.append(0)
+        elif len(temp_df[temp_df['cluster'] != -1]) == 1:
+            cluster_count.append(len(temp_df) - 1)
         else:
             cluster_count.append(len(temp_df) - 1)
+        c_packets = []
+        if len(temp_df[temp_df['cluster'] == -1]) == 0:
+            c_packets.append(0)
+        else:
+            c_packets.append(temp_df[temp_df['cluster'] == -1]['cluster_packet'].values[0])
+        if len(temp_df[temp_df['cluster'] != -1]) != 0:
+            c_packets.append(sorted(temp_df[temp_df['cluster'] != -1]['cluster_packet'].tolist(), reverse=True)[0])
+        cluster_packets.append(c_packets)
+
     bar_width = 0.3
-    alpha = 0.5
+    alpha = 1
 
     # b0 = plt.bar(x2, value, color='g', width=bar_width, alpha=alpha, label='Packet Count')
     # b3 = plt.bar(x2, value, color='none', width=bar_width, alpha=alpha, label='Remain', edgecolor=['r'])
     # b4 = plt.bar(x2, value, color='b', width=bar_width, alpha=alpha, label='Opposite Cardinality')
 
-    fig, ax1 = plt.subplots()
+    fig, _ = plt.subplots()
 
     bar_width = 0.3
     #for legend
@@ -41,31 +53,42 @@ def SummaryGraph(dir):
     index = range(len(x))
 
 
-    b1 = ax1.bar(index, packet, color='g', width=bar_width, alpha=alpha, label='Packet Count')
-    ax1.set_ylabel('Packet Count')
+    b1 = plt.bar(index, packet, color='g', width=bar_width, alpha=alpha, label='Packet Count', edgecolor='g')
+    b2 = plt.bar([i + bar_width for i in index], cluster_count, color='b', width=bar_width, alpha=alpha, label='Cluster Count')
 
-    ax2 = ax1.twinx()
-    ax2.set_ylabel('ClusterCount')
-    b2 = ax2.bar([i + bar_width for i in index], cluster_count, color='b', width=bar_width, alpha=alpha, label='Cluster Count')
-
-    legend = plt.legend(handles=(b1, b2))
+    for i in range(len(x)):
+        if len(cluster_packets[i]) == 2:
+            b4 = plt.bar(index[i], sum(cluster_packets[i][:2]), color = 'green', label='Biggest Cluster', width=bar_width, alpha=alpha, edgecolor='black')
+        b3 = plt.bar(index[i], cluster_packets[i][0], color = 'black', label='Remain', width=bar_width, alpha=1, edgecolor='black')
+    if 'b4' in locals():
+        plt.legend(handles=(b1, b2, b3, b4))
+    else:
+        plt.legend(handles=(b1, b2, b3))
     # plt.yticks(range(max(cluster_count) + 1, ))
-    plt.title("Heavy Hitter Clutering Result(sort by cardinality)")
+    plt.title("Group Cluster Result(sort by cardinality)")
     plt.xlabel('Cluster Name')
-    fig.autofmt_xdate(rotation=30)
-    plt.xticks(np.arange(bar_width, len(x) + bar_width, 1), x)
-    plt.savefig(os.path.join(dir, "group_summary_graph"), dpi=300)
+    plt.ylabel('Count')
+    plt.yscale('log')
+    fig.autofmt_xdate(rotation=25)
+    plt.xticks(np.arange(bar_width, len(x) + bar_width, 1), x, fontsize = 8)
+    plt.savefig(os.path.join(dir, "group_summary_graph"), dpi=300, facecolor=fig.get_facecolor(),transparent=True,bbox_inches='tight')
 
-    for i in group_key_df['group'].tolist():
+    for i in group_key_df['group'].tolist()[:1]:
         temp_df = main_df[main_df['group'] == i]
         remain = temp_df[temp_df['cluster'] == -1]
         temp_df = temp_df[temp_df['cluster'] != -1].sort_values('cluster_packet', ascending=False)
         
         x = range(11 if len(temp_df) > 10 else len(temp_df) + 1)
         x = [float(i) for i in x]
-        value = [int(remain['cluster_packet'])] + temp_df['cluster_packet'][:(10 if len(temp_df) > 10 else len(temp_df))].tolist()
-        card = [int(remain['cluster_key_card'])] + temp_df['cluster_key_card'][:(10 if len(temp_df) > 10 else len(temp_df))].tolist()
-
+        
+        if len(remain) == 0:
+            remain_packet = 0
+            remain_card = 0
+        else:
+            remain_packet = int(remain['cluster_packet'])
+            remain_card = int(remain['cluster_key_card'])
+        value = [remain_packet] + temp_df['cluster_packet'][:(10 if len(temp_df) > 10 else len(temp_df))].tolist()
+        card = [remain_card] + temp_df['cluster_key_card'][:(10 if len(temp_df) > 10 else len(temp_df))].tolist()
         clusters = ['Remain'] + temp_df['cluster'].tolist()[:10]
         
         x2 = [i - bar_width/2 for i in x]
@@ -74,21 +97,21 @@ def SummaryGraph(dir):
         bar_width = 0.3
         alpha = 0.5
 
-        b0 = plt.bar(x2, value, color='g', width=bar_width, alpha=alpha, label='Packet Count')
-        b3 = plt.bar(x2, value, color='none', width=bar_width, alpha=alpha, label='Remain', edgecolor=['r'])
-        b4 = plt.bar(x2, value, color='b', width=bar_width, alpha=alpha, label='Cardinality')
+    #     b0 = plt.bar(x2, value, color='g', width=bar_width, alpha=alpha, label='Packet Count')
+    #     b3 = plt.bar(x2, value, color='none', width=bar_width, alpha=alpha, label='Remain', edgecolor=['r'])
+    #     b4 = plt.bar(x2, value, color='b', width=bar_width, alpha=alpha, label='Cardinality')
 
-        fig, ax1 = plt.subplots()
-        #for legend
+    #     fig, ax1 = plt.subplots()
+    #     #for legend
 
-        b1 = ax1.bar(x2, value, color='g', width=bar_width, alpha=alpha, label='Packet Count', edgecolor=['r'] + ['w'] * (len(x)-1))
-        ax1.set_ylabel('Packet Count')
-        ax2 = ax1.twinx()
-        ax2.set_ylabel('Cardinality')
-        b2 = ax2.bar(x1, card, color='b', width=bar_width, alpha=alpha, label='Cardinality', edgecolor=['r'] + ['w'] * (len(x)-1))
-        legend = plt.legend(handles=(b0, b4, b3))
-        plt.yticks(range(max(card) + 1))
-        plt.title(main_df['group'].tolist()[0])
-        # plt.xlabel('Cluster Name')
+        b1 = plt.bar(x2, value, color='g', width=bar_width, alpha=alpha, label='Packet Count')
+        plt.ylabel('Count')
+        plt.yscale('log')
+    #     ax2 = ax1.twinx()
+    #     ax2.set_ylabel('Cardinality')
+        b2 = plt.bar(x1, card, color='b', width=bar_width, alpha=alpha, label='Cardinality')
+        plt.legend()
+    #     plt.yticks(range(max(card) + 1))
+        plt.title(temp_df['group'].tolist()[0])
         plt.xticks(x, clusters)
-        plt.savefig(os.path.join(dir, i, 'cluster_summary_graph'), dpi=300)
+        plt.savefig(os.path.join(dir, i, 'cluster_summary_graph'), dpi=300, facecolor=fig.get_facecolor(),transparent=True,bbox_inches='tight')

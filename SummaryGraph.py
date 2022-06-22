@@ -45,8 +45,6 @@ def SummaryGraph(dir):
     # b3 = plt.bar(x2, value, color='none', width=bar_width, alpha=alpha, label='Remain', edgecolor=['r'])
     # b4 = plt.bar(x2, value, color='b', width=bar_width, alpha=alpha, label='Opposite Cardinality')
 
-    fig, _ = plt.subplots()
-
     bar_width = 0.3
     #for legend
 
@@ -69,8 +67,7 @@ def SummaryGraph(dir):
     plt.xlabel('Cluster Name')
     plt.ylabel('Count')
     plt.yscale('log')
-    fig.autofmt_xdate(rotation=25)
-    plt.xticks(np.arange(bar_width, len(x) + bar_width, 1), x, fontsize = 8)
+    plt.xticks(np.arange(bar_width, len(x) + bar_width, 1), x, fontsize = 8, rotation=25, ha='right', rotation_mode='anchor')
     plt.savefig(os.path.join(dir, "group_summary_graph"), dpi=300, facecolor=fig.get_facecolor(),transparent=True,bbox_inches='tight')
 
     for i in group_key_df['group'].tolist()[:1]:

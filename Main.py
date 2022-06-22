@@ -114,7 +114,7 @@ def main(args):
         write_csv(  os.path.join(detect_dir, "group_clustering_summary.csv"),
                     ['group', 'key_card', 'group_packet', 'cluster_key_card', 'cluster', 'cluster_packet'],
                     summary_list)
-        SummaryGraph(os.path.join(result_dir, result_path))
+        SummaryGraph(os.path.join(result_dir, detect_dir))
 
 
 if __name__ == '__main__':

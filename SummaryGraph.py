@@ -67,7 +67,7 @@ def SummaryGraph(dir):
     plt.xlabel('Cluster Name')
     plt.ylabel('Count')
     plt.yscale('log')
-    plt.xticks(np.arange(bar_width, len(x) + bar_width, 1), x, fontsize = 8, rotation=25, ha='right', rotation_mode='anchor')
+    plt.xticks(np.arange(bar_width/2, len(x) + bar_width/2, 1), x, fontsize = 8, rotation=25, ha='right', rotation_mode='anchor')
     plt.savefig(os.path.join(dir, "group_summary_graph"), dpi=300, facecolor='#eeeeee',transparent=True,bbox_inches='tight')
     plt.clf()
     for i in group_key_df['group'].tolist()[:1]:

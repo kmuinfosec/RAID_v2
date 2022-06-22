@@ -92,4 +92,4 @@ def SummaryGraph(dir):
         plt.title(temp_df['group'].tolist()[0])
         plt.xlabel('Cluster Name')
         plt.xticks(x, clusters)
-        plt.savefig(os.path.join(dir, i, 'cluster_summary_graph', dpi=300))
+        plt.savefig(os.path.join(dir, i, 'cluster_summary_graph'), dpi=300)

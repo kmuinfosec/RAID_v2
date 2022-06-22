@@ -22,7 +22,7 @@ def get_topn_key(data, key, card_th):
     topn_data = [[] for _ in key]
     for idx, k in enumerate(key):
         # (key, [[sips], [payloads]])
-        topn_data[idx] += sorted(key_dict[k[0]].items(), key=lambda x: len(x[1][0]), reverse=True)[:card_th]
+        topn_data[idx] += sorted(key_dict[k[0]].items(), key=lambda x: len(set(x[1][0])), reverse=True)[:card_th]
         
     return topn_data
 

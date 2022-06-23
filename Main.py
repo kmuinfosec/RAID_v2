@@ -75,6 +75,9 @@ def main(args):
                     # extracting signatures and writing on csv
                     dhh_result = doubleHeavyHitters(c_dict['decoded payload'], hh1_size=200, hh2_size=200, ratio=0.6)
                     ret = [list(x) for x in sorted(dhh_result.items(), key=lambda x:x[1], reverse=True)]
+                    write_csv(  os.path.join(dhh_dir, f"{ci}_result_ToN.csv"),
+                                ['signature', 'frequency'],
+                                ret)
 
                     ## finding common signature
                     for x, _ in ret:
@@ -85,12 +88,16 @@ def main(args):
                                 break
                         if flag:
                             common_signatures[ci].add(x)
-                    write_csv(  os.path.join(dhh_dir, f"{ci}_result_ToN.csv"),
-                                ['signature', 'frequency'],
-                                ret)
                     
+                    indicies = dict()
+                    anchor_packet = c_dict['decoded payload'][0]
+                    for common_signature in common_signatures[ci]:
+                        index = anchor_packet.find(common_signature)
+                        indicies[common_signature] = [index, index+len(common_signature)]
+                    indicies = dict(sorted(indicies.items(), key=lambda x: (x[1][0], x[1][1])))
+                    common_signatures[ci] = list(indicies.keys())
                     common_signature_result = [[x[0], list(x[1])] for x in common_signatures.items()]
-                    write_csv(   os.path.join(cluster_dir, "cluster_unique_signature_summary.csv"),
+                    write_csv(   os.path.join(cluster_dir, "cluster_common_signature_summary.csv"),
                                     ['cluster', 'common signatures'],
                                     common_signature_result)
                     
@@ -98,6 +105,7 @@ def main(args):
                                     c_dict['decoded AE'][i],
                                     str(c_dict['decoded payload'][i])
                                 ] for i in range(len(c_dict['decoded AE']))]
+
                     write_csv(  os.path.join(cluster_dir, f"{ci}_result.csv"),
                                 ['common_string', 'decoded_AE', 'decoded_payload'],
                                 csv_data)

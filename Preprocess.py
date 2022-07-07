@@ -75,7 +75,7 @@ def separate_by_detect(data):
     return data_dict
 
 def preprocess(pcap_dir, detect_type_flag, csv_path=False, cpu_count = None):
-    freeze_support()
+    mp.freeze_support()
     if isinstance(pcap_dir, list):
         data = []
         for dir in pcap_dir:

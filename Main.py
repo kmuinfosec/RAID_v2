@@ -99,7 +99,7 @@ def main(args):
                 ]
                 write_csv(
                     os.path.join(
-                        group_dir, "cluster_signatures.csv"
+                        group_dir, "all_cluster_signatures.csv"
                     ),
                     ["cluster", "common signatures"],
                     common_signature_result,

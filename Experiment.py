@@ -7,7 +7,7 @@ import platform
 
 def experiment():
     cfgs = ConfigParser()
-    cfgs.read("config.ini")
+    cfgs.read("config_temp.ini", encoding="UTF-8")
 
     osp = "python"
     if platform.system() == "Windows":
@@ -25,8 +25,6 @@ def experiment():
         + cfgs["DEFAULT"]["result_name"]
         + " -t "
         + cfgs["DEFAULT"]["threshold"]
-        + " -g "
-        + cfgs["DEFAULT"]["isgroup"]
         + " -a "
         + cfgs["DEFAULT"]["isall"]
     )

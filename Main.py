@@ -15,7 +15,7 @@ def main(args):
     pcap_dir = args.pcap_path
     result_path = get_dir(args.result_path, args.result_dir)
     threshold = float(args.threshold)
-    isall = bool(args.is_all)
+    isall = eval(args.is_all)
     card_th = int(args.card_th)
 
     print("Preprocessing pcap files")
@@ -138,6 +138,8 @@ def main(args):
                         len(key_card),
                         ci,
                         len(c_dict["decoded AE"]),
+                        common_signatures[ci],
+                        ret[0][1] if len(ret) > 0 else 0
                     ]
                 )
 
@@ -150,6 +152,8 @@ def main(args):
             "cluster_key_card",
             "cluster",
             "cluster_packet",
+            "common signatures",
+            "occurrence of most frequent signature",
         ],
         summary_list,
     )

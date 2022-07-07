@@ -1,6 +1,7 @@
 import os
 import pickle
 import random
+from collections import Counter
 
 from RaidUtils import prototypeClustering, hierarchicalClustering, decode, AE2, contents2count
 

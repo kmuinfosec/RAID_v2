@@ -35,12 +35,13 @@ def make_pcap_payload(input_data):
                 detect_type = pcap_path.rsplit('_', 2)[1]
             else:
                 detect_type = "result"
-            processed_pkts.append([detect_type, dip+'_'+str(dport), sip+'_'+str(dport),sip, sport, dip, dport, pcap_path, bytes(pkt[protocol].payload).hex()])
+            if len(pkt[protocol].payload) != 0:
+                processed_pkts.append([detect_type, dip+'_'+str(dport), sip+'_'+str(dport),sip, sport, dip, dport, pcap_path, bytes(pkt[protocol].payload).hex()])
         else:
             pass
     return processed_pkts
 
-def get_parsed_packets(pcap_dir, detect_type_flag, cpu_count = os.cpu_count//2):
+def get_parsed_packets(pcap_dir, detect_type_flag, cpu_count = os.cpu_count()//2):
     if os.path.isdir(pcap_dir):
         files = os.listdir(pcap_dir)
     else:
@@ -86,7 +87,6 @@ def preprocess(pcap_dir, detect_type_flag, csv_path=False, cpu_count = None):
     if csv_path:
         data_key = ['data_type', 'dip_dport', 'sip_dport', 'sip', 'sport', 'dip', 'dport', 'path', 'raw_payload']
         write_csv(csv_path, data_key, data)
-    data = filter_null_payload(data)
 
     return separate_by_detect(data)
 

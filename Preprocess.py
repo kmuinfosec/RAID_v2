@@ -53,7 +53,7 @@ def get_parsed_packets(pcap_dir, detect_type_flag, cpu_count = os.cpu_count//2):
 
     data = []
     with mp.Pool(cpu_count) as pool:    
-        for pkts_list in tqdm(pool.imap_unordered(make_pcap_payload, zip(path_list, repeat(detect_type_flag)), chunksize=10), total=len(path_list)):
+        for pkts_list in tqdm(pool.imap_unordered(make_pcap_payload, zip(path_list, repeat(detect_type_flag)), chunksize=1), total=len(path_list)):
             data += pkts_list
     return data
 

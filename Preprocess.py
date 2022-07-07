@@ -1,6 +1,5 @@
 import os
 import sys
-import csv
 
 import multiprocessing as mp
 
@@ -41,7 +40,7 @@ def make_pcap_payload(input_data):
             pass
     return processed_pkts
 
-def get_parsed_packets(pcap_dir, detect_type_flag):
+def get_parsed_packets(pcap_dir, detect_type_flag, cpu_count = os.cpu_count//2):
     if os.path.isdir(pcap_dir):
         files = os.listdir(pcap_dir)
     else:
@@ -52,9 +51,8 @@ def get_parsed_packets(pcap_dir, detect_type_flag):
         if (os.path.splitext(file_name)[-1] == ".pcap") or (os.path.splitext(file_name)[-1] ==".done"):
             path_list.append(os.path.join(pcap_dir, file_name))
 
-    process_count = os.cpu_count() // 2
     data = []
-    with mp.Pool(process_count) as pool:    
+    with mp.Pool(cpu_count) as pool:    
         for pkts_list in tqdm(pool.imap_unordered(make_pcap_payload, zip(path_list, repeat(detect_type_flag)), chunksize=10), total=len(path_list)):
             data += pkts_list
     return data
@@ -76,14 +74,14 @@ def separate_by_detect(data):
 
     return data_dict
 
-def preprocess(pcap_dir, detect_type_flag, csv_path=False):
-    mp.freeze_support()
+def preprocess(pcap_dir, detect_type_flag, csv_path=False, cpu_count = None):
+    freeze_support()
     if isinstance(pcap_dir, list):
         data = []
         for dir in pcap_dir:
-            data += get_parsed_packets(dir, detect_type_flag)
+            data += get_parsed_packets(dir, detect_type_flag, cpu_count)
     else:
-        data = get_parsed_packets(pcap_dir, detect_type_flag)
+        data = get_parsed_packets(pcap_dir, detect_type_flag, cpu_count)
 
     if csv_path:
         data_key = ['data_type', 'dip_dport', 'sip_dport', 'sip', 'sport', 'dip', 'dport', 'path', 'raw_payload']

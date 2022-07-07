@@ -36,7 +36,6 @@ def main(args):
     print("Clustering")
     # per detect_type (if detect_type)
     summary_list = []
-
     # per key(DIP||DPORT, ...)
     for k in range(len(key)):
 
@@ -56,6 +55,7 @@ def main(args):
 
             # has common signatures for each cluster
             common_signatures = dict()
+            max_card = -1
             # per cluster
             for ci in list(result_dict.keys()):
                 c_dict = result_dict[ci]
@@ -98,17 +98,8 @@ def main(args):
                 indices = dict(
                     sorted(indices.items(), key=lambda x: (x[1][0], x[1][1]))
                 )
+
                 common_signatures[ci] = list(indices.keys())
-                common_signature_result = [
-                    [x[0], list(x[1])] for x in common_signatures.items()
-                ]
-                write_csv(
-                    os.path.join(
-                        group_dir, "all_cluster_signatures.csv"
-                    ),
-                    ["cluster", "common signatures"],
-                    common_signature_result,
-                )
 
                 csv_data = [
                     [
@@ -130,6 +121,7 @@ def main(args):
                     for idx in c_dict["index"]:
                         key_card.add(i[1][0][idx])
 
+
                 summary_list.append(
                     [
                         key_name[k] + i[0],
@@ -138,10 +130,29 @@ def main(args):
                         len(key_card),
                         ci,
                         len(c_dict["decoded AE"]),
-                        common_signatures[ci],
-                        ret[0][1] if len(ret) > 0 else 0
+                        ret[0][1] if len(ret) > 0 else 0,
+                        common_signatures[ci]
                     ]
                 )
+    
+    one_big_cluster_list = []
+    keys = set(x[0] for x in summary_list)
+    for key in keys:
+        one_big_cluster_list.append(max(list(filter(lambda x: x[0]==key, summary_list)), key=lambda x:x[3]))
+    write_csv(
+        os.path.join(result_path, "all_cluster_signatures.csv"),
+        [
+            "group",
+            "key_card",
+            "group_packet",
+            "cluster_key_card",
+            "cluster",
+            "cluster_packet",
+            "occurrence of most frequent signature",
+            "common signatures"
+        ],
+        summary_list,
+    )
 
     write_csv(
         os.path.join(result_path, "group_signatures.csv"),
@@ -152,11 +163,12 @@ def main(args):
             "cluster_key_card",
             "cluster",
             "cluster_packet",
-            "common signatures",
             "occurrence of most frequent signature",
+            "common signatures"
         ],
-        summary_list,
+        one_big_cluster_list
     )
+
     SummaryGraph(result_path)
 
 

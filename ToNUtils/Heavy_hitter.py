@@ -36,9 +36,12 @@ class HeavyHitter:
 
 def doubleHeavyHitters(packets:list, k:int = 4, hh1_size:int = 512, hh2_size:int = 512, ratio:float = 0.8) -> dict:
     heavy_hitter1, heavy_hitter2 = HeavyHitter(hh1_size), HeavyHitter(hh2_size)
-    s_temp = ""
-    temp_count = 0
+
     for packet in tqdm(packets):
+
+        s_temp = ""
+        temp_count = 0
+
         h = len(packet)
         for i in range(h-k+1):
             chunk = packet[i:i+k]
@@ -63,5 +66,10 @@ def doubleHeavyHitters(packets:list, k:int = 4, hh1_size:int = 512, hh2_size:int
                 # reset temp_count and string
                 temp_count = 0
                 s_temp = ""
+        
+        ### append code
+        if s_temp != "":
+            heavy_hitter2.update(s_temp)
+
     heavy_hitter2.fixSubstringFrequency()
     return heavy_hitter2.items

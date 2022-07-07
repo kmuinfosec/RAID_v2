@@ -1,7 +1,5 @@
 import os
 import pickle
-import random
-from collections import Counter
 
 from RaidUtils import prototypeClustering, hierarchicalClustering, decode, AE2, contents2count
 
@@ -45,28 +43,6 @@ def raid(payloads, th, vec_size, win_size, save_path=False):
     result_data_merge.pkl
     dict[key = cluster name] = dict{
         common string:[common string]
-        decoded_AE:[payload1(AE된거), payload2(AE된거)...]
+        decoded_AE:[payload1(AE), payload2(AE)...]
         decoded_payload:[payload1, payload2]}
     """
-
-def detectCluster(payloads, th, vec_size, win_size, sample, detect_rate):
-
-    sampled_payloads = random.sample(payloads, sample)
-    X = contents2count(sampled_payloads, vec_size=vec_size, win_size=win_size)
-
-    prev_label_list = prototypeClustering(X, th, opt1=False)
-    label_list = hierarchicalClustering(X, prev_label_list, th)
-
-    counter = []
-    for label in label_list:
-        if label != -1:
-            counter.append(label)
-    counter = Counter(counter)
-
-    if len(counter)==0:
-        return False
-    
-    p_hat = counter.most_common(1)[0][1]
-    if (p_hat / len(sampled_payloads)) >= detect_rate:
-        return True
-    return False

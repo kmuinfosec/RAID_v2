@@ -3,8 +3,8 @@ import pandas as pd
 import numpy as np
 import os
 
-def SummaryGraph(dir):
-    main_df = pd.read_csv(os.path.join(dir, "group_clustering_summary.csv"))
+def SummaryGraph(result_path):
+    main_df = pd.read_csv(os.path.join(result_path, "group_signatures.csv"))
     if len(main_df['cluster_key_card'].unique()) == 0:
         main_df['cluster_key_card'] = 1
     group_key_df = main_df[['group', 'key_card']]
@@ -36,7 +36,6 @@ def SummaryGraph(dir):
             c_packets.append(sorted(temp_df[temp_df['cluster'] != -1]['cluster_packet'].tolist(), reverse=True)[0])
         cluster_packets.append(c_packets)
 
-    print(cluster_count)
     bar_width = 0.3
     alpha = 1
 
@@ -67,7 +66,7 @@ def SummaryGraph(dir):
     plt.ylabel('Count')
     plt.yscale('log')
     plt.xticks(np.arange(bar_width/2, len(x) + bar_width/2, 1), x, fontsize = 8, rotation=25, ha='right', rotation_mode='anchor')
-    plt.savefig(os.path.join(dir, "group_summary_graph"), dpi=300, facecolor='#eeeeee',transparent=True,bbox_inches='tight')
+    plt.savefig(os.path.join(result_path, "group_summary_graph.png"), dpi=300, facecolor='#eeeeee',transparent=True,bbox_inches='tight')
     plt.clf()
     for i in group_key_df['group'].tolist():
         temp_df = main_df[main_df['group'] == i]
@@ -110,5 +109,5 @@ def SummaryGraph(dir):
     #     plt.yticks(range(max(card) + 1))
         plt.title(temp_df['group'].tolist()[0])
         plt.xticks(x, clusters)
-        plt.savefig(os.path.join(dir, i, 'cluster_summary_graph.png'), dpi=300, facecolor='#eeeeee',transparent=True,bbox_inches='tight')
+        plt.savefig(os.path.join(result_path, i, 'cluster_summary_graph.png'), dpi=300, facecolor='#eeeeee',transparent=True,bbox_inches='tight')
         plt.clf()

@@ -89,13 +89,13 @@ def main(args):
                         if flag:
                             common_signatures[ci].add(x)
                     
-                    indicies = dict()
+                    indices = dict()
                     anchor_packet = c_dict['decoded payload'][0]
                     for common_signature in common_signatures[ci]:
                         index = anchor_packet.find(common_signature)
-                        indicies[common_signature] = [index, index+len(common_signature)]
-                    indicies = dict(sorted(indicies.items(), key=lambda x: (x[1][0], x[1][1])))
-                    common_signatures[ci] = list(indicies.keys())
+                        indices[common_signature] = [index, index+len(common_signature)]
+                    indices = dict(sorted(indices.items(), key=lambda x: (x[1][0], x[1][1])))
+                    common_signatures[ci] = list(indices.keys())
                     common_signature_result = [[x[0], list(x[1])] for x in common_signatures.items()]
                     write_csv(   os.path.join(cluster_dir, "cluster_common_signature_summary.csv"),
                                     ['cluster', 'common signatures'],

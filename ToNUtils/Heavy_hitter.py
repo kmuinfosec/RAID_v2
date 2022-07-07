@@ -1,5 +1,3 @@
-from tqdm.auto import tqdm
-
 class HeavyHitter:
     """
     Heavy Hitters
@@ -37,7 +35,7 @@ class HeavyHitter:
 def doubleHeavyHitters(packets:list, k:int = 4, hh1_size:int = 512, hh2_size:int = 512, ratio:float = 0.8) -> dict:
     heavy_hitter1, heavy_hitter2 = HeavyHitter(hh1_size), HeavyHitter(hh2_size)
 
-    for packet in tqdm(packets):
+    for packet in packets:
 
         s_temp = ""
         temp_count = 0

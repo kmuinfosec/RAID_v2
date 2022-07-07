@@ -47,6 +47,11 @@ def main(args):
             cluster_dir = get_dir(group_dir, "Clustering_result")
 
             X = i[1][1]
+
+            if len(X) > 1000 and raid(X, threshold, 256, 3, earlystop=True)==False:
+                print('earlystop', group_dir)
+                continue
+
             result_dict = raid(X, threshold, 256, 3, group_dir)
 
             # has common signatures for each cluster

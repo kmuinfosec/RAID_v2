@@ -7,7 +7,7 @@ from SummaryGraph import SummaryGraph
 from tqdm import tqdm
 
 from Utils import get_dir, write_csv
-from Raid import raid
+from Raid import raid, detectCluster
 from Group import group
 from ToNUtils import doubleHeavyHitters
 from SummaryGraph import SummaryGraph
@@ -54,6 +54,11 @@ def main(args):
                 dhh_dir = get_dir(cluster_dir, "ToN_result")
 
                 X = i[1][1]
+
+                if len(X) > 1000 and detectCluster(X, threshold, 256, 3, sample=1000, detect_rate=0.4)==False:
+                    print('earlystop -', cluster_dir)
+                continue
+
                 result_dict = raid(X, threshold, 256, 3, cluster_dir)
 
                 # has common signatures for each cluster
@@ -188,4 +193,5 @@ if __name__ == "__main__":
         help="Want to see all | Default : False",
     )
     args = argparser.parse_args()
+
     main(args)

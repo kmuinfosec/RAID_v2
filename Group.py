@@ -21,17 +21,22 @@ def get_topn_key(data, key, card_th):
     topn_data = [[] for _ in range(len(key))]
     for idx, k in enumerate(key):
         # (key, [[sips], [payloads]])
-        sorted(key_dict[k[0]].items(), key=lambda x: len(set(x[1][0])), reverse=True)[:card_th]
-        topn_data[idx] += sorted(key_dict[k[0]].items(), key=lambda x: len(set(x[1][0])), reverse=True)[:card_th]
-        
+        sorted(key_dict[k[0]].items(), key=lambda x: len(set(x[1][0])), reverse=True)[
+            :card_th
+        ]
+        topn_data[idx] += sorted(
+            key_dict[k[0]].items(), key=lambda x: len(set(x[1][0])), reverse=True
+        )[:card_th]
+
     return topn_data
 
+
 def all_keys(data):
-    return [[('all', [{'all'}, [i[-1] for i in data]])]]
+    return [[("all", [{"all"}, [i[-1] for i in data]])]]
+
 
 def group(data, key, card_th, all):
     if all:
         return all_keys(data)
 
     return get_topn_key(data, key, card_th)
-    

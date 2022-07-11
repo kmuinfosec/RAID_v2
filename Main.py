@@ -17,13 +17,11 @@ def main(args):
     threshold = args.threshold
     card_th = args.card_th
     isall = eval(args.is_all)
-    
+
     print(type(args.is_all))
     print(args.is_all)
     print("Preprocessing pcap files")
-    data = preprocess(
-        pcap_dir, csv_path=os.path.join(result_path, "train_data.csv")
-    )
+    data = preprocess(pcap_dir, csv_path=os.path.join(result_path, "train_data.csv"))
     if isall:
         key = ["all"]
     else:
@@ -32,7 +30,7 @@ def main(args):
 
     key_name = ["dip_dport", "sip_dport"]
     print(f"Grouping packets by {[key_name[i] for i in range(len(key_name))]}")
-    
+
     topn_data = group(data, key=key, card_th=card_th, all=isall)
 
     print("Clustering")
@@ -49,8 +47,8 @@ def main(args):
 
             X = i[1][1]
 
-            if len(X) > 1000 and raid(X, threshold, 256, 3, earlystop=True)==False:
-                print('earlystop', group_dir)
+            if len(X) > 1000 and raid(X, threshold, 256, 3, earlystop=True) == False:
+                print("earlystop", group_dir)
                 continue
 
             result_dict = raid(X, threshold, 256, 3, group_dir)
@@ -123,7 +121,6 @@ def main(args):
                     for idx in c_dict["index"]:
                         key_card.add(i[1][0][idx])
 
-
                 summary_list.append(
                     [
                         key_name[k] + i[0],
@@ -133,14 +130,16 @@ def main(args):
                         ci,
                         len(c_dict["decoded AE"]),
                         ret[0][1] if len(ret) > 0 else 0,
-                        common_signatures[ci]
+                        common_signatures[ci],
                     ]
                 )
-    
+
     one_big_cluster_list = []
     keys = set(x[0] for x in summary_list)
     for key in keys:
-        one_big_cluster_list.append(max(list(filter(lambda x: x[0]==key, summary_list)), key=lambda x:x[3]))
+        one_big_cluster_list.append(
+            max(list(filter(lambda x: x[0] == key, summary_list)), key=lambda x: x[3])
+        )
     write_csv(
         os.path.join(result_path, "all_cluster_signatures.csv"),
         [
@@ -151,7 +150,7 @@ def main(args):
             "cluster",
             "cluster_packet",
             "occurrence of most frequent signature",
-            "common signatures"
+            "common signatures",
         ],
         summary_list,
     )
@@ -166,9 +165,9 @@ def main(args):
             "cluster",
             "cluster_packet",
             "occurrence of most frequent signature",
-            "common signatures"
+            "common signatures",
         ],
-        one_big_cluster_list
+        one_big_cluster_list,
     )
 
     SummaryGraph(result_path)
@@ -178,11 +177,14 @@ if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
     argparser.add_argument("pcap_path", help="Input the path of the pcap files")
     argparser.add_argument("result_path", help="Input the path of the result directory")
-    argparser.add_argument("result_dir",help="Input the name of the result directory",)
+    argparser.add_argument(
+        "result_dir",
+        help="Input the name of the result directory",
+    )
     argparser.add_argument(
         "-t",
         "--threshold",
-        type = float,
+        type=float,
         required=False,
         default=0.6,
         help="Input the threshold of the clustering | Default : 0.6",
@@ -190,7 +192,7 @@ if __name__ == "__main__":
     argparser.add_argument(
         "-c",
         "--card_th",
-        type = int,
+        type=int,
         required=False,
         default=5,
         help="Select top \{card_th\} group per each key | Default : 5",

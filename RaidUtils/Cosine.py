@@ -2,6 +2,7 @@ import numpy as np
 from numpy import dot
 from numpy.linalg import norm
 
+
 def getCosinePairwise(x_data):
     A = np.array(x_data)
     similarity = np.dot(A, A.T)
@@ -13,11 +14,14 @@ def getCosinePairwise(x_data):
     cosine = cosine.T * inv_mag
     return cosine
 
+
 def getCosineSimilarity(vec1, vec2):
-    return dot(vec1, vec2) / (norm(vec1)*norm(vec2))
+    return dot(vec1, vec2) / (norm(vec1) * norm(vec2))
+
 
 def getAverageVector(vectors):
     return sum(vectors) / len(vectors)
+
 
 def getProxyDistance(vectors):
     return 1 - getCosinePairwise(vectors)

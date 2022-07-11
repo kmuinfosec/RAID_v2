@@ -3,9 +3,25 @@ import pickle
 import random
 from collections import Counter
 
-from RaidUtils import prototypeClustering, hierarchicalClustering, decode, AE2, contents2count
+from RaidUtils import (
+    prototypeClustering,
+    hierarchicalClustering,
+    decode,
+    AE2,
+    contents2count,
+)
 
-def raid(payloads, th, vec_size, win_size, save_path=False, earlystop=False, sample=1000, detect_rate=0.4):
+
+def raid(
+    payloads,
+    th,
+    vec_size,
+    win_size,
+    save_path=False,
+    earlystop=False,
+    sample=1000,
+    detect_rate=0.4,
+):
 
     X = contents2count(payloads, vec_size=vec_size, win_size=win_size)
 
@@ -27,21 +43,21 @@ def raid(payloads, th, vec_size, win_size, save_path=False, earlystop=False, sam
         for idx, label in enumerate(label_list):
             if label not in ans.keys():
                 ans[label] = {
-                    'common string': set(chunks_list[idx]),
-                    'decoded AE': [],
-                    'decoded payload': [],
-                    'index' : []
+                    "common string": set(chunks_list[idx]),
+                    "decoded AE": [],
+                    "decoded payload": [],
+                    "index": [],
                 }
 
-            ans[label]['common string'].intersection_update(chunks_list[idx])
-            ans[label]['decoded AE'].append(chunks_list[idx])
-            ans[label]['decoded payload'].append(decode(payloads[idx]))
-            ans[label]['index'].append(idx)
+            ans[label]["common string"].intersection_update(chunks_list[idx])
+            ans[label]["decoded AE"].append(chunks_list[idx])
+            ans[label]["decoded payload"].append(decode(payloads[idx]))
+            ans[label]["index"].append(idx)
 
         if save_path:
-            with open(os.path.join(save_path, 'result_data_merge.pkl'), 'wb') as f:
+            with open(os.path.join(save_path, "result_data_merge.pkl"), "wb") as f:
                 pickle.dump(ans, f)
-        
+
         return ans
 
         """
@@ -58,9 +74,9 @@ def raid(payloads, th, vec_size, win_size, save_path=False, earlystop=False, sam
                 counter.append(label)
         counter = Counter(counter)
 
-        if len(counter)==0:
+        if len(counter) == 0:
             return False
-        
+
         p_hat = counter.most_common(1)[0][1]
         if (p_hat / len(X)) >= detect_rate:
             return True

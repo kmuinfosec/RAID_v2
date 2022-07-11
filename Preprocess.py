@@ -17,26 +17,39 @@ def make_pcap_payload(pcap_path):
     pkts = PcapReader(pcap_path)
     processed_pkts = []
     for pkt in pkts:
-        if pkt.haslayer('IP'):
-            sip = pkt['IP'].src
-            dip = pkt['IP'].dst
-            
-            if pkt.haslayer('TCP'):
-                protocol = 'TCP'
-            elif pkt.haslayer('UDP'):
-                protocol = 'UDP'
+        if pkt.haslayer("IP"):
+            sip = pkt["IP"].src
+            dip = pkt["IP"].dst
+
+            if pkt.haslayer("TCP"):
+                protocol = "TCP"
+            elif pkt.haslayer("UDP"):
+                protocol = "UDP"
             else:
                 # processed_pkts.append([detect_rule, sip, None, dip, None, bytes(pkt['IP'].payload).hex()])
                 continue
             sport = int(pkt[protocol].sport)
             dport = int(pkt[protocol].dport)
             if len(pkt[protocol].payload) != 0:
-                processed_pkts.append(['temp', dip+'_'+str(dport), sip+'_'+str(dport),sip, sport, dip, dport, pcap_path, bytes(pkt[protocol].payload).hex()])
+                processed_pkts.append(
+                    [
+                        "temp",
+                        dip + "_" + str(dport),
+                        sip + "_" + str(dport),
+                        sip,
+                        sport,
+                        dip,
+                        dport,
+                        pcap_path,
+                        bytes(pkt[protocol].payload).hex(),
+                    ]
+                )
         else:
             pass
     return processed_pkts
 
-def get_parsed_packets(pcap_dir, cpu_count = os.cpu_count()//2):
+
+def get_parsed_packets(pcap_dir, cpu_count=os.cpu_count() // 2):
     if os.path.isdir(pcap_dir):
         files = os.listdir(pcap_dir)
     else:
@@ -44,16 +57,22 @@ def get_parsed_packets(pcap_dir, cpu_count = os.cpu_count()//2):
     path_list = []
 
     for file_name in files:
-        if (os.path.splitext(file_name)[-1] == ".pcap") or (os.path.splitext(file_name)[-1] ==".done"):
+        if (os.path.splitext(file_name)[-1] == ".pcap") or (
+            os.path.splitext(file_name)[-1] == ".done"
+        ):
             path_list.append(os.path.join(pcap_dir, file_name))
 
     data = []
-    with mp.Pool(cpu_count) as pool:    
-        for pkts_list in tqdm(pool.imap_unordered(make_pcap_payload, path_list, chunksize=1), total=len(path_list)):
+    with mp.Pool(cpu_count) as pool:
+        for pkts_list in tqdm(
+            pool.imap_unordered(make_pcap_payload, path_list, chunksize=1),
+            total=len(path_list),
+        ):
             data += pkts_list
     return data
 
-def preprocess(pcap_dir, csv_path=False, cpu_count = None):
+
+def preprocess(pcap_dir, csv_path=False, cpu_count=None):
     mp.freeze_support()
     if isinstance(pcap_dir, list):
         data = []
@@ -63,12 +82,23 @@ def preprocess(pcap_dir, csv_path=False, cpu_count = None):
         data = get_parsed_packets(pcap_dir, cpu_count)
 
     if csv_path:
-        data_key = ['data_type', 'dip_dport', 'sip_dport', 'sip', 'sport', 'dip', 'dport', 'path', 'raw_payload']
+        data_key = [
+            "data_type",
+            "dip_dport",
+            "sip_dport",
+            "sip",
+            "sport",
+            "dip",
+            "dport",
+            "path",
+            "raw_payload",
+        ]
         write_csv(csv_path, data_key, data)
 
     return data
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     if len(sys.argv) == 1:
         pcap_dir = os.getcwd()
     else:
@@ -80,4 +110,3 @@ if __name__ == '__main__':
         csv_path = get_dir(sys.argv[2], sys.argv[3])
 
     preprocess(pcap_dir, csv_path)
-    

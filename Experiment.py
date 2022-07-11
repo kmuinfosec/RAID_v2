@@ -7,7 +7,7 @@ import platform
 
 def experiment():
     cfgs = ConfigParser()
-    cfgs.read("config_temp.ini", encoding="UTF-8")
+    cfgs.read("config.ini", encoding="UTF-8")
 
     osp = "python"
     if platform.system() == "Windows":

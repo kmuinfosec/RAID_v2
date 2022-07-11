@@ -14,10 +14,12 @@ from SummaryGraph import SummaryGraph
 def main(args):
     pcap_dir = args.pcap_path
     result_path = get_dir(args.result_path, args.result_dir)
-    threshold = float(args.threshold)
+    threshold = args.threshold
+    card_th = args.card_th
     isall = eval(args.is_all)
-    card_th = int(args.card_th)
-
+    
+    print(type(args.is_all))
+    print(args.is_all)
     print("Preprocessing pcap files")
     data = preprocess(
         pcap_dir, csv_path=os.path.join(result_path, "train_data.csv")
@@ -176,16 +178,22 @@ if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
     argparser.add_argument("pcap_path", help="Input the path of the pcap files")
     argparser.add_argument("result_path", help="Input the path of the result directory")
-    argparser.add_argument(
-        "result_dir",
-        help="Input the name of the result directory",
-    )
+    argparser.add_argument("result_dir",help="Input the name of the result directory",)
     argparser.add_argument(
         "-t",
         "--threshold",
+        type = float,
         required=False,
         default=0.6,
         help="Input the threshold of the clustering | Default : 0.6",
+    )
+    argparser.add_argument(
+        "-c",
+        "--card_th",
+        type = int,
+        required=False,
+        default=5,
+        help="Select top \{card_th\} group per each key | Default : 5",
     )
     argparser.add_argument(
         "-a",
@@ -193,13 +201,6 @@ if __name__ == "__main__":
         required=False,
         default=False,
         help="True if don't want to make group | Default : False",
-    )
-    argparser.add_argument(
-        "-c",
-        "--card_th",
-        required=False,
-        default=5,
-        help="Select top \{card_th\} group per each key | Default : 5",
     )
     args = argparser.parse_args()
     main(args)

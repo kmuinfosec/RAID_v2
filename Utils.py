@@ -18,3 +18,10 @@ def write_csv(path, header, data):
     writer = csv.writer(file)
     writer.writerow(header)
     writer.writerows(data)
+
+
+def filter_null_payload(data):
+    print(f"total payloads : {len(data)}", end="")
+    data = list(filter(lambda x: len(x), data))
+    print(f"\tfiltered 0-size payloads : {len(data)}")
+    return data

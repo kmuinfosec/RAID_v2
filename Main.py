@@ -3,7 +3,7 @@ import argparse
 
 from tqdm.auto import tqdm
 
-from Utils import get_dir, write_csv
+from Utils import get_dir, write_csv, filter_null_payload
 from Preprocess import preprocess
 from Group import group
 from Raid import raid
@@ -45,7 +45,7 @@ def main(args):
             dhh_dir = get_dir(group_dir, "ToN_result")
             cluster_dir = get_dir(group_dir, "Clustering_result")
 
-            X = i[1][1]
+            X = filter_null_payload(i[1][1])
 
             if len(X) > 1000 and raid(X, threshold, 256, 3, earlystop=True) == False:
                 print("earlystop", group_dir)

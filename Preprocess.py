@@ -41,7 +41,7 @@ def make_pcap_payload(pcap_path):
                         dip,
                         dport,
                         pcap_path,
-                        bytes(pkt[protocol].payload).hex(),
+                        bytes(pkt[protocol].payload.load).hex(),
                     ]
                 )
         else:

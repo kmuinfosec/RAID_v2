@@ -31,15 +31,18 @@ def make_pcap_payload(pcap_path):
             sport = int(pkt[protocol].sport)
             dport = int(pkt[protocol].dport)
             if bool(pkt[protocol].payload):
-                if 'Padding' in pkt[protocol].payload:
-                    if pkt[protocol].payload['Padding'].load == pkt[protocol].payload.load:
-                        payload = ''
+                if "Padding" in pkt[protocol].payload:
+                    if (
+                        pkt[protocol].payload["Padding"].load
+                        == pkt[protocol].payload.load
+                    ):
+                        payload = ""
                     else:
                         payload = bytes(pkt[protocol].payload.load).hex()
                 else:
                     payload = bytes(pkt[protocol].payload).hex()
             else:
-                payload = ''
+                payload = ""
             processed_pkts.append(
                 [
                     "temp",

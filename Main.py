@@ -9,6 +9,7 @@ from Group import group
 from Raid import raid
 from ToNUtils import doubleHeavyHitters
 from SummaryGraph import SummaryGraph
+from Extract import extract_pcap
 
 
 def main(args):
@@ -18,8 +19,8 @@ def main(args):
     card_th = args.card_th
     isall = eval(args.is_all)
 
-    print(type(args.is_all))
-    print(args.is_all)
+    #print(type(args.is_all))
+    #print(args.is_all)
     print("Preprocessing pcap files")
     data = preprocess(pcap_dir, csv_path=os.path.join(result_path, "train_data.csv"))
     if isall:
@@ -37,7 +38,7 @@ def main(args):
     # per detect_type (if detect_type)
     summary_list = []
     # per key(DIP||DPORT, ...)
-    
+
     for k in range(len(key)):
 
         # per group(top k)
@@ -48,7 +49,7 @@ def main(args):
 
             X = filter_null_payload(i[1][1])
             if len(X) == 0:
-                print('Skip: all 0-padding')
+                print("Skip: all 0-padding")
                 continue
             if len(X) > 1000 and raid(X, threshold, 256, 3, earlystop=True) == False:
                 print("earlystop", group_dir)
@@ -146,12 +147,11 @@ def main(args):
         else:
             one_big_cluster = max(summary_group, key=lambda x: x[3])
 
-        one_big_cluster = one_big_cluster[:3] + [len(clusters[key])] + one_big_cluster[3:] 
-        one_big_cluster_list.append(
-            one_big_cluster
+        one_big_cluster = (
+            one_big_cluster[:3] + [len(clusters[key])] + one_big_cluster[3:]
         )
-    
-    
+        one_big_cluster_list.append(one_big_cluster)
+
     write_csv(
         os.path.join(result_path, "all_cluster_signatures.csv"),
         [
@@ -184,6 +184,15 @@ def main(args):
     )
 
     # SummaryGraph(result_path)
+    print("Extracting pcaps")
+    # print(topn_data)
+    filter_data = []
+    for l in tqdm(range(len(topn_data)), desc="Extracting filter data"):
+        filter_data.append(set([]))
+        for i in topn_data[l]:
+            for j in i:
+                filter_data[l].add((i[0].split("_")[0], i[0].split("_")[1]))
+    extract_pcap(filter_data, pcap_dir, result_path)
 
 
 if __name__ == "__main__":
@@ -214,7 +223,7 @@ if __name__ == "__main__":
         "-a",
         "--is_all",
         required=False,
-        default=False,
+        default="False",
         help="True if don't want to make group | Default : False",
     )
     args = argparser.parse_args()

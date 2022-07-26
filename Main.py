@@ -9,7 +9,7 @@ from Group import group
 from Raid import raid
 from ToNUtils import doubleHeavyHitters
 from SummaryGraph import SummaryGraph
-
+from Extract import extract_pcap
 
 def main(args):
     pcap_dir = args.pcap_path
@@ -184,6 +184,15 @@ def main(args):
     )
 
     # SummaryGraph(result_path)
+    print("Extracting pcaps")
+    #print(topn_data)
+    filter_data = [] 
+    for l in tqdm(range(len(topn_data)), desc = "Extracting filter data"):
+        filter_data.append(set([]))
+        for i in topn_data[l]:
+            for j in i:
+               filter_data[l].add((i[0].split("_")[0],i[0].split("_")[1])) 
+    extract_pcap(filter_data,pcap_dir,result_path)
 
 
 if __name__ == "__main__":

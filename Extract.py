@@ -28,12 +28,12 @@ def extract_pcap(filter_data, pcap_dir,result_path):
                 if i == 0:
                     res = sniff(
                         offline=file_path,
-                        filter=f"dst port {filt[1]} and src host {filt[0]}",
+                        filter=f"dst port {filt[1]} and host {filt[0]}",
                     )
                 else:
                     res = sniff(
                         offline=file_path,
-                        filter=f"dst port {filt[1]} and host {filt[0]}",
+                        filter=f"dst port {filt[1]} and src host {filt[0]}",
                     )
                     type = "sip_dport"
                 dirctory= result_path + "/" + type + str(filt[0]) +"_"+  str(filt[1]) + "/pcaps/"

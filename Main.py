@@ -150,6 +150,7 @@ def main(args):
         one_big_cluster = (
             one_big_cluster[:3] + [len(clusters[key])] + one_big_cluster[3:]
         )
+        one_big_cluster[4], one_big_cluster[5] = one_big_cluster[5], one_big_cluster[4]
         one_big_cluster_list.append(one_big_cluster)
 
     write_csv(
@@ -174,8 +175,8 @@ def main(args):
             "key_card",
             "group_packet",
             "clusters",
-            "cluster_key_card",
             "biggest_cluster",
+            "cluster_key_card",
             "cluster_packet",
             "occurrence of most frequent signature",
             "common signatures",

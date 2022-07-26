@@ -4,7 +4,7 @@ from scapy.all import *
 from tqdm import tqdm
 
 
-def extract_pcap(filter_data, pcap_dir,result_path):
+def extract_pcap(filter_data, pcap_dir, result_path):
     if os.path.isdir(pcap_dir):
         files = os.listdir(pcap_dir)
     else:
@@ -36,12 +36,19 @@ def extract_pcap(filter_data, pcap_dir,result_path):
                         filter=f"dst port {filt[1]} and src host {filt[0]}",
                     )
                     type = "sip_dport"
-                dirctory= result_path + "/" + type + str(filt[0]) +"_"+  str(filt[1]) + "/pcaps/"
+                dirctory = (
+                    result_path
+                    + "/"
+                    + type
+                    + str(filt[0])
+                    + "_"
+                    + str(filt[1])
+                    + "/pcaps/"
+                )
                 if not os.path.exists(dirctory):
                     os.makedirs(dirctory)
                 wrpcap(
-                    dirctory
-                    + os.path.basename(file_path),
+                    dirctory + os.path.basename(file_path),
                     res,
                 )
 

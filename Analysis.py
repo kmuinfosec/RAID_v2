@@ -10,12 +10,8 @@ from Experiment import experiment
 from Utils import get_dir
 
 
-def call_graph_filtered(
-        function_,
-        output_png="./call_graph_png",
-        custom_include=None
-    ):
-    
+def call_graph_filtered(function_, output_png="./call_graph_png", custom_include=None):
+
     """A call graph generator filtered"""
     config = Config()
     config.trace_filter = GlobbingFilter(include=custom_include)

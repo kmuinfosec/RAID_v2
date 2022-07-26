@@ -184,7 +184,7 @@ def main(args):
         one_big_cluster_list,
     )
 
-    # SummaryGraph(result_path)
+    SummaryGraph(result_path)
     print("Extracting pcaps")
     # print(topn_data)
     filter_data = []

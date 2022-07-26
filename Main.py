@@ -46,7 +46,9 @@ def main(args):
             cluster_dir = get_dir(group_dir, "Clustering_result")
 
             X = filter_null_payload(i[1][1])
-
+            if len(X) == 0:
+                print('Skip: all 0-padding')
+                continue
             if len(X) > 1000 and raid(X, threshold, 256, 3, earlystop=True) == False:
                 print("earlystop", group_dir)
                 continue

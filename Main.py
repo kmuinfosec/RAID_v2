@@ -32,11 +32,12 @@ def main(args):
     print(f"Grouping packets by {[key_name[i] for i in range(len(key_name))]}")
 
     topn_data = group(data, key=key, card_th=card_th, all=isall)
-
+    clusters = {}
     print("Clustering")
     # per detect_type (if detect_type)
     summary_list = []
     # per key(DIP||DPORT, ...)
+    
     for k in range(len(key)):
 
         # per group(top k)
@@ -54,7 +55,7 @@ def main(args):
                 continue
 
             result_dict = raid(X, threshold, 256, 3, group_dir)
-
+            clusters[key_name[k] + i[0]] = list(result_dict.keys())
             # has common signatures for each cluster
             common_signatures = dict()
             max_card = -1
@@ -62,7 +63,6 @@ def main(args):
             for ci in list(result_dict.keys()):
                 c_dict = result_dict[ci]
                 common_signatures[ci] = set()
-
                 # extracting signatures and writing on csv
                 dhh_result = doubleHeavyHitters(
                     c_dict["decoded payload"], hh1_size=200, hh2_size=200, ratio=0.6
@@ -139,9 +139,19 @@ def main(args):
     one_big_cluster_list = []
     keys = set(x[0] for x in summary_list)
     for key in keys:
+        summary_group = list(filter(lambda x: x[0] == key, summary_list))
+        filtered_summary = list(filter(lambda x: x[4] != -1, summary_group))
+        if len(filtered_summary) > 0:
+            one_big_cluster = max(filtered_summary, key=lambda x: x[3])
+        else:
+            one_big_cluster = max(summary_group, key=lambda x: x[3])
+
+        one_big_cluster = one_big_cluster[:3] + [len(clusters[key])] + one_big_cluster[3:] 
         one_big_cluster_list.append(
-            max(list(filter(lambda x: x[0] == key, summary_list)), key=lambda x: x[3])
+            one_big_cluster
         )
+    
+    
     write_csv(
         os.path.join(result_path, "all_cluster_signatures.csv"),
         [
@@ -163,8 +173,9 @@ def main(args):
             "group",
             "key_card",
             "group_packet",
+            "clusters",
+            "biggest_cluster",
             "cluster_key_card",
-            "cluster",
             "cluster_packet",
             "occurrence of most frequent signature",
             "common signatures",
@@ -172,7 +183,7 @@ def main(args):
         one_big_cluster_list,
     )
 
-    SummaryGraph(result_path)
+    # SummaryGraph(result_path)
 
 
 if __name__ == "__main__":

@@ -22,20 +22,24 @@ def extract_pcap(filter_data, pcap_dir, result_path):
         for filt in tqdm(filter_data[i], desc="Applying filter"):
             for file_path in path_list:
                 type = "dip_dport"
-
-                # print(filt)
-                # print(type+str(filt[0])+"_"+str(filt[1])+"_"+os.path.basename(file_path))
                 if i == 0:
+                    """
+                    dip_dport filtering
+                    """
                     res = sniff(
                         offline=file_path,
                         filter=f"dst port {filt[1]} and host {filt[0]}",
                     )
                 else:
+                    """
+                    sip_dport filtering
+                    """
+                    type = "sip_dport"
                     res = sniff(
                         offline=file_path,
                         filter=f"dst port {filt[1]} and src host {filt[0]}",
                     )
-                    type = "sip_dport"
+
                 dirctory = (
                     result_path
                     + "/"
@@ -45,12 +49,12 @@ def extract_pcap(filter_data, pcap_dir, result_path):
                     + str(filt[1])
                     + "/pcaps/"
                 )
+                """
+                check for the pcaps directory
+                """
                 if not os.path.exists(dirctory):
                     os.makedirs(dirctory)
                 wrpcap(
                     dirctory + os.path.basename(file_path),
                     res,
                 )
-
-            # print("RESULT")
-            # print(res.summary)

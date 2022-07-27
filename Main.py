@@ -193,8 +193,11 @@ def main(args):
         for i in topn_data[l]:
             for j in i:
                 filter_data[l].add((i[0].split("_")[0], i[0].split("_")[1]))
-    extract_pcap(filter_data, pcap_dir, result_path)
-
+    """
+    tshark or scapy on the last value
+    tshark is currently not confirmed to stable
+    """
+    extract_pcap(filter_data, pcap_dir, result_path, "scapy")
 
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser()

@@ -19,8 +19,6 @@ def main(args):
     card_th = args.card_th
     isall = eval(args.is_all)
 
-    # print(type(args.is_all))
-    # print(args.is_all)
     print("Preprocessing pcap files")
     data = preprocess(pcap_dir, csv_path=os.path.join(result_path, "train_data.csv"))
     if isall:
@@ -185,8 +183,8 @@ def main(args):
     )
 
     SummaryGraph(result_path)
+    
     print("Extracting pcaps")
-    # print(topn_data)
     filter_data = []
     for l in tqdm(range(len(topn_data)), desc="Extracting filter data"):
         filter_data.append(set([]))

@@ -26,6 +26,8 @@ def write_to_file(args):
     for fileidx, file_path in enumerate(path_list):
         pkts = PcapReader(file_path)
         index = 0
+        if not fileidx in cluster[0]:
+            continue
         while index < len(cluster[0]):
             for idx, pkt in enumerate(pkts):
                 if idx == cluster[1][index] and fileidx == cluster[0][index]:
@@ -38,7 +40,7 @@ def write_to_file(args):
     directory = key + "/pcaps/"
     if not os.path.exists(directory):
         os.makedirs(directory)
-    print(res)
+    #print(res)
     if os.name == "nt":
         writing_file = PcapWriter(
             directory + "cluster" + str(clidx) + ".pcap", append=True
@@ -71,7 +73,7 @@ def extract_pcap_cl(data, pcap_dir, cpu_count=os.cpu_count() // 2):
     for key in data:
         pool = mp.Pool(cpu_count)
         args = []
-        for clidx, cluster in enumerate(data[key]):
+        for clidx, cluster in tqdm(enumerate(data[key]), desc="Extracting packets from files"):
             args.append([path_list, cluster, clidx, key])
         pool.map(write_to_file, args)
         pool.close()

@@ -10,13 +10,14 @@ from itertools import repeat
 from Utils import get_dir, write_csv
 
 
-def make_pcap_payload(pcap_path):
+def make_pcap_payload(input):
+    pcap_path, data_idx = input
     if os.path.getsize(pcap_path) == 0:
         return []
 
     pkts = PcapReader(pcap_path)
     processed_pkts = []
-    for pkt in pkts:
+    for idx, pkt in enumerate(pkts):
         if pkt.haslayer("IP"):
             sip = pkt["IP"].src
             dip = pkt["IP"].dst
@@ -52,7 +53,8 @@ def make_pcap_payload(pcap_path):
                     sport,
                     dip,
                     dport,
-                    pcap_path,
+                    data_idx,
+                    idx,
                     payload,
                 ]
             )
@@ -77,7 +79,7 @@ def get_parsed_packets(pcap_dir, cpu_count=os.cpu_count() // 2):
     data = []
     with mp.Pool(cpu_count) as pool:
         for pkts_list in tqdm(
-            pool.imap_unordered(make_pcap_payload, path_list, chunksize=1),
+            pool.imap_unordered(make_pcap_payload, zip(path_list, range(len(path_list))), chunksize=1),
             total=len(path_list),
         ):
             data += pkts_list
@@ -102,7 +104,8 @@ def preprocess(pcap_dir, csv_path=False, cpu_count=None):
             "sport",
             "dip",
             "dport",
-            "path",
+            "data_idx",
+            "packet_idx",
             "raw_payload",
         ]
         write_csv(csv_path, data_key, data)

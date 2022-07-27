@@ -10,7 +10,7 @@ from Raid import raid
 from ToNUtils import doubleHeavyHitters
 from SummaryGraph import SummaryGraph
 from Extract import extract_pcap
-
+import pickle
 
 def main(args):
     pcap_dir = args.pcap_path
@@ -32,10 +32,12 @@ def main(args):
 
     topn_data = group(data, key=key, card_th=card_th, all=isall)
     clusters = {}
+
     print("Clustering")
-    # per detect_type (if detect_type)
     summary_list = []
     # per key(DIP||DPORT, ...)
+
+    packet_idx_dict = dict()
 
     for k in range(len(key)):
 
@@ -55,6 +57,12 @@ def main(args):
 
             result_dict = raid(X, threshold, 256, 3, group_dir)
             clusters[key_name[k] + i[0]] = list(result_dict.keys())
+
+            packet_idx_dict[group_dir] = [list() for _ in range(len(result_dict))]
+            for cluster_idx in result_dict.keys():
+                packet_idx_dict[group_dir][cluster_idx] += (result_dict[cluster_idx]['idx'])
+                
+
             # has common signatures for each cluster
             common_signatures = dict()
             max_card = -1
@@ -183,19 +191,19 @@ def main(args):
     )
 
     SummaryGraph(result_path)
-    
+
     print("Extracting pcaps")
     filter_data = []
     for l in tqdm(range(len(topn_data)), desc="Extracting filter data"):
         filter_data.append(set([]))
         for i in topn_data[l]:
-            for j in i:
+            for _ in i:
                 filter_data[l].add((i[0].split("_")[0], i[0].split("_")[1]))
     """
     tshark or scapy on the last value
     tshark is currently not confirmed to stable
     """
-    extract_pcap(filter_data, pcap_dir, result_path, "scapy")
+    extract_pcap(filter_data, pcap_dir, result_path, "tshark")
 
 
 if __name__ == "__main__":

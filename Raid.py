@@ -13,7 +13,7 @@ from RaidUtils import (
 
 
 def raid(
-    payloads,
+    data,
     th,
     vec_size,
     win_size,
@@ -22,6 +22,7 @@ def raid(
     sample=1000,
     detect_rate=0.4,
 ):
+    payloads = [i[0] for i in data]
 
     X = contents2count(payloads, vec_size=vec_size, win_size=win_size)
 
@@ -47,12 +48,15 @@ def raid(
                     "decoded AE": [],
                     "decoded payload": [],
                     "index": [],
+                    "idx": [[], []],
                 }
 
             ans[label]["common string"].intersection_update(chunks_list[idx])
             ans[label]["decoded AE"].append(chunks_list[idx])
             ans[label]["decoded payload"].append(decode(payloads[idx]))
             ans[label]["index"].append(idx)
+            ans[label]['idx'][1].append(data[idx][2])
+            ans[label]['idx'][0].append(data[idx][1])
 
         if save_path:
             with open(os.path.join(save_path, "result_data_merge.pkl"), "wb") as f:

@@ -1,7 +1,19 @@
 import os
 from scapy.all import *
 from tqdm import tqdm
+import platform
+import subprocess
 
+def get_editcap_path():
+    if platform.system() == "Windows":
+        return 'C:\\"Program Files"\\Wireshark\\tshark.exe'
+    else:
+        system_path = os.environ["PATH"]
+        for path in system_path.split(os.pathsep):
+            filename = os.path.join(path, "tshark")
+            if os.path.isfile(filename):
+                return filename
+    return ""
 
 def extract_pcap(filter_data, pcap_dir, result_path, method):
     if os.path.isdir(pcap_dir):
@@ -23,7 +35,8 @@ def extract_pcap(filter_data, pcap_dir, result_path, method):
                 type = "dip_dport"
 
                 if method == "tshark":
-                    cmd = "tshark -r " + file_path + " -Y "
+                    tshark_path = get_editcap_path()
+                    cmd = tshark_path + " -r " + file_path + " -Y "
                     if i == 0:
                         """
                         dip_dport filtering
@@ -66,7 +79,7 @@ def extract_pcap(filter_data, pcap_dir, result_path, method):
                         os.makedirs(directory)
                     cmd += " -w " + directory + os.path.basename(file_path)
                     print(cmd)
-                    os.system(cmd)
+                    subprocess.call(cmd)
 
                 elif method == "scapy":
 

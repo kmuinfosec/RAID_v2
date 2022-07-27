@@ -16,11 +16,11 @@ def get_topn_key(data, key, card_th):
             if not card_key in key_dict[k[0]]:
                 key_dict[k[0]][card_key] = [[], []]
             key_dict[k[0]][card_key][0].append(pkt[k[1]])
-            key_dict[k[0]][card_key][1].append(pkt[-1])
+            key_dict[k[0]][card_key][1].append([pkt[-1], pkt[-3], pkt[-2]])
 
     topn_data = [[] for _ in range(len(key))]
     for idx, k in enumerate(key):
-        # (key, [[sips], [payloads]])
+        # (key, [[sips], [payloads, data_idx, packet_idx]])
         sorted(key_dict[k[0]].items(), key=lambda x: len(set(x[1][0])), reverse=True)[
             :card_th
         ]

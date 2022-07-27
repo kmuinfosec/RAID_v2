@@ -22,7 +22,13 @@ def get_editcap_path():
 def write_to_file(args):
     path_list, cluster, clidx, key = args
     res = []
+    directory = key + "/pcaps/"
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
+    writing_file = PcapWriter(
+        directory + "cluster " + str(clidx) + ".pcap", append=True
+    )
     for fileidx, file_path in enumerate(path_list):
         pkts = PcapReader(file_path)
         index = 0
@@ -31,27 +37,10 @@ def write_to_file(args):
         while index < len(cluster[0]):
             for idx, pkt in enumerate(pkts):
                 if idx == cluster[1][index] and fileidx == cluster[0][index]:
-                    res.append(pkt)
+                    writing_file.write(pkt)
                     index = index + 1
                 if index >= len(cluster[0]):
                     break
-
-    # print(key)
-    directory = key + "/pcaps/"
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-    #print(res)
-    if os.name == "nt":
-        writing_file = PcapWriter(
-            directory + "cluster" + str(clidx) + ".pcap", append=True
-        )
-        writing_file.write(res)
-        writing_file.flush()
-    else:
-        wrpcap(
-            directory + "cluster " + str(clidx) + ".pcap",
-            res,
-        )
 
 
 def extract_pcap_cl(data, pcap_dir, cpu_count=os.cpu_count() // 2):
@@ -70,10 +59,10 @@ def extract_pcap_cl(data, pcap_dir, cpu_count=os.cpu_count() // 2):
             path_list.append(os.path.join(pcap_dir, file_name))
     path_list.sort()
 
-    for key in data:
+    for key in tqdm(data, desc="Extracting packets from files"):
         pool = mp.Pool(cpu_count)
         args = []
-        for clidx, cluster in tqdm(enumerate(data[key]), desc="Extracting packets from files"):
+        for clidx, cluster in enumerate(data[key]):
             args.append([path_list, cluster, clidx, key])
         pool.map(write_to_file, args)
         pool.close()

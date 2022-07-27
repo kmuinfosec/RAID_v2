@@ -100,11 +100,13 @@ def extract_pcap(filter_data, pcap_dir, result_path, method):
                     )
                     if not os.path.exists(directory):
                         os.makedirs(directory)
-                    if os.name == 'nt':
-                        writing_file = PcapWriter(directory + os.path.basename(file_path), append=True)
+                    if os.name == "nt":
+                        writing_file = PcapWriter(
+                            directory + os.path.basename(file_path), append=True
+                        )
                         writing_file.write(res)
                         writing_file.flush()
-                    else :
+                    else:
                         wrpcap(
                             directory + os.path.basename(file_path),
                             res,

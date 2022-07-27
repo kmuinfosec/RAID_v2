@@ -19,8 +19,8 @@ def main(args):
     card_th = args.card_th
     isall = eval(args.is_all)
 
-    #print(type(args.is_all))
-    #print(args.is_all)
+    # print(type(args.is_all))
+    # print(args.is_all)
     print("Preprocessing pcap files")
     data = preprocess(pcap_dir, csv_path=os.path.join(result_path, "train_data.csv"))
     if isall:
@@ -198,6 +198,7 @@ def main(args):
     tshark is currently not confirmed to stable
     """
     extract_pcap(filter_data, pcap_dir, result_path, "scapy")
+
 
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser()

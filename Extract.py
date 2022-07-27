@@ -1,8 +1,11 @@
 import os
 from scapy.all import *
 from tqdm import tqdm
+import pickle
 import platform
 import subprocess
+import multiprocessing as mp
+
 
 def get_editcap_path():
     if platform.system() == "Windows":
@@ -14,6 +17,66 @@ def get_editcap_path():
             if os.path.isfile(filename):
                 return filename
     return ""
+
+
+def write_to_file(args):
+    path_list, cluster, clidx, key = args
+    res = []
+
+    for fileidx, file_path in enumerate(path_list):
+        pkts = PcapReader(file_path)
+        index = 0
+        while index < len(cluster[0]):
+            for idx, pkt in enumerate(pkts):
+                if idx == cluster[1][index] and fileidx == cluster[0][index]:
+                    res.append(pkt)
+                    index = index + 1
+                if index >= len(cluster[0]):
+                    break
+
+    # print(key)
+    directory = key + "/pcaps/"
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    print(res)
+    if os.name == "nt":
+        writing_file = PcapWriter(
+            directory + "cluster" + str(clidx) + ".pcap", append=True
+        )
+        writing_file.write(res)
+        writing_file.flush()
+    else:
+        wrpcap(
+            directory + "cluster " + str(clidx) + ".pcap",
+            res,
+        )
+
+
+def extract_pcap_cl(data, pcap_dir, cpu_count=os.cpu_count() // 2):
+    # print(data)
+    if os.path.isdir(pcap_dir):
+        files = os.listdir(pcap_dir)
+    else:
+        files = [pcap_dir]
+
+    path_list = []
+
+    for file_name in files:
+        if (os.path.splitext(file_name)[-1] == ".pcap") or (
+            os.path.splitext(file_name)[-1] == ".done"
+        ):
+            path_list.append(os.path.join(pcap_dir, file_name))
+    path_list.sort()
+
+    for key in data:
+        pool = mp.Pool(cpu_count)
+        args = []
+        for clidx, cluster in enumerate(data[key]):
+            args.append([path_list, cluster, clidx, key])
+        pool.map(write_to_file, args)
+        pool.close()
+        pool.join()
+
 
 def extract_pcap(filter_data, pcap_dir, result_path, method):
     if os.path.isdir(pcap_dir):

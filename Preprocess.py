@@ -75,11 +75,13 @@ def get_parsed_packets(pcap_dir, cpu_count=os.cpu_count() // 2):
             os.path.splitext(file_name)[-1] == ".done"
         ):
             path_list.append(os.path.join(pcap_dir, file_name))
-
+    path_list.sort()
     data = []
     with mp.Pool(cpu_count) as pool:
         for pkts_list in tqdm(
-            pool.imap_unordered(make_pcap_payload, zip(path_list, range(len(path_list))), chunksize=1),
+            pool.imap_unordered(
+                make_pcap_payload, zip(path_list, range(len(path_list))), chunksize=1
+            ),
             total=len(path_list),
         ):
             data += pkts_list

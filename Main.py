@@ -1,6 +1,5 @@
 import os
 import argparse
-
 from tqdm.auto import tqdm
 
 from Utils import get_dir, write_csv, filter_null_payload
@@ -10,7 +9,6 @@ from Raid import raid
 from ToNUtils import doubleHeavyHitters
 from SummaryGraph import SummaryGraph
 from Extract import extract_pcap_cl
-import pickle
 
 
 def main(args):

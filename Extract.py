@@ -1,14 +1,18 @@
 import os
+import subprocess
+
+import multiprocessing as mp
+
+if os.name == "posix":
+    import logging
+
+    logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 from scapy.all import *
 from tqdm import tqdm
-import pickle
-import platform
-import subprocess
-import multiprocessing as mp
 
 
 def get_editcap_path():
-    if platform.system() == "Windows":
+    if os.name == "nt":
         return 'C:\\"Program Files"\\Wireshark\\tshark.exe'
     else:
         system_path = os.environ["PATH"]
@@ -29,7 +33,7 @@ def write_to_file(args):
     writing_file = PcapWriter(
         directory + "cluster " + str(clidx) + ".pcap", append=True
     )
-    for fileidx, file_path in enumerate(path_list):
+    for fileidx, file_path in enumerate(tqdm(path_list, desc="Checking Files")):
         pkts = PcapReader(file_path)
         index = 0
         if not fileidx in cluster[0]:
@@ -66,7 +70,7 @@ def extract_pcap_cl(data, pcap_dir, cpu_count=os.cpu_count() // 2):
             args.append([path_list, cluster, clidx, key])
         pool.map(write_to_file, args)
         pool.close()
-        pool.join()
+        # pool.join()
 
 
 def extract_pcap(filter_data, pcap_dir, result_path, method):

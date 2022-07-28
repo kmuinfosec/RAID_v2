@@ -2,7 +2,6 @@ from configparser import ConfigParser
 
 from Main import main
 import os
-import platform
 
 
 def experiment():
@@ -10,7 +9,7 @@ def experiment():
     cfgs.read("config.ini", encoding="UTF-8")
 
     osp = "python"
-    if platform.system() == "Windows":
+    if os.name == "nt":
         osp = "python"
     else:
         osp = "python3"

@@ -1,4 +1,9 @@
 import os
+
+if os.name == "posix":
+    import logging
+
+    logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 import sys
 
 import multiprocessing as mp

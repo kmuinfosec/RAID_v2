@@ -2,7 +2,7 @@ import os
 import argparse
 from tqdm.auto import tqdm
 
-from Utils import get_dir, write_csv, filter_null_payload
+from Utils import get_dir, write_csv, filter_null_payload, get_payloads_by_index, decode_ascii, encode_hex
 from Preprocess import preprocess
 from Group import group
 from Raid import raid
@@ -72,11 +72,13 @@ def main(args):
                 c_dict = result_dict[ci]
                 common_signatures[ci] = set()
                 # extracting signatures and writing on csv
+                candidate_X = get_payloads_by_index(X, c_dict['index'])
+                decode_X = [decode_ascii(x) for x in candidate_X]
                 dhh_result = doubleHeavyHitters(
-                    c_dict["decoded payload"], hh1_size=200, hh2_size=200, ratio=0.6
+                    decode_X, hh1_size=200, hh2_size=200, ratio=0.6
                 )
                 ret = [
-                    list(x)
+                    [encode_hex(x[0]), x[1]]
                     for x in sorted(
                         dhh_result.items(), key=lambda x: x[1], reverse=True
                     )

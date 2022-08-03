@@ -33,7 +33,7 @@ def get_topn_key(data, key, card_th):
 
 
 def all_keys(data):
-    return [[("all", [{"all"}, [i[-1] for i in data]])]]
+    return [[("all", [{"all"}, [[i[-1],i[-3],i[-2]] for i in data]])]]
 
 
 def group(data, key, card_th, all):

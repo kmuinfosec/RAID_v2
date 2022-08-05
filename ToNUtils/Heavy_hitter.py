@@ -28,8 +28,11 @@ class HeavyHitter:
         return 0
 
     def fixSubstringFrequency(self) -> None:
-        for string1 in self.items.keys():
-            for string2 in self.items.keys():
+        keys = list(self.items.keys())
+        keys.sort(key=lambda x: len(x))
+        
+        for string1 in keys:
+            for string2 in keys:
                 if string1 != string2 and string1 in string2:
                     self.items[string1] += self.items[string2]
 

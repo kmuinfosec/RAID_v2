@@ -8,7 +8,7 @@ from Group import group
 from Raid import raid
 from ToNUtils import doubleHeavyHitters
 from SummaryGraph import SummaryGraph
-from Extract import extract_pcap_cl
+from Extract import extract_pcap_cl_v2
 
 
 def main(args):
@@ -205,7 +205,7 @@ def main(args):
                 filter_data[l].add((i[0].split("_")[0], i[0].split("_")[1]))
     """
 
-    extract_pcap_cl(packet_idx_dict, pcap_dir)
+    extract_pcap_cl_v2(packet_idx_dict, pcap_dir)
     """
     tshark or scapy on the last value
     tshark is currently not confirmed to stable

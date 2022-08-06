@@ -1,11 +1,11 @@
 import os
 import subprocess
-
+import shutil
 import multiprocessing as mp
 
 if os.name == "posix":
     import logging
-
+    
     logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 from scapy.all import *
 from tqdm import tqdm
@@ -22,33 +22,49 @@ def get_editcap_path():
                 return filename
     return ""
 
+def CustomPcapWriter(filename,pkt,overwritting=False):
+    if overwritting:
+        wrpcap(filename, pkt)
+    else :
+        if os.path.isfile(filename):
+            wrpcap(filename, pkt, append=True)
+        else:
+            wrpcap(filename, pkt)
 
-def write_to_file(args):
-    path_list, cluster, clidx, key = args
-    res = []
-    directory = key + "/pcaps/"
-    if not os.path.exists(directory):
-        os.makedirs(directory)
+def write_to_file_v3(args):
+    fileidx, file_path, data = args
+    # fileidx = pcap의 파일 index
+    pkts = PcapReader(file_path)
 
-    writing_file = PcapWriter(
-        directory + "cluster " + str(clidx) + ".pcap", append=True
-    )
-    for fileidx, file_path in enumerate(tqdm(path_list, desc="Checking Files")):
-        pkts = PcapReader(file_path)
-        index = 0
-        if not fileidx in cluster[0]:
+    dp = dict()
+
+    for key in data:
+        directory = key + "/pcaps/"
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        for clidx, cluster in enumerate(data[key]):
+            writing_file = directory + "cluster " + str(clidx) + ".pcap"
+            for index in range(len(cluster[0])):
+
+                packet_index = cluster[1][index]
+                file_index = cluster[0][index]
+
+                if file_index != fileidx:
+                    continue
+
+                group_key = (packet_index, clidx)
+                if packet_index not in dp.keys():
+                    dp[packet_index] = []
+                dp[packet_index].append(writing_file)
+    
+    for idx, pkt in enumerate(pkts):
+        if idx not in dp.keys():
             continue
-        while index < len(cluster[0]):
-            for idx, pkt in enumerate(pkts):
-                if idx == cluster[1][index] and fileidx == cluster[0][index]:
-                    writing_file.write(pkt)
-                    index = index + 1
-                if index >= len(cluster[0]):
-                    break
+        for writing_file in dp[idx]:
+            CustomPcapWriter(writing_file, pkt)
 
-
-def extract_pcap_cl(data, pcap_dir, cpu_count=os.cpu_count() // 2):
-    # print(data)
+def extract_pcap_cl_v2(data,pcap_dir,cpu_count=os.cpu_count()//2):
+    mp.freeze_support()
     if os.path.isdir(pcap_dir):
         files = os.listdir(pcap_dir)
     else:
@@ -62,16 +78,24 @@ def extract_pcap_cl(data, pcap_dir, cpu_count=os.cpu_count() // 2):
         ):
             path_list.append(os.path.join(pcap_dir, file_name))
     path_list.sort()
-
-    for key in tqdm(data, desc="Extracting packets from files"):
-        pool = mp.Pool(cpu_count)
-        args = []
-        for clidx, cluster in enumerate(data[key]):
-            args.append([path_list, cluster, clidx, key])
-        pool.map(write_to_file, args)
-        pool.close()
-        # pool.join()
-
+    
+    for key in data:
+        directory = key + "/pcaps"
+        if os.path.exists(directory):
+            shutil.rmtree(directory)
+    
+    pool = mp.Pool(cpu_count)
+    args = []
+    for fileidx, file_path in enumerate(path_list):
+        args.append([fileidx,file_path,data])
+    with tqdm(total=len(args), desc="Extracting packets from files") as pbar:
+        for _ in pool.imap_unordered(write_to_file_v3, args):
+            pbar.update(1)
+    pool.close()
+    pool.join()
+    #tqdm(pool.map(write_to_file_v2, args))
+        #pool.close()
+    
 
 def extract_pcap(filter_data, pcap_dir, result_path, method):
     if os.path.isdir(pcap_dir):

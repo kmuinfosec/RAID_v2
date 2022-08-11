@@ -17,15 +17,26 @@ def SummaryGraph(result_path):
             "biggest_cluster",
             "cluster_packet",
             "occurrence of most frequent signature",
+            "cluster_key_card",
         ]
     ]
     group_key_df = group_key_df.drop_duplicates()
     group_key_df = group_key_df.sort_values("key_card", ascending=False)
 
+    remain_packets = dict()
+
+    total_key_df = pd.read_csv(os.path.join(result_path, "all_cluster_signatures.csv"))
+    total_key_df = total_key_df[total_key_df['cluster']==-1]
+    for group in total_key_df["group"].tolist():
+        sub_df = total_key_df[total_key_df["group"] == group]
+        remain_packets[group] = sub_df['cluster_packet'].tolist()[0]
+
     x = []
     packet = []
     bigcluster_packets = []
     most_occurrence_signature = []
+    group_key_cards = []
+    cluster_key_cards = []
 
     for group in group_key_df["group"].tolist():
         sub_df = group_key_df[group_key_df["group"] == group]
@@ -38,6 +49,8 @@ def SummaryGraph(result_path):
         else:
             bigcluster_packets.append(0)
         most_occurrence_signature.append(group_summary[0][5])
+        group_key_cards.append(group_summary[0][1])
+        cluster_key_cards.append(group_summary[0][6])
 
     alpha = 0.7
     bar_width = 0.2
@@ -87,7 +100,24 @@ def SummaryGraph(result_path):
     plt.yscale("log")
     plt.grid()
     plt.tight_layout()
-    plt.xticks(np.arange(bar_width + 0.5, len(index) * 2 + bar_width, 2), x, fontsize=8)
+
+    # One big Cluster rate, Remain rate, Cardinality
+    x_sub_info = []
+    for idx in range(len(x)):
+        group_name = x[idx]
+        cluster_rate = f'{round(100*bigcluster_packets[idx]/packet[idx], 2)}%'
+        if group_name not in remain_packets.keys():
+            remain = 0
+        else:
+            remain = remain_packets[group_name]
+        remain_rate = f'{round(100*remain/packet[idx], 2)}%'
+        card = f'{cluster_key_cards[idx]}/{group_key_cards[idx]}'
+        x_sub_info.append(f'{group_name}\n{cluster_rate}\n{remain_rate}\n{card}')
+    plt.xticks(np.arange(bar_width + 0.5, len(index) * 2 + bar_width, 2), x_sub_info, fontsize=8)
+    plt.text(-1.2, 0.52, 'largest cluster rate', fontsize=7, color='black')
+    plt.text(-1.2, 0.44, 'remain rate', fontsize=7, color='black')
+    plt.text(-1.2, 0.36, 'cardinality', fontsize=7, color='black')
+    
     plt.savefig(
         os.path.join(result_path, "group_summary_graph.png"),
         dpi=300,

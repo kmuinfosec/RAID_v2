@@ -14,32 +14,34 @@ def decode(payload):
         ans += data
     return ans
 
-
-def AE2(_input, w):
-    if _input == None:
-        return ""
-    result = []
-    input_size = len(_input)
-    m = _input[:2]
-    last_index = 0
-    recent_index = 0
-    window_count = 0
-    appned_index = 0
-    while recent_index < input_size:
-        if window_count > w:
-            result.append(_input[last_index:recent_index])
-            last_index = recent_index
-            m = _input[recent_index - 2 : recent_index]
-            window_count = 0
-            appned_index = recent_index
-        elif _input[recent_index] > m:
-            window_count = 0
-            m = _input[recent_index - 2 : recent_index]
-        recent_index = recent_index + 2
-        window_count = window_count + 1
-    if appned_index <= input_size - 1:
-        result.append(_input[last_index:recent_index])
-    return result
+def AE2(_str, window_size):
+    bytes_len = len(_str)
+    chunk_bytes_list = []
+    byte_idx = 0
+    byte_arr = []
+    while byte_idx < bytes_len:
+        max_value = int(_str[byte_idx:byte_idx+2], 16)
+        max_position = byte_idx
+        byte_arr.append(_str[byte_idx:byte_idx+2])
+        byte_idx += 2
+        while byte_idx < bytes_len:
+            if int(_str[byte_idx:byte_idx+2], 16) <= max_value:
+                if byte_idx == max_position + 2 * window_size:
+                    byte_arr.append(_str[byte_idx:byte_idx+2])
+                    content_bytes = "".join(byte_arr)
+                    chunk_bytes_list.append(content_bytes)
+                    byte_arr = []
+                    byte_idx += 2
+                    break
+            else:
+                max_value = int(_str[byte_idx:byte_idx+2], 16)
+                max_position = byte_idx
+            byte_arr.append(_str[byte_idx:byte_idx+2])
+            byte_idx += 2
+    if len(byte_arr):
+        content_bytes = "".join(byte_arr)
+        chunk_bytes_list.append(content_bytes)
+    return chunk_bytes_list
 
 
 def contents2count(return_data, vec_size, win_size):

@@ -72,7 +72,7 @@ def SummaryGraph(result_path):
         alpha=alpha,
         zorder=3,
         align="center",
-        label="All Packets",
+        label="Group Packets",
     )
     b2 = plt.bar(
         [0.5 + i + bar_width for i in index],
@@ -81,7 +81,7 @@ def SummaryGraph(result_path):
         width=bar_width,
         zorder=3,
         align="center",
-        label="Largest-cluster Packets",
+        label="Big-Cluster Packets",
     )
     b3 = plt.bar(
         [0.8 + i + bar_width for i in index],
@@ -90,34 +90,39 @@ def SummaryGraph(result_path):
         width=bar_width,
         zorder=3,
         align="center",
-        label="Mode Signature Count",
+        label="Most Frequent String",
     )
     plt.legend(handles=(b1, b2, b3))
-    plt.yticks(range(max(packet) + 1))
-    plt.title("Group Cluster Result(sort by cardinality)")
-    plt.xlabel("Group Name")
+
+    ylabels = [1]
+    while max(packet) > ylabels[-1]:
+        ylabels.append(ylabels[-1] * 10)
+    plt.ylim(0.8, ylabels[-1] + 1)
+
+    plt.yticks(ylabels, ylabels)
+    plt.title("Grouping-Clustering Result (sorted by cardinality)", pad=25)
+    # plt.xlabel("Group Name")
     plt.ylabel("Count")
     plt.yscale("log")
     plt.grid()
     plt.tight_layout()
 
-    # One big Cluster rate, Remain rate, Cardinality
-    x_sub_info = []
-    for idx in range(len(x)):
+    plt.xticks(np.arange(bar_width + 0.5, len(index) * 2 + bar_width, 2), [group_key.split('port')[1] for group_key in x], fontsize=10)
+    for idx in range(len(index)):
         group_name = x[idx]
-        cluster_rate = f'{round(100*bigcluster_packets[idx]/packet[idx], 2)}%'
+        cluster_rate = f'{round(100*bigcluster_packets[idx]/packet[idx])}%'
         if group_name not in remain_packets.keys():
             remain = 0
         else:
             remain = remain_packets[group_name]
-        remain_rate = f'{round(100*remain/packet[idx], 2)}%'
-        card = f'{cluster_key_cards[idx]}/{group_key_cards[idx]}'
-        x_sub_info.append(f'{group_name}\n{cluster_rate}\n{remain_rate}\n{card}')
-    plt.xticks(np.arange(bar_width + 0.5, len(index) * 2 + bar_width, 2), x_sub_info, fontsize=8)
-    plt.text(-1.2, 0.52, 'largest cluster rate', fontsize=7, color='black')
-    plt.text(-1.2, 0.44, 'remain rate', fontsize=7, color='black')
-    plt.text(-1.2, 0.36, 'cardinality', fontsize=7, color='black')
-    
+        remain_rate = f'{round(100*remain/packet[idx])}%'
+        cluster_card = f'{cluster_key_cards[idx]}'
+        group_card = f'{group_key_cards[idx]}'
+
+        plt.text(0.11 + idx * 0.0925, -0.1, 'Group Card.:\nBig-Cluster Ratio:\nBig-Cluster Card.:\nNon-Cluster Ratio:', ha='right', fontsize=8, transform=plt.gcf().transFigure)
+        plt.text(0.135 + idx * 0.0925, -0.1, f'{group_card}\n{cluster_rate}\n{cluster_card}\n{remain_rate}', ha='right', fontsize=8, transform=plt.gcf().transFigure)
+        plt.text(0.10 + idx * 0.0925, 0.875, x[idx][:9], ha='center', fontsize=10, transform=plt.gcf().transFigure)
+
     plt.savefig(
         os.path.join(result_path, "group_summary_graph.png"),
         dpi=300,

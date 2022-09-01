@@ -107,7 +107,7 @@ def SummaryGraph(result_path):
     plt.grid()
     plt.tight_layout()
 
-    plt.xticks(np.arange(bar_width + 0.5, len(index) * 2 + bar_width, 2), [group_key.split('port')[1] for group_key in x], fontsize=10)
+    plt.xticks(np.arange(bar_width + 0.5, len(index) * 2 + bar_width, 2), [group_key.split('-')[1] for group_key in x], fontsize=10)
     for idx in range(len(index)):
         group_name = x[idx]
         cluster_rate = f'{round(100*bigcluster_packets[idx]/packet[idx])}%'
@@ -121,7 +121,7 @@ def SummaryGraph(result_path):
 
         plt.text(0.11 + idx * 0.0925, -0.1, 'Group Card.:\nBig-Cluster Ratio:\nBig-Cluster Card.:\nNon-Cluster Ratio:', ha='right', fontsize=8, transform=plt.gcf().transFigure)
         plt.text(0.135 + idx * 0.0925, -0.1, f'{group_card}\n{cluster_rate}\n{cluster_card}\n{remain_rate}', ha='right', fontsize=8, transform=plt.gcf().transFigure)
-        plt.text(0.10 + idx * 0.0925, 0.875, x[idx][:9], ha='center', fontsize=10, transform=plt.gcf().transFigure)
+        plt.text(0.10 + idx * 0.0925, 0.875, x[idx].split('-')[0], ha='center', fontsize=10, transform=plt.gcf().transFigure)
 
     plt.savefig(
         os.path.join(result_path, "group_summary_graph.png"),

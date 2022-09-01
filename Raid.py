@@ -45,6 +45,7 @@ def raid(
         for idx, label in enumerate(label_list):
             if label not in ans.keys():
                 ans[label] = {
+                    "raw payload": [],
                     "common string": set(chunks_list[idx]),
                     "decoded AE": [],
                     "decoded payload": [],
@@ -52,6 +53,7 @@ def raid(
                     "idx": [[], []],
                 }
 
+            ans[label]["raw payload"].append(payloads[idx])
             ans[label]["common string"].intersection_update(chunks_list[idx])
             ans[label]["decoded AE"].append(chunks_list[idx])
             ans[label]["decoded payload"].append(decode(payloads[idx]))

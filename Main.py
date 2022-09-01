@@ -16,18 +16,28 @@ def main(args):
     result_path = get_dir(args.result_path, args.result_dir)
     threshold = args.threshold
     card_th = args.card_th
-    isall = eval(args.is_all)
+    group_type = args.group
+    israw = eval(args.israw)
 
     print("Preprocessing pcap files")
     data = preprocess(pcap_dir, csv_path=os.path.join(result_path, "train_data.csv"))
-    if isall:
+
+    if group_type == 'all':
         key = ["all"]
-    else:
+        key_name = ["all_group-"]
+    elif group_type == 'ip_dport':
         # (1, 3) means ('dip|dport', 'sip'), (2, 6) means('sip|dport', 'dip'), card_th == top_k cardinality
         key = [(1, 3), (2, 5)]
-
-    key_name = ["dip_dport", "sip_dport"]
+        key_name = ["dip_dport-", "sip_dport-"]
+    else:
+        key = [(5, 3), (3, 5)]
+        key_name = ["dip-", "sip-"]
+    
     print(f"Grouping packets by {[key_name[i] for i in range(len(key_name))]}")
+
+    isall = False
+    if group_type == 'all':
+        isall = True
 
     topn_data = group(data, key=key, card_th=card_th, all=isall)
     clusters = {}
@@ -50,9 +60,11 @@ def main(args):
             if len(X) == 0:
                 print("Skip: all 0-padding")
                 continue
+            """
             if len(X) > 1000 and raid(X, threshold, 256, 3, earlystop=True) == False:
                 print("earlystop", group_dir)
                 continue
+            """
 
             result_dict = raid(X, threshold, 256, 3, group_dir)
 
@@ -75,10 +87,10 @@ def main(args):
                 candidate_X = get_payloads_by_index(X, c_dict['index'])
                 decode_X = [decode_ascii(x) for x in candidate_X]
                 dhh_result = doubleHeavyHitters(
-                    decode_X, hh1_size=200, hh2_size=200, ratio=0.6
+                    decode_X, hh1_size=1024, hh2_size=200, ratio=0.6
                 )
                 ret = [
-                    [encode_hex(x[0]), x[1]]
+                    [encode_hex(x[0], israw=israw), x[1]]
                     for x in sorted(
                         dhh_result.items(), key=lambda x: x[1], reverse=True
                     )
@@ -90,9 +102,13 @@ def main(args):
                 )
 
                 ## finding common signature
+                compare_key = "decoded payload"
+                if israw == True:
+                    compare_key = "raw payload"
+
                 for x, _ in ret:
                     flag = True
-                    for payload in c_dict["decoded payload"]:
+                    for payload in c_dict[compare_key]:
                         if x not in payload:
                             flag = False
                             break
@@ -238,11 +254,18 @@ if __name__ == "__main__":
         help="Select top \{card_th\} group per each key | Default : 5",
     )
     argparser.add_argument(
-        "-a",
-        "--is_all",
+        "-g",
+        "--group",
+        required=False,
+        default="ip_dport",
+        help="select grouping type: [ip_dport, ip, all] | Default : ip_dport",
+    )
+    argparser.add_argument(
+        "-r",
+        "--israw",
         required=False,
         default="False",
-        help="True if don't want to make group | Default : False",
+        help="True if you don't want to convert signature to ASCII | Default : False",
     )
     args = argparser.parse_args()
     main(args)

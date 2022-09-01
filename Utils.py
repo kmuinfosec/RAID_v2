@@ -44,12 +44,15 @@ def decode_ascii(payload):
     return ''.join(arr)
 
 
-def encode_hex(payload):
+def encode_hex(payload, israw=False):
     ans = []
     for char in payload:
-        data_hex = (ord(char))
-        if 0x20 <= data_hex < 0x7F:
-            ans.append(char)
-        else:
+        if israw==True:
             ans.append(hex(ord(char))[2:].rjust(2, '0'))
+        else:
+            data_hex = (ord(char))
+            if 0x20 <= data_hex < 0x7F:
+                ans.append(char)
+            else:
+                ans.append(hex(ord(char))[2:].rjust(2, '0'))
     return ''.join(ans)

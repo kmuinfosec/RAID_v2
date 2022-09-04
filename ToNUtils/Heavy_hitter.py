@@ -43,10 +43,13 @@ def doubleHeavyHitters(
     hh1_size: int = 512,
     hh2_size: int = 512,
     ratio: float = 0.8,
+    deduplication: bool = False
 ) -> dict:
     heavy_hitter1, heavy_hitter2 = HeavyHitter(hh1_size), HeavyHitter(hh2_size)
 
     for packet in packets:
+
+        signset = set()
 
         s_temp = ""
         temp_count = 0
@@ -65,19 +68,21 @@ def doubleHeavyHitters(
                         temp_count = count
                     else:
                         # reset
-                        if s_temp != "":
+                        if s_temp != "" and s_temp not in signset:
                             heavy_hitter2.update(s_temp)
+                            signset.add(s_temp)
                         s_temp = chunk
                         temp_count = count
             else:
-                if s_temp != "":
+                if s_temp != "" and s_temp not in signset:
                     heavy_hitter2.update(s_temp)
+                    signset.add(s_temp)
                 # reset temp_count and string
                 temp_count = 0
                 s_temp = ""
 
         ### append code
-        if s_temp != "":
+        if s_temp != "" and s_temp not in signset:
             heavy_hitter2.update(s_temp)
 
     heavy_hitter2.fixSubstringFrequency()

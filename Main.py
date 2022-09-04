@@ -18,6 +18,7 @@ def main(args):
     card_th = args.card_th
     group_type = args.group
     israw = eval(args.israw)
+    deduplication = eval(args.deduplication)
 
     print("Preprocessing pcap files")
     data = preprocess(pcap_dir, csv_path=os.path.join(result_path, "train_data.csv"))
@@ -87,7 +88,7 @@ def main(args):
                 candidate_X = get_payloads_by_index(X, c_dict['index'])
                 decode_X = [decode_ascii(x) for x in candidate_X]
                 dhh_result = doubleHeavyHitters(
-                    decode_X, hh1_size=1024, hh2_size=200, ratio=0.6
+                    decode_X, hh1_size=1024, hh2_size=200, ratio=0.6, deduplication=deduplication
                 )
                 ret = [
                     [encode_hex(x[0], israw=israw), x[1]]
@@ -266,6 +267,13 @@ if __name__ == "__main__":
         required=False,
         default="False",
         help="True if you don't want to convert signature to ASCII | Default : False",
+    )
+    argparser.add_argument(
+        "-d",
+        "--deduplication",
+        required=False,
+        default="False",
+        help="True if you want deduplication | Default : False",
     )
     args = argparser.parse_args()
     main(args)

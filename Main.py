@@ -19,6 +19,7 @@ def main(args):
     group_type = args.group
     israw = eval(args.israw)
     deduplication = eval(args.deduplication)
+    iscount = eval(args.count)
 
     print("Preprocessing pcap files")
     data = preprocess(pcap_dir, csv_path=os.path.join(result_path, "train_data.csv"))
@@ -107,6 +108,17 @@ def main(args):
                 if israw == True:
                     compare_key = "raw payload"
 
+                ## finding actual signature frequency with string matching
+                if iscount:
+                    nxt_ret = []
+                    for x, _ in ret:
+                        count = 0
+                        for payload in c_dict[compare_key]:
+                            if x in payload:
+                                count += 1
+                        nxt_ret.append([x, count])
+                    ret = nxt_ret
+
                 for x, _ in ret:
                     flag = True
                     for payload in c_dict[compare_key]:
@@ -150,14 +162,21 @@ def main(args):
                     for idx in c_dict["index"]:
                         key_card.add(i[1][0][idx])
 
+                group_unique_packet = set()
+                for payload in X:
+                    payload = payload[0]
+                    group_unique_packet.add(payload)
+
                 summary_list.append(
                     [
                         key_name[k] + i[0],
                         len(set(i[1][0])),
                         len(i[1][1]),
+                        len(group_unique_packet),
                         len(key_card),
                         ci,
                         len(c_dict["decoded AE"]),
+                        len(set(c_dict["decoded payload"])),
                         ret[0][1] if len(ret) > 0 else 0,
                         common_signatures[ci],
                     ]
@@ -167,16 +186,16 @@ def main(args):
     keys = set(x[0] for x in summary_list)
     for key in keys:
         summary_group = list(filter(lambda x: x[0] == key, summary_list))
-        filtered_summary = list(filter(lambda x: x[4] != -1, summary_group))
+        filtered_summary = list(filter(lambda x: x[5] != -1, summary_group))
         if len(filtered_summary) > 0:
-            one_big_cluster = max(filtered_summary, key=lambda x: x[3])
+            one_big_cluster = max(filtered_summary, key=lambda x: x[4])
         else:
-            one_big_cluster = max(summary_group, key=lambda x: x[3])
+            one_big_cluster = max(summary_group, key=lambda x: x[4])
 
         one_big_cluster = (
-            one_big_cluster[:3] + [len(clusters[key])] + one_big_cluster[3:]
+            one_big_cluster[:4] + [len(clusters[key])] + one_big_cluster[4:]
         )
-        one_big_cluster[4], one_big_cluster[5] = one_big_cluster[5], one_big_cluster[4]
+        one_big_cluster[5], one_big_cluster[6] = one_big_cluster[6], one_big_cluster[5]
         one_big_cluster_list.append(one_big_cluster)
 
     write_csv(
@@ -185,9 +204,11 @@ def main(args):
             "group",
             "key_card",
             "group_packet",
+            "group_unique_packet",
             "cluster_key_card",
             "cluster",
             "cluster_packet",
+            "cluster_unique_packet",
             "occurrence of most frequent signature",
             "common signatures",
         ],
@@ -200,10 +221,12 @@ def main(args):
             "group",
             "key_card",
             "group_packet",
+            "group_unique_packet",
             "clusters",
             "biggest_cluster",
             "cluster_key_card",
             "cluster_packet",
+            "cluster_unique_packet",
             "occurrence of most frequent signature",
             "common signatures",
         ],
@@ -274,6 +297,13 @@ if __name__ == "__main__":
         required=False,
         default="False",
         help="True if you want deduplication | Default : False",
+    )
+    argparser.add_argument(
+        "-co",
+        "--count",
+        required=False,
+        default="False",
+        help="True if you want actual count | Default : False",
     )
     args = argparser.parse_args()
     main(args)

@@ -70,13 +70,15 @@ def doubleHeavyHitters(
                         # reset
                         if s_temp != "" and s_temp not in signset:
                             heavy_hitter2.update(s_temp)
-                            signset.add(s_temp)
+                            if deduplication:
+                                signset.add(s_temp)
                         s_temp = chunk
                         temp_count = count
             else:
                 if s_temp != "" and s_temp not in signset:
                     heavy_hitter2.update(s_temp)
-                    signset.add(s_temp)
+                    if deduplication:
+                        signset.add(s_temp)
                 # reset temp_count and string
                 temp_count = 0
                 s_temp = ""

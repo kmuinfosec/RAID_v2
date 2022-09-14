@@ -7,8 +7,6 @@ import numpy as np
 
 def SummaryGraph(result_path):
     main_df = pd.read_csv(os.path.join(result_path, "group_signatures.csv"))
-    # if len(main_df["cluster_key_card"].unique()) == 0:
-    #     main_df["cluster_key_card"] = 1
     group_key_df = main_df[
         [
             "group",
@@ -101,7 +99,6 @@ def SummaryGraph(result_path):
 
     plt.yticks(ylabels, ylabels)
     plt.title("Grouping-Clustering Result (sorted by cardinality)", pad=25)
-    # plt.xlabel("Group Name")
     plt.ylabel("Count")
     plt.yscale("log")
     plt.grid()
@@ -119,9 +116,30 @@ def SummaryGraph(result_path):
         cluster_card = f'{cluster_key_cards[idx]}'
         group_card = f'{group_key_cards[idx]}'
 
-        plt.text(0.11 + idx * 0.0925, -0.1, 'Group Card.:\nBig-Cluster Ratio:\nBig-Cluster Card.:\nNon-Cluster Ratio:', ha='right', fontsize=8, transform=plt.gcf().transFigure)
-        plt.text(0.135 + idx * 0.0925, -0.1, f'{group_card}\n{cluster_rate}\n{cluster_card}\n{remain_rate}', ha='right', fontsize=8, transform=plt.gcf().transFigure)
-        plt.text(0.10 + idx * 0.0925, 0.875, x[idx].split('-')[0], ha='center', fontsize=10, transform=plt.gcf().transFigure)
+        plt.text(
+            0.11 + idx * 0.0925,
+            -0.1,
+            'Group Card.:\nBig-Cluster Ratio:\nBig-Cluster Card.:\nNon-Cluster Ratio:',
+            ha='right',
+            fontsize=8,
+            transform=plt.gcf().transFigure
+        )
+        plt.text(
+            0.135 + idx * 0.0925,
+            -0.1,
+            f'{group_card}\n{cluster_rate}\n{cluster_card}\n{remain_rate}',
+            ha='right',
+            fontsize=8,
+            transform=plt.gcf().transFigure
+        )
+        plt.text(
+            0.10 + idx * 0.0925,
+            0.875,
+            x[idx].split('-')[0],
+            ha='center',
+            fontsize=10,
+            transform=plt.gcf().transFigure
+        )
 
     plt.savefig(
         os.path.join(result_path, "group_summary_graph.png"),
@@ -167,25 +185,14 @@ def SummaryGraph(result_path):
         bar_width = 0.3
         alpha = 0.5
 
-        #     b0 = plt.bar(x2, value, color='g', width=bar_width, alpha=alpha, label='Packet Count')
-        #     b3 = plt.bar(x2, value, color='none', width=bar_width, alpha=alpha, label='Remain', edgecolor=['r'])
-        #     b4 = plt.bar(x2, value, color='b', width=bar_width, alpha=alpha, label='Cardinality')
-
-        #     fig, ax1 = plt.subplots()
-        #     #for legend
-
         b1 = plt.bar(
             x2, value, color="g", width=bar_width, alpha=alpha, label="Packet Count"
         )
         plt.ylabel("Count")
         plt.yscale("log")
-        #     ax2 = ax1.twinx()
-        #     ax2.set_ylabel('Cardinality')
         b2 = plt.bar(
             x1, card, color="b", width=bar_width, alpha=alpha, label="Cardinality"
         )
-        plt.legend()
-        #     plt.yticks(range(max(card) + 1))
         if len(temp_df["group"].tolist()) != 0:
             plt.title(temp_df["group"].tolist()[0])
         plt.xticks(x, clusters)

@@ -118,28 +118,27 @@ def SummaryGraph(result_path):
             group_card = f'{group_key_cards[idx]}'
 
             plt.text(
-                0.11 + idx * 0.0925,
-                -0.1,
+                1.0 - 0.05 * (10 - len(x)) + idx * 2,
+                0.14,
                 'Group Card.:\nBig-Cluster Ratio:\nBig-Cluster Card.:\nNon-Cluster Ratio:',
                 ha='right',
                 fontsize=8,
-                transform=plt.gcf().transFigure
             )
+
             plt.text(
-                0.135 + idx * 0.0925,
-                -0.1,
+                1.4 - 0.05 * (10 - len(x)) + idx * 2,
+                0.14,
                 f'{group_card}\n{cluster_rate}\n{cluster_card}\n{remain_rate}',
                 ha='right',
                 fontsize=8,
-                transform=plt.gcf().transFigure
             )
+
             plt.text(
-                0.10 + idx * 0.0925,
-                0.875,
+                0.75 + idx * 2,
+                ylabels[-1] * 1.4,
                 x[idx].split('-')[0],
                 ha='center',
                 fontsize=10,
-                transform=plt.gcf().transFigure
             )
 
         plt.savefig(

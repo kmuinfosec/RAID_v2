@@ -1,5 +1,4 @@
 import os
-from tkinter import E
 from tqdm.auto import tqdm
 from types import SimpleNamespace
 

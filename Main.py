@@ -73,6 +73,9 @@ def main(args):
         if len(X) == 0:
             print("Skip: No packet with application payload in this group")
             continue
+        if len(set(group_info[1][1])) == 0:
+            print("Skip: All of payloads are same in this group")
+            continue
         if n.earlystop and len(X) > 1000 and raid(X, n.threshold, n.vector_size, n.window_size, earlystop=True) == False:
             print("Earlystop", group_dir)
             continue

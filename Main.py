@@ -1,5 +1,7 @@
 import os
+from tkinter import E
 from tqdm.auto import tqdm
+from types import SimpleNamespace
 
 from Utils import get_dir, write_csv, filter_null_payload, get_payloads_by_index, decode_ascii, encode_hex
 from Preprocess import preprocess
@@ -44,29 +46,15 @@ KEY_DICT = {
 
 
 def main(args):
-
-    pcap_dir = args['pcap_dir']
-    result_path = get_dir(args['result_path'], args['result_dir'])
-    threshold = float(args['threshold'])
-    card_th = int(args['card_th'])
-    group_type = args['group']
-    israw = eval(args['israw'])
-    deduplication = eval(args['deduplication'])
-    iscount = eval(args['count'])
-    earlystop = eval(args['earlystop'])
-    vector_size = int(args['vector_size'])
-    window_size = int(args['window_size'])
-    hh1_size = int(args['hh1_size'])
-    hh2_size = int(args['hh2_size'])
-    ratio = float(args['ratio'])
+    n = SimpleNamespace(**args)
 
     print("Preprocessing pcap files")
-    data = preprocess(pcap_dir, csv_path=os.path.join(result_path, "train_data.csv"))
+    data = preprocess(n.pcap_dir, csv_path=os.path.join(n.result_path, "train_data.csv"))
     
-    key, key_name, isall = KEY_DICT[group_type]
+    key, key_name, isall = KEY_DICT[n.group_type]
 
     print(f"Grouping packets by {[key_name[i] for i in range(len(key_name))]}")
-    topn_data = group(data, key=key, card_th=card_th, all=isall)
+    topn_data = group(data, key=key, card_th=n.card_th, all=isall)
 
     print("Clustering")
     summary_list = []
@@ -78,7 +66,7 @@ def main(args):
         group_key_pair += [(key_idx, group_info) for group_info in topn_data[key_idx]]
     
     for key_idx, group_info in group_key_pair:
-        group_dir = get_dir(result_path, key_name[key_idx] + group_info[0])
+        group_dir = get_dir(n.result_path, key_name[key_idx] + group_info[0])
         dhh_dir = get_dir(group_dir, "ToN_result")
         cluster_dir = get_dir(group_dir, "Clustering_result")
 
@@ -86,11 +74,11 @@ def main(args):
         if len(X) == 0:
             print("Skip: all 0-padding")
             continue
-        if earlystop and len(X) > 1000 and raid(X, threshold, vector_size, window_size, earlystop=True) == False:
+        if n.earlystop and len(X) > 1000 and raid(X, n.threshold, n.vector_size, n.window_size, earlystop=True) == False:
             print("earlystop", group_dir)
             continue
 
-        result_dict = raid(X, threshold, vector_size, window_size, group_dir)
+        result_dict = raid(X, n.threshold, n.vector_size, n.window_size, group_dir)
 
         clusters[key_name[key_idx] + group_info[0]] = list(result_dict.keys())
 
@@ -109,10 +97,10 @@ def main(args):
             candidate_X = get_payloads_by_index(X, c_dict['index'])
             decode_X = [decode_ascii(x) for x in candidate_X]
             dhh_result = doubleHeavyHitters(
-                decode_X, hh1_size=hh1_size, hh2_size=hh2_size, ratio=ratio, deduplication=deduplication
+                decode_X, hh1_size=n.hh1_size, hh2_size=n.hh2_size, ratio=n.ratio, deduplication=n.deduplication
             )
             ret = [
-                [encode_hex(x[0], israw), x[1]]
+                [encode_hex(x[0], n.israw), x[1]]
                 for x in sorted(
                     dhh_result.items(), key=lambda x: x[1], reverse=True
                 )
@@ -120,11 +108,11 @@ def main(args):
 
             ## finding common signature
             compare_key = "decoded payload"
-            if israw == True:
+            if n.israw == True:
                 compare_key = "raw payload"
 
             ## finding actual signature frequency with string matching
-            if iscount:
+            if n.iscount:
                 nxt_ret = []
                 for x, _ in ret:
                     count = 0
@@ -220,17 +208,17 @@ def main(args):
         one_big_cluster_list.append(one_big_cluster)
 
     write_csv(
-        os.path.join(result_path, "all_cluster_signatures.csv"),
+        os.path.join(n.result_path, "all_cluster_signatures.csv"),
         ALL_CLUSTER_SIGNATURES_COLUMN,
         summary_list,
     )
 
     write_csv(
-        os.path.join(result_path, "group_signatures.csv"),
+        os.path.join(n.result_path, "group_signatures.csv"),
         GROUP_SIGNATURES_COLUMN,
         one_big_cluster_list,
     )
 
-    SummaryGraph(result_path)
+    SummaryGraph(n.result_path)
 
-    extract_pcap_cl_v2(packet_idx_dict, pcap_dir)
+    extract_pcap_cl_v2(packet_idx_dict, n.pcap_dir)

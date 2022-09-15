@@ -8,7 +8,7 @@ from Group import group
 from Raid import raid
 from ToNUtils import doubleHeavyHitters
 from SummaryGraph import SummaryGraph
-from Extract import extract_pcap_cl_v2
+from Extract import extract
 
 GROUP_SIGNATURES_COLUMN = [
     "group",
@@ -227,4 +227,4 @@ def main(args):
 
     SummaryGraph(n.result_path)
 
-    extract_pcap_cl_v2(packet_idx_dict, n.pcap_dir)
+    extract(packet_idx_dict, n.pcap_dir)

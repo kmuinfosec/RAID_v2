@@ -10,18 +10,6 @@ if os.name == "posix":
 from scapy.all import *
 from tqdm.auto import tqdm
 
-
-def get_editcap_path():
-    if os.name == "nt":
-        return 'C:\\"Program Files"\\Wireshark\\tshark.exe'
-    else:
-        system_path = os.environ["PATH"]
-        for path in system_path.split(os.pathsep):
-            filename = os.path.join(path, "tshark")
-            if os.path.isfile(filename):
-                return filename
-    return ""
-
 def CustomPcapWriter(filename,pkt,overwritting=False):
     if overwritting:
         wrpcap(filename, pkt)
@@ -31,7 +19,7 @@ def CustomPcapWriter(filename,pkt,overwritting=False):
         else:
             wrpcap(filename, pkt)
 
-def write_to_file_v3(args):
+def write_to_file(args):
     fileidx, file_path, data = args
     # fileidx = pcap의 파일 index
     pkts = PcapReader(file_path)
@@ -64,7 +52,7 @@ def write_to_file_v3(args):
         for writing_file in dp[idx]:
             CustomPcapWriter(writing_file, pkt)
 
-def extract_pcap_cl_v2(data,pcap_dir,cpu_count=os.cpu_count()//2):
+def extract(data,pcap_dir,cpu_count=os.cpu_count()//2):
     mp.freeze_support()
     if os.path.isdir(pcap_dir):
         files = os.listdir(pcap_dir)
@@ -90,13 +78,24 @@ def extract_pcap_cl_v2(data,pcap_dir,cpu_count=os.cpu_count()//2):
     for fileidx, file_path in enumerate(path_list):
         args.append([fileidx,file_path,data])
     with tqdm(total=len(args), desc="Extracting packets from files") as pbar:
-        for _ in pool.imap_unordered(write_to_file_v3, args):
+        for _ in pool.imap_unordered(write_to_file, args):
             pbar.update(1)
     pool.close()
     pool.join()
-    #tqdm(pool.map(write_to_file_v2, args))
-        #pool.close()
     
+    
+""" Lagacy extraction method
+def get_editcap_path():
+    if os.name == "nt":
+        return 'C:\\"Program Files"\\Wireshark\\tshark.exe'
+    else:
+        system_path = os.environ["PATH"]
+        for path in system_path.split(os.pathsep):
+            filename = os.path.join(path, "tshark")
+            if os.path.isfile(filename):
+                return filename
+    return ""
+
 
 def extract_pcap(filter_data, pcap_dir, result_path, method):
     if os.path.isdir(pcap_dir):
@@ -210,3 +209,4 @@ def extract_pcap(filter_data, pcap_dir, result_path, method):
 
             # print("RESULT")
             # print(res.summary)
+"""

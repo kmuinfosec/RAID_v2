@@ -2,7 +2,7 @@
 
 ## How to Use
 
-1. `Config.ini` 에 *하이퍼 파라미터*를 넣어줍니다.
+1. `config.ini` 에 *하이퍼 파라미터*를 넣어줍니다.
     
     ```markdown
     하이퍼 파라미터 목록

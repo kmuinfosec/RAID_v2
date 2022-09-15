@@ -6,7 +6,7 @@ from Utils import get_dir, write_csv, filter_null_payload, get_payloads_by_index
 from Preprocess import preprocess
 from Group import group
 from Raid import raid
-from ToNUtils import doubleHeavyHitters
+from DHHUtils import doubleHeavyHitters
 from SummaryGraph import SummaryGraph
 from Extract import extract
 
@@ -66,7 +66,7 @@ def main(args):
     
     for key_idx, group_info in group_key_pair:
         group_dir = get_dir(n.result_path, key_name[key_idx] + group_info[0])
-        dhh_dir = get_dir(group_dir, "ToN_result")
+        dhh_dir = get_dir(group_dir, "DHH_result")
         cluster_dir = get_dir(group_dir, "Clustering_result")
 
         X = filter_null_payload(group_info[1][1])
@@ -129,7 +129,7 @@ def main(args):
                 ret = nxt_ret
 
             write_csv(
-                os.path.join(dhh_dir, f"{ci}_result_ToN.csv"),
+                os.path.join(dhh_dir, f"{ci}_result_DHH.csv"),
                 ["signature", "frequency"],
                 ret,
             )

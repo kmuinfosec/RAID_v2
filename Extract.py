@@ -120,9 +120,7 @@ def extract_pcap(filter_data, pcap_dir, result_path, method):
                     tshark_path = get_editcap_path()
                     cmd = tshark_path + " -r " + file_path + " -Y "
                     if i == 0:
-                        """
-                        dip_dport filtering
-                        """
+                        # dip_dport filtering
                         cmd = (
                             cmd
                             + '"((tcp.dstport=='
@@ -134,9 +132,7 @@ def extract_pcap(filter_data, pcap_dir, result_path, method):
                             + ')"'
                         )
                     else:
-                        """
-                        sip_sport filtering
-                        """
+                        # sip_sport filtering
                         type = "sip_dport"
                         cmd = (
                             cmd
@@ -166,18 +162,14 @@ def extract_pcap(filter_data, pcap_dir, result_path, method):
                 elif method == "scapy":
 
                     if i == 0:
-                        """
-                        dip_dport filtering
-                        """
+                        # dip_dport filtering
                         res = sniff(
                             offline=file_path,
                             filter=f"dst port {filt[1]} and host {filt[0]}",
                         )
 
                     else:
-                        """
-                        sip_sport filtering
-                        """
+                        # sip_sport filtering
                         type = "sip_dport"
                         res = sniff(
                             offline=file_path,

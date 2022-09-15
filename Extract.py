@@ -42,7 +42,8 @@ def write_to_file_v3(args):
         directory = key + "/pcaps/"
         if not os.path.exists(directory):
             os.makedirs(directory)
-        for clidx, cluster in enumerate(data[key]):
+        for clidx in data[key].keys():
+            cluster = data[key][clidx]
             writing_file = directory + "cluster " + str(clidx) + ".pcap"
             for index in range(len(cluster[0])):
 

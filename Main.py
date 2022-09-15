@@ -81,8 +81,10 @@ def main(args):
 
         clusters[key_name[key_idx] + group_info[0]] = list(result_dict.keys())
 
-        packet_idx_dict[group_dir] = [list() for _ in range(len(result_dict))]
+        packet_idx_dict[group_dir] = dict()
         for cluster_idx in result_dict.keys():
+            if cluster_idx not in packet_idx_dict[group_dir].keys():
+                packet_idx_dict[group_dir][cluster_idx] = []
             packet_idx_dict[group_dir][cluster_idx] += result_dict[cluster_idx]["idx"]
 
         # has common signatures for each cluster

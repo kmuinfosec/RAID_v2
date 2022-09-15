@@ -25,10 +25,10 @@ def raid(
 ):
     payloads = [i[0] for i in data]
 
-    X = contents2count(payloads, vec_size=vec_size, win_size=win_size)
-
     if earlystop:
         X = random.sample(X, sample)
+
+    X = contents2count(payloads, vec_size=vec_size, win_size=win_size)
 
     prev_label_list = prototypeClustering(X, th, opt1=False)
     label_list = hierarchicalClustering(X, prev_label_list, th)

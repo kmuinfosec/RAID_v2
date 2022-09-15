@@ -2,7 +2,7 @@ from configparser import ConfigParser
 
 from Main import main
 
-from Utils import get_dir, parse_config
+from Utils import parse_config
 
 
 def experiment():

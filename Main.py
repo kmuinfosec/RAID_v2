@@ -1,5 +1,4 @@
 import os
-import argparse
 from tqdm.auto import tqdm
 
 from Utils import get_dir, write_csv, filter_null_payload, get_payloads_by_index, decode_ascii, encode_hex
@@ -10,177 +9,199 @@ from ToNUtils import doubleHeavyHitters
 from SummaryGraph import SummaryGraph
 from Extract import extract_pcap_cl_v2
 
+GROUP_SIGNATURES_COLUMN = [
+    "group",
+    "key_card",
+    "group_packet",
+    "group_unique_packet",
+    "clusters",
+    "biggest_cluster",
+    "cluster_key_card",
+    "cluster_packet",
+    "cluster_unique_packet",
+    "occurrence of most frequent signature",
+    "common signatures",
+]
+
+ALL_CLUSTER_SIGNATURES_COLUMN = [
+    "group",
+    "key_card",
+    "group_packet",
+    "group_unique_packet",
+    "cluster_key_card",
+    "cluster",
+    "cluster_packet",
+    "cluster_unique_packet",
+    "occurrence of most frequent signature",
+    "common signatures",
+]
+
+KEY_DICT = {
+    'all': (['all'], ['all_group-'], True),
+    'ip': ([(5, 3), (3, 5)], ['dip-', 'sip-'], False),
+    'ip_dport': ([(1, 3), (2, 5)], ["dip_dport-", "sip_dport-"], False),
+}
+
 
 def main(args):
-    pcap_dir = args.pcap_path
-    result_path = get_dir(args.result_path, args.result_dir)
-    threshold = args.threshold
-    card_th = args.card_th
-    group_type = args.group
-    israw = eval(args.israw)
-    deduplication = eval(args.deduplication)
-    iscount = eval(args.count)
+
+    pcap_dir = args['pcap_dir']
+    result_path = get_dir(args['result_path'], args['result_dir'])
+    threshold = float(args['threshold'])
+    card_th = int(args['card_th'])
+    group_type = args['group']
+    israw = eval(args['israw'])
+    deduplication = eval(args['deduplication'])
+    iscount = eval(args['count'])
+    earlystop = eval(args['earlystop'])
+    vector_size = int(args['vector_size'])
+    window_size = int(args['window_size'])
+    hh1_size = int(args['hh1_size'])
+    hh2_size = int(args['hh2_size'])
+    ratio = float(args['ratio'])
 
     print("Preprocessing pcap files")
     data = preprocess(pcap_dir, csv_path=os.path.join(result_path, "train_data.csv"))
-
-    if group_type == 'all':
-        key = ["all"]
-        key_name = ["all_group-"]
-    elif group_type == 'ip_dport':
-        # (1, 3) means ('dip|dport', 'sip'), (2, 6) means('sip|dport', 'dip'), card_th == top_k cardinality
-        key = [(1, 3), (2, 5)]
-        key_name = ["dip_dport-", "sip_dport-"]
-    else:
-        key = [(5, 3), (3, 5)]
-        key_name = ["dip-", "sip-"]
     
+    key, key_name, isall = KEY_DICT[group_type]
+
     print(f"Grouping packets by {[key_name[i] for i in range(len(key_name))]}")
-
-    isall = False
-    if group_type == 'all':
-        isall = True
-
     topn_data = group(data, key=key, card_th=card_th, all=isall)
-    clusters = {}
 
     print("Clustering")
     summary_list = []
-    # per key(DIP||DPORT, ...)
-
+    clusters = {}
     packet_idx_dict = dict()
 
-    for k in range(len(key)):
+    group_key_pair = []
+    for key_idx in range(len(key)):
+        group_key_pair += [(key_idx, group_info) for group_info in topn_data[key_idx]]
+    
+    for key_idx, group_info in group_key_pair:
+        group_dir = get_dir(result_path, key_name[key_idx] + group_info[0])
+        dhh_dir = get_dir(group_dir, "ToN_result")
+        cluster_dir = get_dir(group_dir, "Clustering_result")
 
-        # per group(top k)
-        for i in tqdm(topn_data[k]):
-            group_dir = get_dir(result_path, key_name[k] + i[0])
-            dhh_dir = get_dir(group_dir, "ToN_result")
-            cluster_dir = get_dir(group_dir, "Clustering_result")
+        X = filter_null_payload(group_info[1][1])
+        if len(X) == 0:
+            print("Skip: all 0-padding")
+            continue
+        if earlystop and len(X) > 1000 and raid(X, threshold, vector_size, window_size, earlystop=True) == False:
+            print("earlystop", group_dir)
+            continue
 
-            X = filter_null_payload(i[1][1])
-            if len(X) == 0:
-                print("Skip: all 0-padding")
-                continue
-            """
-            if len(X) > 1000 and raid(X, threshold, 256, 3, earlystop=True) == False:
-                print("earlystop", group_dir)
-                continue
-            """
+        result_dict = raid(X, threshold, vector_size, window_size, group_dir)
 
-            result_dict = raid(X, threshold, 256, 3, group_dir)
+        clusters[key_name[key_idx] + group_info[0]] = list(result_dict.keys())
 
-            clusters[key_name[k] + i[0]] = list(result_dict.keys())
+        packet_idx_dict[group_dir] = [list() for _ in range(len(result_dict))]
+        for cluster_idx in result_dict.keys():
+            packet_idx_dict[group_dir][cluster_idx] += result_dict[cluster_idx]["idx"]
 
-            packet_idx_dict[group_dir] = [list() for _ in range(len(result_dict))]
-            for cluster_idx in result_dict.keys():
-                packet_idx_dict[group_dir][cluster_idx] += result_dict[cluster_idx][
-                    "idx"
-                ]
-
-            # has common signatures for each cluster
-            common_signatures = dict()
-            max_card = -1
-            # per cluster
-            for ci in list(result_dict.keys()):
-                c_dict = result_dict[ci]
-                common_signatures[ci] = set()
-                # extracting signatures and writing on csv
-                candidate_X = get_payloads_by_index(X, c_dict['index'])
-                decode_X = [decode_ascii(x) for x in candidate_X]
-                dhh_result = doubleHeavyHitters(
-                    decode_X, hh1_size=1024, hh2_size=200, ratio=0.6, deduplication=deduplication
+        # has common signatures for each cluster
+        common_signatures = dict()
+        max_card = -1
+        # per cluster
+        for ci in list(result_dict.keys()):
+            c_dict = result_dict[ci]
+            common_signatures[ci] = set()
+            # extracting signatures and writing on csv
+            candidate_X = get_payloads_by_index(X, c_dict['index'])
+            decode_X = [decode_ascii(x) for x in candidate_X]
+            dhh_result = doubleHeavyHitters(
+                decode_X, hh1_size=hh1_size, hh2_size=hh2_size, ratio=ratio, deduplication=deduplication
+            )
+            ret = [
+                [encode_hex(x[0], israw), x[1]]
+                for x in sorted(
+                    dhh_result.items(), key=lambda x: x[1], reverse=True
                 )
-                ret = [
-                    [encode_hex(x[0], israw=israw), x[1]]
-                    for x in sorted(
-                        dhh_result.items(), key=lambda x: x[1], reverse=True
-                    )
-                ]
-                write_csv(
-                    os.path.join(dhh_dir, f"{ci}_result_ToN.csv"),
-                    ["signature", "frequency"],
-                    ret,
-                )
+            ]
 
-                ## finding common signature
-                compare_key = "decoded payload"
-                if israw == True:
-                    compare_key = "raw payload"
+            ## finding common signature
+            compare_key = "decoded payload"
+            if israw == True:
+                compare_key = "raw payload"
 
-                ## finding actual signature frequency with string matching
-                if iscount:
-                    nxt_ret = []
-                    for x, _ in ret:
-                        count = 0
-                        for payload in c_dict[compare_key]:
-                            if x in payload:
-                                count += 1
-                        nxt_ret.append([x, count])
-                    ret = nxt_ret
-
+            ## finding actual signature frequency with string matching
+            if iscount:
+                nxt_ret = []
                 for x, _ in ret:
-                    flag = True
+                    count = 0
                     for payload in c_dict[compare_key]:
-                        if x not in payload:
-                            flag = False
-                            break
-                    if flag:
-                        common_signatures[ci].add(x)
+                        if x in payload:
+                            count += 1
+                    nxt_ret.append([x, count])
+                ret = nxt_ret
 
-                indices = dict()
-                anchor_packet = c_dict["decoded payload"][0]
-                for common_signature in common_signatures[ci]:
-                    index = anchor_packet.find(common_signature)
-                    indices[common_signature] = [
-                        index,
-                        index + len(common_signature),
-                    ]
-                indices = dict(
-                    sorted(indices.items(), key=lambda x: (x[1][0], x[1][1]))
-                )
+            write_csv(
+                os.path.join(dhh_dir, f"{ci}_result_ToN.csv"),
+                ["signature", "frequency"],
+                ret,
+            )
 
-                common_signatures[ci] = list(indices.keys())
+            for x, _ in ret:
+                flag = True
+                for payload in c_dict[compare_key]:
+                    if x not in payload:
+                        flag = False
+                        break
+                if flag:
+                    common_signatures[ci].add(x)
 
-                csv_data = [
-                    [
-                        list(c_dict["common string"]),
-                        c_dict["decoded AE"][i],
-                        str(c_dict["decoded payload"][i]),
-                    ]
-                    for i in range(len(c_dict["decoded AE"]))
+            indices = dict()
+            anchor_packet = c_dict["decoded payload"][0]
+            for common_signature in common_signatures[ci]:
+                index = anchor_packet.find(common_signature)
+                indices[common_signature] = [
+                    index,
+                    index + len(common_signature),
                 ]
+            indices = dict(
+                sorted(indices.items(), key=lambda x: (x[1][0], x[1][1]))
+            )
 
-                write_csv(
-                    os.path.join(cluster_dir, f"{ci}_result.csv"),
-                    ["common_string", "decoded_AE", "decoded_payload"],
-                    csv_data,
-                )
+            common_signatures[ci] = list(indices.keys())
 
-                key_card = set()
-                if not isall:
-                    for idx in c_dict["index"]:
-                        key_card.add(i[1][0][idx])
+            csv_data = [
+                [
+                    list(c_dict["common string"]),
+                    c_dict["decoded AE"][i],
+                    str(c_dict["decoded payload"][i]),
+                ]
+                for i in range(len(c_dict["decoded AE"]))
+            ]
 
-                group_unique_packet = set()
-                for payload in X:
-                    payload = payload[0]
-                    group_unique_packet.add(payload)
+            write_csv(
+                os.path.join(cluster_dir, f"{ci}_result.csv"),
+                ["common_string", "decoded_AE", "decoded_payload"],
+                csv_data,
+            )
 
-                summary_list.append(
-                    [
-                        key_name[k] + i[0],
-                        len(set(i[1][0])),
-                        len(i[1][1]),
-                        len(group_unique_packet),
-                        len(key_card),
-                        ci,
-                        len(c_dict["decoded AE"]),
-                        len(set(c_dict["decoded payload"])),
-                        ret[0][1] if len(ret) > 0 else 0,
-                        common_signatures[ci],
-                    ]
-                )
+            key_card = set()
+            if not isall:
+                for idx in c_dict["index"]:
+                    key_card.add(group_info[1][0][idx])
+
+            group_unique_packet = set()
+            for payload in X:
+                payload = payload[0]
+                group_unique_packet.add(payload)
+
+            summary_list.append(
+                [
+                    key_name[key_idx] + group_info[0],
+                    len(set(group_info[1][0])),
+                    len(group_info[1][1]),
+                    len(group_unique_packet),
+                    len(key_card),
+                    ci,
+                    len(c_dict["decoded AE"]),
+                    len(set(c_dict["decoded payload"])),
+                    ret[0][1] if len(ret) > 0 else 0,
+                    common_signatures[ci],
+                ]
+            )
 
     one_big_cluster_list = []
     keys = set(x[0] for x in summary_list)
@@ -200,110 +221,16 @@ def main(args):
 
     write_csv(
         os.path.join(result_path, "all_cluster_signatures.csv"),
-        [
-            "group",
-            "key_card",
-            "group_packet",
-            "group_unique_packet",
-            "cluster_key_card",
-            "cluster",
-            "cluster_packet",
-            "cluster_unique_packet",
-            "occurrence of most frequent signature",
-            "common signatures",
-        ],
+        ALL_CLUSTER_SIGNATURES_COLUMN,
         summary_list,
     )
 
     write_csv(
         os.path.join(result_path, "group_signatures.csv"),
-        [
-            "group",
-            "key_card",
-            "group_packet",
-            "group_unique_packet",
-            "clusters",
-            "biggest_cluster",
-            "cluster_key_card",
-            "cluster_packet",
-            "cluster_unique_packet",
-            "occurrence of most frequent signature",
-            "common signatures",
-        ],
+        GROUP_SIGNATURES_COLUMN,
         one_big_cluster_list,
     )
 
     SummaryGraph(result_path)
 
-    """
-    print("Extracting pcaps")
-    filter_data = []
-    for l in tqdm(range(len(topn_data)), desc="Extracting filter data"):
-        filter_data.append(set([]))
-        for i in topn_data[l]:
-            for _ in i:
-                filter_data[l].add((i[0].split("_")[0], i[0].split("_")[1]))
-    """
-
     extract_pcap_cl_v2(packet_idx_dict, pcap_dir)
-    """
-    tshark or scapy on the last value
-    tshark is currently not confirmed to stable
-    """
-    # extract_pcap(filter_data, pcap_dir, result_path, "tshark")
-
-
-if __name__ == "__main__":
-    argparser = argparse.ArgumentParser()
-    argparser.add_argument("pcap_path", help="Input the path of the pcap files")
-    argparser.add_argument("result_path", help="Input the path of the result directory")
-    argparser.add_argument(
-        "result_dir",
-        help="Input the name of the result directory",
-    )
-    argparser.add_argument(
-        "-t",
-        "--threshold",
-        type=float,
-        required=False,
-        default=0.6,
-        help="Input the threshold of the clustering | Default : 0.6",
-    )
-    argparser.add_argument(
-        "-c",
-        "--card_th",
-        type=int,
-        required=False,
-        default=5,
-        help="Select top \{card_th\} group per each key | Default : 5",
-    )
-    argparser.add_argument(
-        "-g",
-        "--group",
-        required=False,
-        default="ip_dport",
-        help="select grouping type: [ip_dport, ip, all] | Default : ip_dport",
-    )
-    argparser.add_argument(
-        "-r",
-        "--israw",
-        required=False,
-        default="False",
-        help="True if you don't want to convert signature to ASCII | Default : False",
-    )
-    argparser.add_argument(
-        "-d",
-        "--deduplication",
-        required=False,
-        default="False",
-        help="True if you want deduplication | Default : False",
-    )
-    argparser.add_argument(
-        "-co",
-        "--count",
-        required=False,
-        default="False",
-        help="True if you want actual count | Default : False",
-    )
-    args = argparser.parse_args()
-    main(args)

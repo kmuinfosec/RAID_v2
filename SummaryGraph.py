@@ -116,10 +116,10 @@ def SummaryGraph(result_path):
             remain_rate = f'{round(100*remain/packet[idx])}%'
             cluster_card = f'{cluster_key_cards[idx]}'
             group_card = f'{group_key_cards[idx]}'
-
+            margin_detail = 2 ** len(str(max(packet)))
             plt.text(
                 1.0 - 0.05 * (10 - len(x)) + idx * 2,
-                0.14,
+                0.8 / margin_detail,
                 'Group Card.:\nBig-Cluster Ratio:\nBig-Cluster Card.:\nNon-Cluster Ratio:',
                 ha='right',
                 fontsize=8,
@@ -127,7 +127,7 @@ def SummaryGraph(result_path):
 
             plt.text(
                 1.4 - 0.05 * (10 - len(x)) + idx * 2,
-                0.14,
+                0.8 / margin_detail,
                 f'{group_card}\n{cluster_rate}\n{cluster_card}\n{remain_rate}',
                 ha='right',
                 fontsize=8,

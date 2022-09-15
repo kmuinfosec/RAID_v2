@@ -48,7 +48,9 @@ def main(args):
     n = SimpleNamespace(**args)
 
     print("Preprocessing pcap files")
-    data = preprocess(n.pcap_dir, csv_path=os.path.join(n.result_path, "train_data.csv"))
+
+    
+    data = preprocess(n.pcap_dir, n.cpu_count)
     
     key, key_name, isall = KEY_DICT[n.group_type]
 
@@ -227,4 +229,4 @@ def main(args):
 
     SummaryGraph(n.result_path)
 
-    extract(packet_idx_dict, n.pcap_dir)
+    extract(packet_idx_dict, n.pcap_dir, n.cpu_count)

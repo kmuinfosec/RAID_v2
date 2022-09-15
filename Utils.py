@@ -16,6 +16,7 @@ def get_dir(path, dir=False):
 def parse_config(cfgs):
     args_dict = dict()
     args_dict['pcap_dir'] = cfgs["DEFAULT"]['pcap_dir']
+    args_dict['cpu_count'] = eval(cfgs["DEFAULT"]['cpu_count'])
     args_dict['result_path'] = get_dir(cfgs["DEFAULT"]['result_path'], cfgs["DEFAULT"]['result_dir'])
     args_dict['threshold'] = float(cfgs["DEFAULT"]['threshold'])
     args_dict['card_th'] = int(cfgs["DEFAULT"]['card_th'])

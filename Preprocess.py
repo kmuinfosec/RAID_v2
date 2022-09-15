@@ -90,7 +90,7 @@ def get_parsed_packets(pcap_dir, cpu_count=os.cpu_count() // 2):
     return data
 
 
-def preprocess(pcap_dir, csv_path=False, cpu_count=None):
+def preprocess(pcap_dir, cpu_count=None):
     mp.freeze_support()
     if isinstance(pcap_dir, list):
         data = []

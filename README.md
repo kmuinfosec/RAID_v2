@@ -45,7 +45,7 @@
 
     *상세 설명은 아래 모듈 설명에 기재되어 있음
     
-2. `Experiment.py`를 python으로 실행합니다.
+2. `Experiment.py`를 python으로 실행한다.
 ```python
 python Experiment.py
 ```

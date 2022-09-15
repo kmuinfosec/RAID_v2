@@ -2,67 +2,65 @@
 
 ## How to Use
 
-1. `config.ini` 에 *하이퍼 파라미터*를 넣어줍니다.
+1. `Config.ini` 에 *하이퍼 파라미터*를 넣어줍니다.
     
     ```markdown
     하이퍼 파라미터 목록
-    pcap_dir (string) : pcap파일이나 done파일이 들어있는 directory의 경로
-    result_path (string) : 결과 폴더를 생성할 directory 경로
-    result_dir (string) : 실행 결과를 저장할 폴더 이름
+    pcap_dir : pcap파일이나 done파일이 들어있는 directory의 경로
+    result_path : 결과 폴더를 생성할 directory 경로
+    result_dir : 실행 결과를 저장할 폴더 이름
     threshold (float) - 클러스터링에 사용할 threshold
-    card_th (int) - group의 최대 개수
+    card_th (int) - group의 key별 그룹의 최대 개수
     group (string) - group의 type [ip_dport, ip, all]
-    israw (bool) - ASCII encoding 적용 여부
-    deduplication (bool) - DHH 수행 시 한 패킷 내의 중복 제거 적용 여부
+    israw (bool) - ASCII encoding 적용 여부 (True시 미적용)
+    deduplication (bool) - DHH 수행 시 한 패킷 내의 동일 시그니처의 중복 제거 적용 여부
     count (bool) - 시그니처의 실제 등장 횟수 출력 여부 
     earlystop (bool) - earlystop을 적용할지 여부
     vector_size (int) - RAID에서 사용할 vector의 크기
     window_size (int) - RAID에서 AE청킹할 때 윈도우의 사이즈
     hh1_size (int) - DHH에서 1번째 HeavyHitter의 크기
     hh2_size (int) - DHH에서 2번째 HeavyHitter의 크기
-    ratio (float) - DHH에서 사용할 ratio
+    ratio (float) - DHH에서 사용할 ratio. 
+    * Ratio가 낮은경우 발생이 적은 단어도 concat되고 높은경우 발생 빈도가 높아야 concatd 됨
     ```
     
 2. `Experiment.py`를 python으로 실행합니다.
 
 ```markdown
 결과물 목록
-train_data.csv : Pcap파일에서 추출한 데이터를 csv로 저장한 파일
-group_signatures.csv : 그룹의 정보, Big One 클러스터 정보가 작성 된 파일
-all_cluster_signatures.csv : 그룹의 클러스터들의 모든 클러스터들의 정보가 작성 된 파일
-group_summary_graph.png : 그룹의 총 패킷 수와 가장 큰 클러스터에 포함된 패킷 수, 가장 많이 반복된 시그니처의 횟수를 히스토그램으로 표현한 그래프
+| train_data.csv : Pcap파일에서 추출한 데이터를 csv로 저장한 파일 (optional)
+| group_signatures.csv : 그룹의 정보, Big One 클러스터 정보가 작성 된 파일
+| all_cluster_signatures.csv : 그룹의 클러스터들의 모든 클러스터들의 정보가 작성 된 파일
+| group_summary_graph.png : 그룹의 총 패킷 수와 가장 큰 클러스터에 포함된 패킷 수, 가장 많이 반복된 시그니처의 횟수를 히스토그램으로 표현한 그래프
+|
+└─────── <*group*>-<ip>/: *card_th*만큼 생성된 그룹 별 클러스터 데이터를 저장한 directory
+	  | Clustering_result/: 클러스터 별 common_string, 청킹된 패킷, payload원본을 저장한 파일들의 directory
+		| pcaps/: 클러스터에 속한 패킷들을 하나의 pcap으로 만든 파일들의 directory
+		| DHH_result/: 클러스터 별 시그니처와 등장 횟수가 적힌 파일들의 directory
+		| result_data_merge.pkl	: raid를 모두 수행한 후 생성된 dictionary를 저장한 pickle파일 
+		| Cluster_summary_graph.png : 클러스터의 총 패킷 개수와 cardinality를 히스토그램으로 나타낸 그래프
+			* 클러스터는 숫자로 표현
+			* 클러스터에 속하지 않은 패킷의 경우 파일명 -1에 저장 ex) cluster -1.pcap, -1_result.csv
 
-{key}-{ip}directory (클러스터) : 각 클러스터 별 데이터를 저장한 directory
-		- Clustering_result : 클러스터 별 common_string, 청킹된 패킷, payload원본을 저장한 파일의 directory
-		- pcaps : 클러스터에 속한 패킷들을 하나의 pcap으로 만든 파일의 directory
-		- ToN_result : 클러스터 별 시그니처와 등장 횟수가 적힌 파일의 directory
-		- result_data_merge.pkl	: raid를 모두 수행한 후 생성된 dictionary를 저장한 pickle파일 
-		- Cluster_summary_graph.png : 클러스터의 총 패킷 개수와 cardinality를 히스토그램으로 나타낸 그래프
-
-		* 클러스터에 속하지 않은 패킷의 경우 파일명 -1에 저장
 ```
 
 ## Experiment.py
 
-Config에 작성 된 *하이퍼 파라미터*를 적용하여 Main.py를 실행해주는 파일
+`config.ini`에 작성 된 *하이퍼 파라미터*를 적용하여 `Main.py`를 실행해주는 파일
 
 ## Main.py
 
-Pcap파일에서 패킷 별 데이터를 추출 (preprocess)
-
-추출된 데이터를 key에 따라 그룹화 (group)
-
-클러스터링 적용 (raid)
-
-시그니처 추출 (doubleheavyHitter)
-
-요약 그래프 생성 순으로 진행하는 모듈
+1. 패킷전처리 : Pcap파일에서 패킷 별 데이터를 추출 (preprocess)
+2. 패킷 그룹핑 : 추출된 데이터를 key에 따라 그룹화 (group)
+3. 클러스터링 : 클러스터링 적용 (raid)
+4. 시그니처 추출: 시그니처 추출 (doubleheavyHitter)
+5. 결과 출력 : 요약 그래프 생성 순으로 진행하는 모듈
 
 ## Preprocess.py
 
 pcap파일에서 각 패킷 별 사용할 정보들(5-tuple, application payload, pcap data index, packet index)을 파싱하고 해당 정보를 사용해 그룹키를 미리 만들어 데이터를 구축한다. 
 
-만들어진 데이터를 *result_path*에 train.csv파일로 저장한다.
+만들어진 데이터를 *result_path*에 `train_data.csv`파일로 저장한다. (optional)
 
 - `make_pcap_payload()`: pcap파일을 읽어 각 패킷별 사용할 정보를 파싱하고 그룹키를 생성한 후 반환하는 함수
 - `get_parsed_packets()`: `make_pcap_payload`를 호출하여 각 pcap파일을 멀티프로세스로 처리하는 함수
@@ -72,7 +70,7 @@ pcap파일에서 각 패킷 별 사용할 정보들(5-tuple, application payload
 ```markdown
 key 설명 (*group*)
 - ip_dport : sip_dport와 dip_dport가 key
-- ip : ip만을 key로 사용
+- ip : sip와 dip를 key로 사용
 - all : key를 사용하지 않음
 ```
 
@@ -89,20 +87,25 @@ payload 데이터를 입력받아 `prototypeClustering`과 `hierarchicalClusteri
 
 만들어진 데이터를 group의 directory에 pickle형태로 저장한다.
 
-*earlystop* : 일정 비율 이상의 클러스터가 존재하는지 확인 후 존재하지 않으면 False를 반환하는 함수
+*earlystop* : 일정 비율 이상의 클러스터가 존재하는지 확인 후 존재하지 않으면 False를 반환하는 파라미터
 
 ## SummaryGraph.py
 
-`group_signatures.csv`를 읽어 그룹 별 클러스터링 결과를 cardinality가 높은 순으로 그래프를 그려 `group_summary_graph.png`로 저장하고 `group_signatures.csv`를 읽어 클러스터 별 패킷 수와 cardinality를 그래프로 만들어 `cluster_summary_graph.png`로 저장하는 함수
+`group_signatures.csv`를 읽어 그룹 별 클러스터링 결과를 cardinality가 높은 순으로 그래프를 그려 `group_summary_graph.png`로 저장한다
 
-두 그래프 모두 최대 10개의 그래프를 그린다.
+`group_signatures.csv`는 최대 *cardth*의 두 배 만큼 그린다.
+
+ `all_cluster_signatures.csv`를 읽어 클러스터 별 패킷 수와 cardinality를 그래프로 만들어 `cluster_summary_graph.png`로 저장하는 함수
+
+`cluster_summary_graph.png` 는 최대 10개의 그래프를 그린다.
 
 ## Extract.py
 
-- `get_editcap_path()` : tshark의 경로를 반환해주는 함수
-- `CustomPcapWriter()` : packet을 pcab에 작성하는 함수
-- `write_to_file_v3()` : packet을 하나씩 `CustomPcapWriter`에 전송하는 함수
-- `extract_pcap_c1_v2()` : 클러스터 별로 일치했던 패킷들을 원본 pcap에서 추출하는 함수
+클러스터 별로 일치했던 패킷들을 원본 pcap파일과 비교하여 클러스터 별로 pcap에 저장하는 모듈
+
+- `CustomPcapWriter()` : packet을 pcap에 작성하는 함수
+- `write_to_file()` : packet을 하나씩 `CustomPcapWriter`에 전송하는 함수
+- `extract()` : 클러스터 별로 일치했던 패킷들을 원본 pcap에서 추출하는 함수
 
 ## RaidUtils
 
@@ -118,7 +121,7 @@ Raid를 진행할 때 사용하는 Clustering과 청킹 및 계산을 위한 Cos
 - `getAverageVector()` : Vector의 평균값을 계산해주는 함수
 - `getProxyDistance()` : 모든 payload의 Cosine Distance를 구한 Vector를 반환 함수
 
-## ToNUtils
+## DHHUtils
 
 1:N으로 그룹화된 payload들의 시그니처를 Double Heavy Hitter가 구현된 모듈
 
@@ -130,7 +133,7 @@ HeavyHitter : 입력받은 문자열들의 등장횟수가 높은 Substring을 �
 
 - `get_dir()` : directoy의 경로를 찾고 directory가 존재하지 않는다면 생성해주는 함수
 - `write_csv()` : header와 data를 csv파일로 저장하는 함수
-- `fillter_null_payload()` : payload가 없는 데이터를 제외해주는 함수
+- `filter_null_payload()` : payload가 없는 데이터를 제외해주는 함수
 - `get_payloads_by_index()` : index 위치에 존재하는 패킷의 payload를 return해주는 함수
 - `decode_ascii()` : payload 데이터(hex)를 decode(ascii) 해주는 함수
 - `encode_hex()` : payload(ascii)를 encode(hex) 해주는 함수. *isrow*에 따라 0x20(space) ~ 0x7E(’~’)는 문자로 만들어준다.

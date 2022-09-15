@@ -93,7 +93,7 @@ payload 데이터를 입력받아 `prototypeClustering`과 `hierarchicalClusteri
 
 `group_signatures.csv`를 읽어 그룹 별 클러스터링 결과를 cardinality가 높은 순으로 그래프를 그려 `group_summary_graph.png`로 저장한다
 
-`group_signatures.csv`는 최대 *cardth*의 두 배 만큼 그린다.
+`group_signatures.csv`는 최대 *card_th*의 두 배 만큼 그린다.
 
  `all_cluster_signatures.csv`를 읽어 클러스터 별 패킷 수와 cardinality를 그래프로 만들어 `cluster_summary_graph.png`로 저장하는 함수
 

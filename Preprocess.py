@@ -95,7 +95,6 @@ def preprocess(pcap_dir, csv_path=False, cpu_count=None):
     if isinstance(pcap_dir, list):
         data = []
         for dir in pcap_dir:
-            print(dir)
             data += get_parsed_packets(dir, cpu_count)
     else:
         data = get_parsed_packets(pcap_dir, cpu_count)

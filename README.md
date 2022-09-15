@@ -16,7 +16,7 @@
 - [Utils.py](#utilspy)
 
 ## 약어 설명
-- DHH(Double Heavy-Hitter): 주어진 패킷들에서 공통 시그니처를 추출할 때 사용하는 기술, "[Zero-Day Signature Extraction for High Volume Attacks](chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://www.openu.ac.il/personal_sites/shir-landau-feibish/papers/2019_AutoSigGen_ToN.pdf)" 논문의 제안 아이디어에 포함되는 기술이다.
+- DHH(Double Heavy-Hitter): 주어진 패킷들에서 공통 시그니처를 추출할 때 사용하는 기술, "[Zero-Day Signature Extraction for High Volume Attacks](https://www.openu.ac.il/personal_sites/shir-landau-feibish/papers/2019_AutoSigGen_ToN.pdf)" 논문의 제안 아이디어에 포함되는 기술이다.
 - RAID(Reducing Alert Fatigue in Network Intrusion Detection): 페이로드를 컨텐츠 기반 AE청킹으로 청킹한 후, 해당 청크들을 해싱하여 프로토타입 클러스터링과 계층적 클러스터링을 통해 효과적으로 워크로드를 감쇄하는 국민대학교 정보보호연구실 독자 기술이다. 현재 [INFOCOM2023](https://infocom2023.ieee-infocom.org) review 진행 중이다.
 
 ## 1. 사용방법

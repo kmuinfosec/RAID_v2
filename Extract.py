@@ -8,7 +8,7 @@ if os.name == "posix":
     
     logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 from scapy.all import *
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 
 def get_editcap_path():

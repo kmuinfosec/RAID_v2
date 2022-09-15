@@ -1,15 +1,13 @@
 import os
-
 if os.name == "posix":
     import logging
 
     logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 import sys
-
 import multiprocessing as mp
 
 from scapy.all import *
-from tqdm import tqdm
+from tqdm.auto import tqdm
 from itertools import repeat
 
 from Utils import get_dir, write_csv
@@ -51,7 +49,6 @@ def make_pcap_payload(input):
                 payload = ""
             processed_pkts.append(
                 [
-                    "temp",
                     dip + "_" + str(dport),
                     sip + "_" + str(dport),
                     sip,
@@ -73,12 +70,12 @@ def get_parsed_packets(pcap_dir, cpu_count=os.cpu_count() // 2):
         files = os.listdir(pcap_dir)
     else:
         files = [pcap_dir]
+
     path_list = []
 
     for file_name in files:
-        if (os.path.splitext(file_name)[-1] == ".pcap") or (
-            os.path.splitext(file_name)[-1] == ".done"
-        ):
+        ext = os.path.splitext(file_name)[-1]
+        if ext in {'.pcap', '.cap', '.done'}:
             path_list.append(os.path.join(pcap_dir, file_name))
     path_list.sort()
     data = []
@@ -98,13 +95,13 @@ def preprocess(pcap_dir, csv_path=False, cpu_count=None):
     if isinstance(pcap_dir, list):
         data = []
         for dir in pcap_dir:
+            print(dir)
             data += get_parsed_packets(dir, cpu_count)
     else:
         data = get_parsed_packets(pcap_dir, cpu_count)
 
     if csv_path:
         data_key = [
-            "data_type",
             "dip_dport",
             "sip_dport",
             "sip",

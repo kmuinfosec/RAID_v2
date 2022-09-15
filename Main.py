@@ -39,8 +39,8 @@ ALL_CLUSTER_SIGNATURES_COLUMN = [
 
 KEY_DICT = {
     'all': (['all'], ['all_group-'], True),
-    'ip': ([(5, 3), (3, 5)], ['dip-', 'sip-'], False),
-    'ip_dport': ([(1, 3), (2, 5)], ["dip_dport-", "sip_dport-"], False),
+    'ip': ([(4, 2), (2, 4)], ['dip-', 'sip-'], False),
+    'ip_dport': ([(0, 2), (1, 4)], ["dip_dport-", "sip_dport-"], False),
 }
 
 

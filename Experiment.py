@@ -1,7 +1,7 @@
 from configparser import ConfigParser
 
 from Main import main
-import os
+
 from Utils import get_dir, parse_config
 
 

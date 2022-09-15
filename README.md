@@ -6,9 +6,9 @@
     
     ```markdown
     하이퍼 파라미터 목록
-    pcap_dir : pcap파일이나 done파일이 들어있는 directory의 경로
-    result_path : 결과 폴더를 생성할 directory 경로
-    result_dir : 실행 결과를 저장할 폴더 이름
+    pcap_dir (string) : pcap파일이나 done파일이 들어있는 directory의 경로
+    result_path (string) : 결과 폴더를 생성할 directory 경로
+    result_dir (string) : 실행 결과를 저장할 폴더 이름
     threshold (float) - 클러스터링에 사용할 threshold
     card_th (int) - group의 최대 개수
     group (string) - group의 type [ip_dport, ip, all]

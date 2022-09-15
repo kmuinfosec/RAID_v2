@@ -71,10 +71,10 @@ def main(args):
 
         X = filter_null_payload(group_info[1][1])
         if len(X) == 0:
-            print("Skip: all 0-padding")
+            print("Skip: No packet with application payload in this group")
             continue
         if n.earlystop and len(X) > 1000 and raid(X, n.threshold, n.vector_size, n.window_size, earlystop=True) == False:
-            print("earlystop", group_dir)
+            print("Earlystop", group_dir)
             continue
 
         result_dict = raid(X, n.threshold, n.vector_size, n.window_size, group_dir)

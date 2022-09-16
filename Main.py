@@ -47,17 +47,12 @@ KEY_DICT = {
 def main(args):
     n = SimpleNamespace(**args)
 
-    print("Preprocessing pcap files")
-
-    
     data = preprocess(n.pcap_dir, n.cpu_count)
     
     key, key_name, isall = KEY_DICT[n.group_type]
 
-    print(f"Grouping packets by {[key_name[i] for i in range(len(key_name))]}")
-    topn_data = group(data, key=key, card_th=n.card_th, all=isall)
+    topn_data = group(data, key=key, key_name=key_name, card_th=n.card_th, all=isall)
 
-    print("Clustering")
     summary_list = []
     clusters = {}
     packet_idx_dict = dict()
@@ -66,12 +61,12 @@ def main(args):
     for key_idx in range(len(key)):
         group_key_pair += [(key_idx, group_info) for group_info in topn_data[key_idx]]
     
-    for key_idx, group_info in group_key_pair:
+    for key_idx, group_info in tqdm(group_key_pair, desc='Processing RAID and DHH'):
         group_dir = get_dir(n.result_path, key_name[key_idx] + group_info[0])
         dhh_dir = get_dir(group_dir, "DHH_result")
         cluster_dir = get_dir(group_dir, "Clustering_result")
 
-        X = filter_null_payload(group_info[1][1])
+        X = filter_null_payload(group_info[1][1], key_name[key_idx] + group_info[0])
         payloads = [x[0] for x in X]
 
         if len(X) == 0:
@@ -227,6 +222,8 @@ def main(args):
         one_big_cluster_list,
     )
 
+    print("Making Summary Graph")
     SummaryGraph(n.result_path)
 
+    print("Extracting PCAP for each cluster")
     extract(packet_idx_dict, n.pcap_dir, n.cpu_count)

@@ -85,6 +85,7 @@ def get_parsed_packets(pcap_dir, cpu_count=os.cpu_count() // 2):
                 make_pcap_payload, zip(path_list, range(len(path_list))), chunksize=1
             ),
             total=len(path_list),
+            desc='Preprocessing pcap files'
         ):
             data += pkts_list
     return data

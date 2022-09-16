@@ -4,14 +4,14 @@ from collections import Counter
 from tqdm.auto import tqdm
 
 
-def get_topn_key(data, key, card_th):
+def get_topn_key(data, key, key_name, card_th):
     key_dict = {}
 
     # k[0] == concat key, k[1] == standard of cardinality
     for k in key:
         key_dict[k[0]] = {}
 
-    for pkt in tqdm(data):
+    for pkt in tqdm(data, desc=f"Grouping packets by {[key_name[i] for i in range(len(key_name))]}"):
         for k in key:
             card_key = pkt[k[0]]
             if not card_key in key_dict[k[0]]:
@@ -33,8 +33,8 @@ def all_keys(data):
     return [[("all", [{"all"}, [[i[-1],i[-3],i[-2]] for i in data]])]]
 
 
-def group(data, key, card_th, all):
+def group(data, key, key_name, card_th, all):
     if all:
         return all_keys(data)
 
-    return get_topn_key(data, key, card_th)
+    return get_topn_key(data, key, key_name, card_th)

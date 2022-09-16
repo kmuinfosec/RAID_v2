@@ -42,8 +42,8 @@ def write_csv(path, header, data):
     writer.writerows(data)
 
 
-def filter_null_payload(data):
-    print(f"total payloads : {len(data)}", end="")
+def filter_null_payload(data, group_name):
+    print(f"\n{group_name}\ttotal payloads : {len(data)}", end="")
     data = list(filter(lambda x: len(x[0]), data))
     print(f"\tfiltered 0-size payloads : {len(data)}")
     return data

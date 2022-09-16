@@ -17,6 +17,8 @@ def parse_config(cfgs):
     args_dict = dict()
     args_dict['pcap_dir'] = cfgs["DEFAULT"]['pcap_dir']
     args_dict['cpu_count'] = eval(cfgs["DEFAULT"]['cpu_count'])
+    if args_dict['cpu_count'] == False:
+        args_dict['cpu_count'] = os.cpu_count() // 2
     args_dict['result_path'] = get_dir(cfgs["DEFAULT"]['result_path'], cfgs["DEFAULT"]['result_dir'])
     args_dict['threshold'] = float(cfgs["DEFAULT"]['threshold'])
     args_dict['card_th'] = int(cfgs["DEFAULT"]['card_th'])

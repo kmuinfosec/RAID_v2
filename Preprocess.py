@@ -99,20 +99,6 @@ def preprocess(pcap_dir, cpu_count=None):
     else:
         data = get_parsed_packets(pcap_dir, cpu_count)
 
-    if csv_path:
-        data_key = [
-            "dip_dport",
-            "sip_dport",
-            "sip",
-            "sport",
-            "dip",
-            "dport",
-            "data_idx",
-            "packet_idx",
-            "raw_payload",
-        ]
-        write_csv(csv_path, data_key, data)
-
     return data
 
 

@@ -1,36 +1,60 @@
+from tqdm.auto import tqdm
+
 class HeavyHitter:
-    """
-    Heavy Hitters
-
-    member_variable
-    - vector_size : heavy_hitter items의 size
-    - items : {id(string): value(integer)} 형식의 dictionary
-
-    """
 
     def __init__(self, vector_size: int = 512) -> None:
         self.vector_size = vector_size
         self.items = dict()
+        self.inverted_items = dict()
+        self.alpha = 0
 
     def update(self, item: str) -> int:
-        if self.items.get(item):  # item is already in heavy hitter
+
+        if item in self.items.keys():
+            count = self.items[item]
             self.items[item] += 1
+
+            self.inverted_items[count].discard(item)
+            if len(self.inverted_items[count]) == 0:
+                if self.alpha == count:
+                    self.alpha += 1
+                del self.inverted_items[count]
+
+            if count + 1 not in self.inverted_items.keys():
+                self.inverted_items[count + 1] = set()
+            self.inverted_items[count + 1].add(item)
+
             return self.items[item]
 
-        # if items is not full
-        if len(self.items) < self.vector_size:
+        elif len(self.items) < self.vector_size:
             self.items[item] = 1
+            if 1 not in self.inverted_items.keys():
+                self.inverted_items[1] = set()
+            self.inverted_items[1].add(item)
+            self.alpha = 1
             return 0
 
-        # find the item which has smallest count
-        smallest_key = min(self.items, key=self.items.get)
-        self.items[item] = self.items.pop(smallest_key) + 1
+        # replace
+        smallest_key = self.inverted_items[self.alpha].pop()
+        count = self.items.pop(smallest_key)
+
+        self.items[item] = 1
+
+        self.inverted_items[count].discard(item)
+        if len(self.inverted_items[count]) == 0:
+            del self.inverted_items[count]
+
+        if 1 not in self.inverted_items.keys():
+            self.inverted_items[1] = set()
+        self.inverted_items[1].add(item)
+        self.alpha = 1
+
         return 0
 
     def fixSubstringFrequency(self) -> None:
         keys = list(self.items.keys())
         keys.sort(key=lambda x: len(x))
-        
+
         for string1 in keys:
             for string2 in keys:
                 if string1 != string2 and string1 in string2:
@@ -47,7 +71,7 @@ def doubleHeavyHitters(
 ) -> dict:
     heavy_hitter1, heavy_hitter2 = HeavyHitter(hh1_size), HeavyHitter(hh2_size)
 
-    for packet in packets:
+    for packet in tqdm(packets):
 
         signset = set()
 

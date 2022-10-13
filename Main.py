@@ -47,7 +47,7 @@ KEY_DICT = {
 def main(args):
     n = SimpleNamespace(**args)
 
-    data = preprocess(n.pcap_dir, n.cpu_count)
+    data = preprocess(n.pcap_dir, n.cpu_count, n.extension)
     
     key, key_name, isall = KEY_DICT[n.group_type]
 

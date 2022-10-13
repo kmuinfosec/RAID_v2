@@ -32,6 +32,7 @@ def parse_config(cfgs):
     args_dict['hh1_size'] = int(cfgs["DEFAULT"]['hh1_size'])
     args_dict['hh2_size'] = int(cfgs["DEFAULT"]['hh2_size'])
     args_dict['ratio'] = float(cfgs["DEFAULT"]['ratio'])
+    args_dict['extension'] = cfgs["DEFAULT"]['extension']
     
     return args_dict
 

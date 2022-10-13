@@ -65,7 +65,7 @@ def make_pcap_payload(input):
     return processed_pkts
 
 
-def get_parsed_packets(pcap_dir, cpu_count=os.cpu_count() // 2):
+def get_parsed_packets(pcap_dir, cpu_count=os.cpu_count() // 2, extension = ".pcap"):
     if os.path.isdir(pcap_dir):
         files = os.listdir(pcap_dir)
     else:
@@ -75,7 +75,7 @@ def get_parsed_packets(pcap_dir, cpu_count=os.cpu_count() // 2):
 
     for file_name in files:
         ext = os.path.splitext(file_name)[-1]
-        if ext in {'.pcap', '.cap', '.done'}:
+        if ext == extension:
             path_list.append(os.path.join(pcap_dir, file_name))
     path_list.sort()
     data = []
@@ -91,14 +91,14 @@ def get_parsed_packets(pcap_dir, cpu_count=os.cpu_count() // 2):
     return data
 
 
-def preprocess(pcap_dir, cpu_count=None):
+def preprocess(pcap_dir, cpu_count=None, extension='.pcap'):
     mp.freeze_support()
     if isinstance(pcap_dir, list):
         data = []
         for dir in pcap_dir:
-            data += get_parsed_packets(dir, cpu_count)
+            data += get_parsed_packets(dir, cpu_count, extension)
     else:
-        data = get_parsed_packets(pcap_dir, cpu_count)
+        data = get_parsed_packets(pcap_dir, cpu_count, extension)
 
     return data
 

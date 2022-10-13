@@ -3,7 +3,7 @@ import argparse
 
 from Main import main
 
-from Utils import parse_config, get_dir
+from Utils import parse_config
 
 
 def experiment(args_user):
@@ -11,7 +11,8 @@ def experiment(args_user):
     cfgs.read("config.ini", encoding="UTF-8")
     parsed_args = parse_config(cfgs, args_user)
 
-    main(args=parsed_args)
+    if (parsed_args["result_path"]!=0): 
+        main(args=parsed_args)
 
 if __name__ == "__main__":
     argument_store = ["pcap_dir", "cpu_count", "result_path", 'result_dir',\

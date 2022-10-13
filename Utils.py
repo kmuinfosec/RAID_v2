@@ -13,26 +13,28 @@ def get_dir(path, dir=False):
 
     return path_
 
-def parse_config(cfgs):
+def parse_config(cfgs, args):
     args_dict = dict()
-    args_dict['pcap_dir'] = cfgs["DEFAULT"]['pcap_dir']
-    args_dict['cpu_count'] = eval(cfgs["DEFAULT"]['cpu_count'])
+    args_dict['pcap_dir'] = args['pcap_dir'] if args['pcap_dir'] else cfgs["DEFAULT"]['pcap_dir']
+    args_dict['cpu_count'] = eval(args['cpu_count']) if args['cpu_count'] else eval(cfgs["DEFAULT"]['cpu_count'])
     if args_dict['cpu_count'] == False:
         args_dict['cpu_count'] = os.cpu_count() // 2
-    args_dict['result_path'] = get_dir(cfgs["DEFAULT"]['result_path'], cfgs["DEFAULT"]['result_dir'])
-    args_dict['threshold'] = float(cfgs["DEFAULT"]['threshold'])
-    args_dict['card_th'] = int(cfgs["DEFAULT"]['card_th'])
-    args_dict['group_type'] = cfgs["DEFAULT"]['group']
-    args_dict['israw'] = eval(cfgs["DEFAULT"]['israw'])
-    args_dict['deduplication'] = eval(cfgs["DEFAULT"]['deduplication'])
-    args_dict['iscount'] = eval(cfgs["DEFAULT"]['count'])
-    args_dict['earlystop'] = eval(cfgs["DEFAULT"]['earlystop'])
-    args_dict['vector_size'] = int(cfgs["DEFAULT"]['vector_size'])
-    args_dict['window_size'] = int(cfgs["DEFAULT"]['window_size'])
-    args_dict['hh1_size'] = int(cfgs["DEFAULT"]['hh1_size'])
-    args_dict['hh2_size'] = int(cfgs["DEFAULT"]['hh2_size'])
-    args_dict['ratio'] = float(cfgs["DEFAULT"]['ratio'])
-    args_dict['extension'] = cfgs["DEFAULT"]['extension']
+
+    args_dict['result_path'] = get_dir(args['result_path'] if args['result_path'] else cfgs["DEFAULT"]['result_path'],\
+                                    args['result_dir'] if args['result_dir'] else cfgs["DEFAULT"]['result_dir'])
+    args_dict['threshold'] = float(args['threshold']) if args['threshold'] else float(cfgs["DEFAULT"]['threshold'])
+    args_dict['card_th'] = int(args['card_th']) if args['card_th'] else int(cfgs["DEFAULT"]['card_th'])
+    args_dict['group_type'] = args['group'] if args['group'] else cfgs["DEFAULT"]['group']
+    args_dict['israw'] = eval(args['israw']) if args['israw'] else eval(cfgs["DEFAULT"]['israw'])
+    args_dict['deduplication'] = eval(args['deduplication']) if args['deduplication'] else eval(cfgs["DEFAULT"]['deduplication'])
+    args_dict['iscount'] = eval(args['count']) if args['count'] else eval(cfgs["DEFAULT"]['count'])
+    args_dict['earlystop'] = eval(args['earlystop']) if args['earlystop'] else eval(cfgs["DEFAULT"]['earlystop'])
+    args_dict['vector_size'] = int(args['vector_size']) if args['vector_size'] else int(cfgs["DEFAULT"]['vector_size'])
+    args_dict['window_size'] = int(args['window_size']) if args['window_size'] else int(cfgs["DEFAULT"]['window_size'])
+    args_dict['hh1_size'] = int(args['hh1_size']) if args['hh1_size'] else int(cfgs["DEFAULT"]['hh1_size'])
+    args_dict['hh2_size'] = int(args['hh2_size']) if args['hh2_size'] else int(cfgs["DEFAULT"]['hh2_size'])
+    args_dict['ratio'] = float(args['ratio']) if args['ratio'] else float(cfgs["DEFAULT"]['ratio'])
+    args_dict['extension'] = args['extension'] if args['extension'] else cfgs["DEFAULT"]['extension']
     
     return args_dict
 

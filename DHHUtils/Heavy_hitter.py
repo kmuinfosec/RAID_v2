@@ -42,7 +42,7 @@ class HeavyHitter:
 
         if self.alpha + 1 not in self.inverted_items.keys():
             self.inverted_items[self.alpha + 1] = []
-        self.inverted_items[self.alpha + 1].append(item)
+        self.inverted_items[self.alpha + 1].add(item)
 
         if len(self.inverted_items[self.alpha]) == 0:
             self.alpha += 1

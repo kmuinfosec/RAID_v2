@@ -29,6 +29,7 @@ def get_dir_result(path, dir=False):
 def parse_config(cfgs, args):
     args_dict = dict()
     args_dict['pcap_dir'] = args['pcap_dir'] if args['pcap_dir'] else cfgs["DEFAULT"]['pcap_dir']
+    args_dict['regex_path'] = args['regex_path'] if args['regex_path'] else cfgs["DEFAULT"]['regex_path']
     args_dict['cpu_count'] = eval(args['cpu_count']) if args['cpu_count'] else eval(cfgs["DEFAULT"]['cpu_count'])
     if args_dict['cpu_count'] == False:
         args_dict['cpu_count'] = os.cpu_count() // 2

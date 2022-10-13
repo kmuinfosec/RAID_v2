@@ -9,6 +9,7 @@ from Raid import raid
 from DHHUtils import doubleHeavyHitters
 from SummaryGraph import SummaryGraph
 from Extract import extract
+from Match import match
 
 GROUP_SIGNATURES_COLUMN = [
     "group",
@@ -227,3 +228,6 @@ def main(args):
 
     print("Extracting PCAP for each cluster")
     extract(packet_idx_dict, n.pcap_dir, n.cpu_count)
+
+    print("Making Regex Matching Result")
+    match(n.result_path, n.regex_path)

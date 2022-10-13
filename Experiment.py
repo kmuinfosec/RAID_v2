@@ -15,7 +15,7 @@ def experiment(args_user):
         main(args=parsed_args)
 
 if __name__ == "__main__":
-    argument_store = ["pcap_dir", "cpu_count", "result_path", 'result_dir',\
+    argument_store = ["pcap_dir", "regex_path", "cpu_count", "result_path", 'result_dir',\
             "threshold", "card_th", "group", "vector_size", "window_size", "hh1_size",\
             "hh2_size", "ratio", "extension"]
 

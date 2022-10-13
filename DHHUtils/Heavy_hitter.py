@@ -35,18 +35,20 @@ class HeavyHitter:
             return 0
 
         # replace
+        
         smallest_key = self.inverted_items[self.alpha].pop()
         self.items.pop(smallest_key)
 
         self.items[item] = self.alpha + 1
 
         if self.alpha + 1 not in self.inverted_items.keys():
-            self.inverted_items[self.alpha + 1] = []
+            self.inverted_items[self.alpha + 1] = set()
         self.inverted_items[self.alpha + 1].add(item)
 
         if len(self.inverted_items[self.alpha]) == 0:
-            self.alpha += 1
             del self.inverted_items[self.alpha]
+            while not (self.alpha in self.inverted_items):
+                self.alpha += 1
 
         return 0
 

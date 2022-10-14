@@ -11,6 +11,7 @@
 - [Raid.py](#raidpy)
 - [SummaryGraph.py](#summarygraphpy)
 - [Extract.py](#extractpy)
+- [Match.py](#matchpy)
 - [RaidUtils](#raidutils)
 - [DHHUtils](#dhhutils)
 - [Utils.py](#utilspy)

@@ -25,6 +25,7 @@
     
     파라미터 목록
     - *pcap_dir* : 분석에 사용할 [`'.pcap'`, `'.done'`, `'.cap'`] 파일들이 위치한 폴더 경로
+    - *regex_path* : 시그니처 라벨링에 사용할 정규표현식 파일이 위치한 경로
     - *cpu_count* : 전처리와 pcap추출 멀티프로세싱 과정에서 사용할 cpu_count 개수(False일 경우 현재 cpu 코어의 절반만 사용한다.)
     - *result_path* : 결과 폴더를 생성할 경로
     - *result_dir* : *result_path*에 생성할 결과 저장 폴더 이름
@@ -48,7 +49,7 @@
     
 2. `Experiment.py`를 python으로 실행한다. (Keyword Argumnets는 config.ini의 파라미터 이름과 같음.)
 ```bash
-python Experiment.py [-pcap_dir `<dir>`] [-cpu_count `<cpu_count>`] [-result_path `<path>`] 
+python Experiment.py [-pcap_dir `<dir>`] [-regex_path `<regex_path>`] [-cpu_count `<cpu_count>`] [-result_path `<path>`] 
 [-result_dir `<result_dir_name>`] [-threshold `<threshold>`] [-card_th `<card_th>`] [-group `<group_type>`] 
 [-israw `<israw>`] [-deduplication `<isduplication>`] [-count `<signature_acture_count>`] 
 [-earlystop `<isearlystop>`] [-vector_size `<vector_size>`] [-window_size `<window_size>`] 
@@ -60,6 +61,7 @@ Argument Table
 | Parameter                 | Data Type       | Description   |	
 | :------------------------ |:-------------:| :-------------|
 | -pcap_dir	       |	string           | 분석에 사용할 pcap의 파일 경로
+| -regex_path	       |	string           | 시그니처 라벨링에 사용할 정규표현식 파일이 위치한 경로
 | -cpu_count          |   int           | 멀티프로세싱 과정에서 사용할 cpu_count 개수
 | -result_path	       |	string	            | 결과 폴더를 생성할 경로
 | -result_dir 		       | string	           | 결과를 저장할 폴더의 이름
@@ -86,6 +88,7 @@ Argument Table
   * `Clustering_result/`: 클러스터 별 common_string, 청킹된 패킷, payload원본을 저장한 파일들의 폴더
   * `pcaps/`: 클러스터에 속한 패킷들을 하나의 pcap으로 만든 파일들의 폴더
   * `DHH_result/`: 클러스터 별 시그니처와 등장 횟수가 적힌 파일들의 폴더
+  * `Match_result/`: 정규표현식을 통해 시그니처 라벨링 한 결과를 라벨 별로 분리하여 저장한 파일들의 폴더
   * `result_data_merge.pkl`	: raid 실행 결과 dictionary를 저장한 pickle파일 
   * `Cluster_summary_graph.png` : 클러스터의 총 패킷 개수와 cardinality를 그룹별로 표현한 막대 그래프
 
@@ -103,7 +106,7 @@ Argument Table
 2. 패킷 그룹핑 : 추출된 데이터를 key에 따라 그룹화 (Group)
 3. 클러스터링 : 페이로드를 그룹별로 클러스터링 (Raid)
 4. 시그니처 추출: 페이로드에서 클러스터별로 많이 등장한 시그니처를 추출 (Heavy_hitter)
-5. 결과 출력 : 통계 엑셀 파일 생성, 요약 그래프 생성(SummaryGraph), 클러스터별 pcap 추출(Extract)
+5. 결과 출력 : 통계 엑셀 파일 생성, 요약 그래프 생성(SummaryGraph), 클러스터별 pcap 추출(Extract), 시그니처 라벨링(Match)
 
 *통계 엑셀 파일 : `group_signatures.csv`, `all_cluster_signatures.csv`
 
@@ -148,6 +151,11 @@ payload 데이터를 입력받아 AE청킹과 피처 해싱(`contents2count()`)�
 - `CustomPcapWriter()` : packet을 pcap에 작성하는 함수
 - `write_to_file()` : packet을 하나씩 `CustomPcapWriter`에 전송하는 함수
 - `extract()` : 클러스터 별로 일치했던 패킷들을 원본 pcap에서 추출하는 함수
+
+### Match.py
+입력으로 받은 정규표현식과 그룹 별로 생성된 시그니처를 비교하여 라벨링을 수행하는 모듈
+- 각 라벨마다 클러스터 번호, 시그니처, 빈도수를 tsv 파일로 저장한다. 
+- 매칭 시그니처가 존재하지 않으면 결과 폴더 및 파일을 생성하지 않는다. 
 
 ### RaidUtils
 Raid 관련 모듈

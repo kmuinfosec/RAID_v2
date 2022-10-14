@@ -5,6 +5,9 @@ from datetime import datetime
 
 
 def get_dir(path, dir=False):
+    if not os.path.exists(path):
+        raise Exception(f'Path <{path}> does not exist')
+
     if not dir:
         dir = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     path_ = os.path.join(path, dir)
@@ -12,19 +15,6 @@ def get_dir(path, dir=False):
         os.mkdir(path_)
 
     return path_
-def get_dir_result(path, dir=False):
-    
-    if not os.path.exists(path):
-        print('this path does not exist.')
-        return 0 
-    else:
-        path_ = os.path.join(path, dir)
-        if not os.path.exists(path_):
-            dir_t = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            print('this direcotry does not exist.')
-            path_ = os.path.join(path, dir_t)
-            os.mkdir(path_)
-        return path_
 
 def parse_config(cfgs, args):
     args_dict = dict()
@@ -34,7 +24,7 @@ def parse_config(cfgs, args):
     if args_dict['cpu_count'] == False:
         args_dict['cpu_count'] = os.cpu_count() // 2
 
-    args_dict['result_path'] = get_dir_result(args['result_path'] if args['result_path'] else cfgs["DEFAULT"]['result_path'],\
+    args_dict['result_path'] = get_dir(args['result_path'] if args['result_path'] else cfgs["DEFAULT"]['result_path'],\
                                     args['result_dir'] if args['result_dir'] else cfgs["DEFAULT"]['result_dir'])
     args_dict['threshold'] = float(args['threshold']) if args['threshold'] else float(cfgs["DEFAULT"]['threshold'])
     args_dict['card_th'] = int(args['card_th']) if args['card_th'] else int(cfgs["DEFAULT"]['card_th'])

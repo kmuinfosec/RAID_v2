@@ -1,5 +1,4 @@
-from tqdm.auto import tqdm
-
+from collections import OrderedDict
 class HeavyHitter:
 
     def __init__(self, vector_size: int = 512) -> None:
@@ -14,36 +13,36 @@ class HeavyHitter:
             count = self.items[item]
             self.items[item] += 1
 
-            self.inverted_items[count].discard(item)
+            self.inverted_items[count].pop(item)
             if len(self.inverted_items[count]) == 0:
                 if self.alpha == count:
                     self.alpha += 1
                 del self.inverted_items[count]
 
             if count + 1 not in self.inverted_items.keys():
-                self.inverted_items[count + 1] = set()
-            self.inverted_items[count + 1].add(item)
+                self.inverted_items[count + 1] = OrderedDict()
+            self.inverted_items[count + 1][item] = None
 
             return self.items[item]
 
         elif len(self.items) < self.vector_size:
             self.items[item] = 1
             if 1 not in self.inverted_items.keys():
-                self.inverted_items[1] = set()
-            self.inverted_items[1].add(item)
+                self.inverted_items[1] = OrderedDict()
+            self.inverted_items[1][item] = None
             self.alpha = 1
             return 0
 
         # replace
         
-        smallest_key = self.inverted_items[self.alpha].pop()
-        self.items.pop(smallest_key)
+        smallest_key = self.inverted_items[self.alpha].popitem(last=False)
+        self.items.pop(smallest_key[0])
 
         self.items[item] = self.alpha + 1
 
         if self.alpha + 1 not in self.inverted_items.keys():
-            self.inverted_items[self.alpha + 1] = set()
-        self.inverted_items[self.alpha + 1].add(item)
+            self.inverted_items[self.alpha + 1] = OrderedDict()
+        self.inverted_items[self.alpha + 1][item] = None
 
         if len(self.inverted_items[self.alpha]) == 0:
             del self.inverted_items[self.alpha]
@@ -72,7 +71,7 @@ def doubleHeavyHitters(
 ) -> dict:
     heavy_hitter1, heavy_hitter2 = HeavyHitter(hh1_size), HeavyHitter(hh2_size)
 
-    for packet in tqdm(packets):
+    for packet in packets:
 
         signset = set()
 

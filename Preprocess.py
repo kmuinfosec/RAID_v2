@@ -77,6 +77,9 @@ def get_parsed_packets(pcap_dir, cpu_count=os.cpu_count() // 2, extension = ".pc
         ext = os.path.splitext(file_name)[-1]
         if ext == extension:
             path_list.append(os.path.join(pcap_dir, file_name))
+    if len(path_list) == 0:
+        raise Exception(f'There are no files with <{extension}> extension')
+
     path_list.sort()
     data = []
     with mp.Pool(cpu_count) as pool:

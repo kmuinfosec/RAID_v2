@@ -40,15 +40,42 @@
     - *hh1_size* (`int`) - DHH의 1번째 HeavyHitter의 크기
     - *hh2_size* (`int`) - DHH의 2번째 HeavyHitter의 크기
     - *ratio* (`float`) - DHH의 n-garm을 concat하여 시그니처로 만드는 강도(낮을 수록 더 긴 시그니처가 생성됨)
+    - *extension* (`string`) - 분석을 진행할 파일의 확장자
     
     *Ratio가 낮은경우 발생이 적은 단어도 concat되고 높은경우 발생 빈도가 높아야 concat 됨 
 
     *상세 설명은 아래 모듈 설명에 기재되어 있음
     
-2. `Experiment.py`를 python으로 실행한다.
+2. `Experiment.py`를 python으로 실행한다. (Keyword Argumnets는 config.ini의 파라미터 이름과 같음.)
 ```bash
-python Experiment.py
+python Experiment.py [-pcap_dir `<dir>`] [-cpu_count `<cpu_count>`] [-result_path `<path>`] 
+[-result_dir `<result_dir_name>`] [-threshold `<threshold>`] [-card_th `<card_th>`] [-group `<group_type>`] 
+[-israw `<israw>`] [-deduplication `<isduplication>`] [-count `<signature_acture_count>`] 
+[-earlystop `<isearlystop>`] [-vector_size `<vector_size>`] [-window_size `<window_size>`] 
+[-hh1_size `<dhh_size>`] [-hh2_size `<dhh_size>`] [-ratio `<ratio>`] [-extension `<extension>`]
 ```
+
+Argument Table
+
+| Parameter                 | Data Type       | Description   |	
+| :------------------------ |:-------------:| :-------------|
+| -pcap_dir	       |	string           | 분석에 사용할 pcap의 파일 경로
+| -cpu_count          |   int           | 멀티프로세싱 과정에서 사용할 cpu_count 개수
+| -result_path	       |	string	            | 결과 폴더를 생성할 경로
+| -result_dir 		       | string	           | 결과를 저장할 폴더의 이름
+| -threshold	           |  float            | 프로토타입 클러스터링의 threshold
+| -card_th	        |  int          |  각 그룹 키별로 분석 그룹 선정 최대 개수
+| -group         |  sting          | 그룹의 타입 [ ip_dport \| ip \| all ]
+| -israw          |  bool          | ASCII encoding 적용 여부
+| -deduplication       |   bool      | DHH 수행 시 한 패킷 내의 동일 시그니처 중복 빈도 집계 제거 여부
+| -count   | bool         | 시그니처의 실제 빈도를 계산 및 출력할지 여부
+| -earlystop 			             | bool 	           | earlystop을 적용할지 여부
+| -vector_size			     | int         | RAID의 청크 해싱 vector의 크기
+| -window_size			             | int     	     | RAID의 AE청킹 윈도우의 사이즈
+| -hh1_size	    | int     	     | DHH의 1번째 HeavyHitter의 크기
+| -hh2_size		      | int     	   | DHH의 2번째 HeavyHitter의 크기
+| -ratio            | float       | DHH의 n-garm을 concat하여 시그니처로 만드는 강도
+| -extension            | string       | 분석을 진행할 파일의 확장자
 
 ## 2. 결과물 목록
 - `train_data.csv` : Pcap파일에서 추출한 데이터를 csv로 저장한 파일 (optional) 

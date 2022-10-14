@@ -22,7 +22,7 @@
 
 ## 1. 사용방법
 
-1. `config.ini` 에 *파라미터*를 작성한다.
+1. `config.ini` 에 파라미터를 작성한다.
     
     파라미터 목록
     - *pcap_dir* : 분석에 사용할 [`'.pcap'`, `'.done'`, `'.cap'`] 파일들이 위치한 폴더 경로
@@ -48,13 +48,16 @@
 
     *상세 설명은 아래 모듈 설명에 기재되어 있음
     
-2. `Experiment.py`를 python으로 실행한다. (Keyword Argumnets는 config.ini의 파라미터 이름과 같음.)
+2. `Experiment.py`를 python으로 실행한다.<br>
+    실행할 때 실행 인자를 지정해 줄 수 있으며, 실행 인자는 `config.ini`의 파라미터 이름과 동일하다.<br>
+    명령어 실행시에 작성한 실행 인자는 `config.ini`의 파라미터값을 덮어쓴다.<br>
+    명령어 작성 방식은 다음과 같다. ( []는 선택 옵션 )
     ```bash
-    python Experiment.py [-pcap_dir `<dir>`] [-regex_path `<regex_path>`] [-cpu_count `<cpu_count>`] 
-    [-result_path `<path>`] [-result_dir `<result_dir_name>`] [-threshold `<threshold>`] [-card_th `<card_th>`] 
-    [-group `<group_type>`] [-israw <israw>] [-deduplication <isduplication>] [-count <signature_acture_count>] 
-    [-earlystop <isearlystop>] [-vector_size `<vector_size>`] [-window_size `<window_size>`] 
-    [-hh1_size `<dhh_size>`] [-hh2_size `<dhh_size>`] [-ratio `<ratio>`] [-extension `<extension>`]
+    python Experiment.py [-pcap_dir <dir>] [-regex_path <regex_path>] [-cpu_count <cpu_count>] 
+    [-result_path <path>] [-result_dir <result_dir_name>] [-threshold <threshold>] [-card_th <card_th>] 
+    [-group <group_type>] [-israw] [-deduplication] [-count] [-earlystop] [-vector_size <vector_size>] 
+    [-window_size <window_size>] [-hh1_size <dhh_size>] [-hh2_size <dhh_size>] [-ratio <ratio>] 
+    [-extension <extension>]
     ```
 
     실행 인자 옵션 목록 (\*표시는 입력값이 없는 argument를 나타냄.)

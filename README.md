@@ -91,7 +91,7 @@
   * `Clustering_result/`: 클러스터 별 common_string, 청킹된 패킷, payload원본을 저장한 파일들의 폴더
   * `pcaps/`: 클러스터에 속한 패킷들을 하나의 pcap으로 만든 파일들의 폴더
   * `DHH_result/`: 클러스터 별 시그니처와 등장 횟수가 적힌 파일들의 폴더
-  * `Match_result/`: 정규표현식을 통해 시그니처 라벨링 한 결과를 라벨 별로 분리하여 저장한 파일들의 폴더
+  * `Match_result/`: 정규표현식을 통해 매칭된 시그니처를 각 라벨별로 저장한 파일들의 폴더
   * `result_data_merge.pkl`	: raid 실행 결과 dictionary를 저장한 pickle파일 
   * `Cluster_summary_graph.png` : 클러스터의 총 패킷 개수와 cardinality를 그룹별로 표현한 막대 그래프
 
@@ -156,7 +156,7 @@ payload 데이터를 입력받아 AE청킹과 피처 해싱(`contents2count()`)�
 - `extract()` : 클러스터 별로 일치했던 패킷들을 원본 pcap에서 추출하는 함수
 
 ### Match.py
-입력으로 받은 정규표현식과 그룹 별로 생성된 시그니처를 비교하여 라벨링을 수행하는 모듈
+라벨 및 정규표현식 목록 config.yaml을 입력하여, 각 그룹별 시그니처와 매칭되는 식이 있는지 탐색하는 모듈
 - 각 라벨마다 클러스터 번호, 시그니처, 빈도수를 tsv 파일로 저장한다. 
 - 매칭 시그니처가 존재하지 않으면 결과 폴더 및 파일을 생성하지 않는다. 
 

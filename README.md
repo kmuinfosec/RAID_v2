@@ -91,29 +91,29 @@
 
     | Column                 | Explaination        
     | :------------------------ |:------------------:
-    | group	       |	<그룹키\>\_<ip\>\_<protocol\>          
-    | key_card	       |	 그룹과 통신한 ip 수      
+    | group	       |	<그룹 키 종류\>-<그룹 키 값>          
+    | key_card	       |	 그룹과 통신한 ip 종류      
     | group_packet          |   그룹에 속한 패킷의 수        
     | group_unique_packet	       |	 그룹에 속한 서로 다른 패킷의 수          
     | clusters 		       |  클러스터의 수          
-    | biggest_cluster	           |  가장 `cluster_key_card`가 높은 클러스터의 번호       
-    | cluster_key_card	        |    가장 큰 클러스터에서 기준과 통신한 ip 수       
+    | biggest_cluster	           |  가장 `cluster_key_card`가 높은 클러스터의 고유 인덱스 번호       
+    | cluster_key_card	        |    가장 큰 클러스터에서 기준과 통신한 ip 종류       
     | cluster_packet         |     가장 큰 클러스터에 속한 패킷의 수       
     | cluster_unique_packet         |    가장 큰 클러스터에 속한 서로 다른 패킷의 수       
-    | occurrence of most frequent signature     |   가장 많이나온 시그니처의 빈도수      
+    | occurrence of most frequent signature     |   가장 많이나온 시그니처의 빈도 수      
     | common signatures  | 가장 큰 클러스터에 속한 모든 패킷에 공통으로 등장한 시그니처        
 - `all_cluster_signatures.csv` : 모든 그룹의 모든 클러스터들 정보가 작성 된 파일
 
     | Column                 | Explaination        
     | :------------------------ |:-------------:
-    | group	       |	<그룹키\>\_<ip\>\_<protocol\>          
-    | key_card	       |	 그룹과 통신한 ip 수       
+    | group	       |	<그룹 키 종류\>-<그룹 키 값>          
+    | key_card	       |	 그룹과 통신한 ip 종류       
     | group_packet          |   그룹에 속한 패킷의 수        
     | group_unique_packet	       |	 그룹에 속한 서로 다른 패킷의 수           
-    | cluster 		       |  클러스터의 번호          
+    | cluster 		       |  클러스터의 고유 인덱스 번호<br> (-1은 클러스터가 되지 않음을 의미)
     | cluster_packet	           |  클러스터에 속한 패킷의 수          
     | cluster_unique_packet	        |    그룹에 속한 서로 다른 패킷의 수           
-    | occurrence of most frequent signature     |   가장 많이나온 시그니처의 빈도수      
+    | occurrence of most frequent signature     |   가장 많이나온 시그니처의 빈도 수      
     | common signatures  | 클러스터에 속한 모든 패킷에 공통으로 나타나는 시그니처   
     
 - `group_summary_graph.png` : 그룹의 총 패킷 수와 가장 큰 클러스터에 포함된 패킷 수, 최빈 시그니처의 횟수를 그룹별로 표현한 막대 그래프

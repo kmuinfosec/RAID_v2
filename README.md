@@ -88,7 +88,34 @@
 ## 2. 결과물 목록
 - `train_data.csv` : Pcap파일에서 추출한 데이터를 csv로 저장한 파일 (optional) 
 - `group_signatures.csv` : 그룹별 정보, 그룹별 가장 큰 클러스터 정보가 작성 된 파일
+
+    | Column                 | Explaination        
+    | :------------------------ |:------------------:
+    | group	       |	<그룹키\>\_<ip\>\_<protocol\>          
+    | key_card	       |	 그룹과 통신한 ip 수      
+    | group_packet          |   그룹에 속한 패킷의 수        
+    | group_unique_packet	       |	 그룹에 속한 서로 다른 패킷의 수          
+    | clusters 		       |  클러스터의 수          
+    | biggest_cluster	           |  가장 `cluster_key_card`가 높은 클러스터의 번호       
+    | cluster_key_card	        |    가장 큰 클러스터에서 기준과 통신한 ip 수       
+    | cluster_packet         |     가장 큰 클러스터에 속한 패킷의 수       
+    | cluster_unique_packet         |    가장 큰 클러스터에 속한 서로 다른 패킷의 수       
+    | occurrence of most frequent signature     |   가장 많이나온 시그니처의 빈도수      
+    | common signatures  | 가장 큰 클러스터에 속한 모든 패킷에 공통으로 등장한 시그니처        
 - `all_cluster_signatures.csv` : 모든 그룹의 모든 클러스터들 정보가 작성 된 파일
+
+    | Column                 | Explaination        
+    | :------------------------ |:-------------:
+    | group	       |	<그룹키\>\_<ip\>\_<protocol\>          
+    | key_card	       |	 그룹과 통신한 ip 수       
+    | group_packet          |   그룹에 속한 패킷의 수        
+    | group_unique_packet	       |	 그룹에 속한 서로 다른 패킷의 수           
+    | cluster 		       |  클러스터의 번호          
+    | cluster_packet	           |  클러스터에 속한 패킷의 수          
+    | cluster_unique_packet	        |    그룹에 속한 서로 다른 패킷의 수           
+    | occurrence of most frequent signature     |   가장 많이나온 시그니처의 빈도수      
+    | common signatures  | 클러스터에 속한 모든 패킷에 공통으로 나타나는 시그니처   
+    
 - `group_summary_graph.png` : 그룹의 총 패킷 수와 가장 큰 클러스터에 포함된 패킷 수, 최빈 시그니처의 횟수를 그룹별로 표현한 막대 그래프
 - `<group type>_<group key>/` *card_th*만큼 생성된 그룹 별 클러스터 데이터를 저장한 폴더
   * `Clustering_result/`: 클러스터 별 common_string, 청킹된 패킷, payload원본을 저장한 파일들의 폴더

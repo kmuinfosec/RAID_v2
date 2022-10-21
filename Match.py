@@ -6,7 +6,7 @@ import pandas as pd
 def match(result_path, regex_path):
 
     with open(regex_path, 'r') as f:
-        regex_dict = yaml.load(f)
+        regex_dict = yaml.load(f, Loader=yaml.FullLoader)
 
     tmp_regex_dict = dict()
     for category1 in regex_dict.keys():

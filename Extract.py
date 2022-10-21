@@ -57,7 +57,8 @@ def extract(data,pcap_dir,cpu_count=os.cpu_count()//2):
     if os.path.isdir(pcap_dir):
         files = os.listdir(pcap_dir)
     else:
-        files = [pcap_dir]
+        pcap_dir, filename = os.path.split(pcap_dir)
+        files = [ filename ]
 
     path_list = []
 

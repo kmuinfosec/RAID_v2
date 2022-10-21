@@ -1,3 +1,4 @@
+from tqdm.auto import tqdm
 from collections import OrderedDict
 class HeavyHitter:
 
@@ -71,7 +72,7 @@ def doubleHeavyHitters(
 ) -> dict:
     heavy_hitter1, heavy_hitter2 = HeavyHitter(hh1_size), HeavyHitter(hh2_size)
 
-    for packet in packets:
+    for packet in tqdm(packets):
 
         signset = set()
 

@@ -1,5 +1,6 @@
 import os
 import re
+import csv
 import yaml
 import pandas as pd
 
@@ -26,18 +27,28 @@ def match(result_path, regex_path):
         signature_dict = dict()
         for filename in os.listdir(os.path.join(group_path, 'DHH_result')):
             cluster_num = filename.split('_')[0]
-            df = pd.read_csv(os.path.join(group_path, 'DHH_result', filename))
-            for signature, frequency in zip(df.signature.tolist(), df.frequency.tolist()):
+
+            sign_list = []
+            with open(os.path.join(group_path, 'DHH_result', filename), 'r') as f:
+                reader = csv.reader(f)
+                header = next(reader)
+                for row in reader:
+                    sign_list.append((str(row[0]), int(row[1])))
+
+            for signature, frequency in sign_list:
                 if cluster_num not in signature_dict.keys():
                     signature_dict[cluster_num] = []
                 signature_dict[cluster_num].append((signature, frequency))
 
         for (category1, category2, category3), match_list in regex_dict.items():
+            
             result = []
             for regex in match_list:
+                pattern = re.compile(regex)
+
                 for cluster_num in signature_dict.keys():
                     for signature, frequency in signature_dict[cluster_num]:
-                        if re.search(regex, signature) != None:
+                        if pattern.search(signature) != None:
                             result.append((cluster_num, signature, frequency))
             
             if len(result)==0:

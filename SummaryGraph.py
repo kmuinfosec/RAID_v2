@@ -172,10 +172,10 @@ def SummaryGraph(result_path):
             else:
                 remain_packet = int(remain["cluster_packet"])
                 remain_card = int(remain["cluster_key_card"])
-            value = [remain_packet] + temp_df["cluster_packet"][
+            value = [remain_packet] + temp_df["cluster_packet"].iloc[
                 : (10 if len(temp_df) > 10 else len(temp_df))
             ].tolist()
-            card = [remain_card] + temp_df["cluster_key_card"][
+            card = [remain_card] + temp_df["cluster_key_card"].iloc[
                 : (10 if len(temp_df) > 10 else len(temp_df))
             ].tolist()
             clusters = ["Remain"] + temp_df["cluster"].tolist()[:10]

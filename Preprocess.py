@@ -65,15 +65,11 @@ def make_pcap_payload(input):
     return processed_pkts
 
 
-def get_parsed_packets(pcap_dir, cpu_count=os.cpu_count() // 2, extension = ".pcap"):
-    if os.path.isdir(pcap_dir):
+def get_parsed_packets(pcap_dir, files, cpu_count=os.cpu_count() // 2, extension = ".pcap"):
+    if not files:
         files = os.listdir(pcap_dir)
-    else:
-        pcap_dir, filename = os.path.split(pcap_dir)
-        files = [ filename ]
-
+    
     path_list = []
-
     for file_name in files:
         ext = os.path.splitext(file_name)[-1]
         if ext == extension:
@@ -95,27 +91,22 @@ def get_parsed_packets(pcap_dir, cpu_count=os.cpu_count() // 2, extension = ".pc
     return data
 
 
-def preprocess(pcap_dir, cpu_count=None, extension='.pcap'):
+def preprocess(pcap_dir, pcap_list, cpu_count=None, extension='.pcap'):
     mp.freeze_support()
-    if isinstance(pcap_dir, list):
-        data = []
-        for dir in pcap_dir:
-            data += get_parsed_packets(dir, cpu_count, extension)
-    else:
-        data = get_parsed_packets(pcap_dir, cpu_count, extension)
+    data = get_parsed_packets(pcap_dir, pcap_list, cpu_count, extension)
 
     return data
 
 
-if __name__ == "__main__":
-    if len(sys.argv) == 1:
-        pcap_dir = os.getcwd()
-    else:
-        pcap_dir = sys.argv[1]
+# if __name__ == "__main__":
+#     if len(sys.argv) == 1:
+#         pcap_dir = os.getcwd()
+#     else:
+#         pcap_dir = sys.argv[1]
 
-    if len(sys.argv) < 3:
-        csv_path = get_dir(os.getcwd())
-    else:
-        csv_path = get_dir(sys.argv[2], sys.argv[3])
+#     if len(sys.argv) < 3:
+#         csv_path = get_dir(os.getcwd())
+#     else:
+#         csv_path = get_dir(sys.argv[2], sys.argv[3])
 
-    preprocess(pcap_dir, csv_path)
+#     preprocess(pcap_dir, csv_path)

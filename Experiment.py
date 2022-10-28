@@ -4,7 +4,7 @@ import argparse
 from Main import main
 from Utils import parse_config
 
-ARG_STORE = ["pcap_dir", "regex_path", "cpu_count", "result_path", 'result_dir',\
+ARG_STORE = ["pcap_dir", "pcap_list", "regex_path", "cpu_count", "result_path", 'result_dir',\
         "threshold", "card_th", "group", "vector_size", "window_size", "hh1_size",\
         "hh2_size", "ratio", "extension"]
 
@@ -15,7 +15,6 @@ def experiment(args_user):
     cfgs = ConfigParser()
     cfgs.read("config.ini", encoding="UTF-8")
     parsed_args = parse_config(cfgs, args_user)
-
     main(args=parsed_args)
 
 

@@ -56,8 +56,8 @@ class HeavyHitter:
         keys = list(self.items.keys())
         keys.sort(key=lambda x: len(x))
 
-        for string1 in keys:
-            for string2 in keys:
+        for idx, string1 in enumerate(keys):
+            for string2 in keys[idx:]:
                 if string1 != string2 and string1 in string2:
                     self.items[string1] += self.items[string2]
 

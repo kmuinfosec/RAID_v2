@@ -15,6 +15,7 @@ def experiment(args_user):
     cfgs = ConfigParser()
     cfgs.read("config.ini", encoding="UTF-8")
     parsed_args = parse_config(cfgs, args_user)
+    
     main(args=parsed_args)
 
 

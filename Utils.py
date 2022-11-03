@@ -1,5 +1,6 @@
 import os
 import csv
+import ast
 
 from datetime import datetime
 
@@ -19,6 +20,9 @@ def get_dir(path, dir=False):
 def parse_config(cfgs, args):
     args_dict = dict()
     args_dict['pcap_dir'] = args['pcap_dir'] if args['pcap_dir'] else cfgs["DEFAULT"]['pcap_dir']
+    args_dict['pcap_dir'] = "./" if args_dict['pcap_dir'] == "False" else args_dict['pcap_dir']
+    args_dict['pcap_list'] = args['pcap_list'] if args['pcap_list'] else cfgs["DEFAULT"]['pcap_list']
+    args_dict['pcap_list'] = ast.literal_eval(args_dict['pcap_list']) if eval(args_dict['pcap_list']) else False
     args_dict['regex_path'] = args['regex_path'] if args['regex_path'] else cfgs["DEFAULT"]['regex_path']
     args_dict['cpu_count'] = eval(args['cpu_count']) if args['cpu_count'] else eval(cfgs["DEFAULT"]['cpu_count'])
     if args_dict['cpu_count'] == False:

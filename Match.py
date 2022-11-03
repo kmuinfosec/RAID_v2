@@ -3,6 +3,7 @@ import re
 import csv
 import yaml
 import pandas as pd
+import pickle
 
 def match(result_path, regex_path):
 
@@ -19,14 +20,18 @@ def match(result_path, regex_path):
                     tmp_regex_dict[(category1, category2, category3)].append(regex)
     regex_dict = tmp_regex_dict
 
+    total = dict()
+
     main_df = pd.read_csv(os.path.join(result_path, 'group_signatures.csv'))
 
     for group in main_df.group.tolist():
+        total[group] = dict()
         group_path = os.path.join(result_path, group)
 
         signature_dict = dict()
         for filename in os.listdir(os.path.join(group_path, 'DHH_result')):
             cluster_num = filename.split('_')[0]
+            total[group][cluster_num] = [[], [], []]
 
             sign_list = []
             with open(os.path.join(group_path, 'DHH_result', filename), 'r') as f:
@@ -38,6 +43,7 @@ def match(result_path, regex_path):
             for signature, frequency in sign_list:
                 if cluster_num not in signature_dict.keys():
                     signature_dict[cluster_num] = []
+                
                 signature_dict[cluster_num].append((signature, frequency))
 
         for (category1, category2, category3), match_list in regex_dict.items():
@@ -49,6 +55,9 @@ def match(result_path, regex_path):
                 for cluster_num in signature_dict.keys():
                     for signature, frequency in signature_dict[cluster_num]:
                         if pattern.search(signature) != None:
+                            total[group][cluster_num][0].append('.'.join([category1, category2, category3]))
+                            total[group][cluster_num][1].append(signature)
+                            total[group][cluster_num][2].append(frequency)
                             result.append((cluster_num, signature, frequency))
             
             if len(result)==0:
@@ -60,8 +69,29 @@ def match(result_path, regex_path):
                 if not os.path.exists(cur_path):
                     os.mkdir(cur_path)
 
-            writer = open(os.path.join(cur_path, f'{category3}.tsv'), 'w')
-            writer.write('cluster_num\tsignature\tfrequency\n')
+            writer = open(os.path.join(cur_path, f'{category3}.csv'), 'w')
+            writer.write('cluster_num,signature,frequency\n')
             for cluster_num, signature, frequency in result:
-                writer.write(f'{cluster_num}\t{signature}\t{frequency}\n')
+                writer.write(f'{cluster_num},{signature},{frequency}\n')
             writer.close()
+
+    all_cluster = pd.read_csv(f'{result_path}/all_cluster_signatures.csv')
+    
+    all_cluster = all_cluster.to_dict('list')
+
+    all_cluster['labels_names'] = []
+    all_cluster['labels_hex'] = []
+    all_cluster['labels_feq'] = []
+    all_cluster['Num_labels'] = []
+
+    for idx in range(len(all_cluster['group'])):
+        g = all_cluster['group'][idx]
+        c = str(all_cluster['cluster'][idx])
+        all_cluster['labels_names'].append(str(total[g][c][0]))
+        all_cluster['labels_hex'].append(str(total[g][c][1]))
+        all_cluster['labels_feq'].append(str(total[g][c][2]))
+        all_cluster['Num_labels'].append(len(total[g][c][0]))
+
+    all_cluster = pd.DataFrame(all_cluster)
+
+    all_cluster.to_csv(f'{result_path}/all_cluster_signatures.csv', index=False)

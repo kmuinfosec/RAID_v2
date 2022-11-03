@@ -64,7 +64,7 @@ def match(result_path, regex_path):
                 continue
 
             cur_path = group_path
-            for append_name in ['Match_result', category1, category2]:
+            for append_name in ['Labels', category1, category2]:
                 cur_path = os.path.join(cur_path, append_name)
                 if not os.path.exists(cur_path):
                     os.mkdir(cur_path)

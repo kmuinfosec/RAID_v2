@@ -23,6 +23,11 @@ GROUP_SIGNATURES_COLUMN = [
     "cluster_unique_packet",
     "occurrence of most frequent signature",
     "common signatures",
+    "num_of_clusters"
+    "signature_match_ratio",
+    "packet_match_ratio",
+    "signature_match_ratio_-1",
+    "packet_match_ratio_-1",
 ]
 
 ALL_CLUSTER_SIGNATURES_COLUMN = [
@@ -36,6 +41,8 @@ ALL_CLUSTER_SIGNATURES_COLUMN = [
     "cluster_unique_packet",
     "occurrence of most frequent signature",
     "common signatures",
+    "signature_match_ratio",
+    "packet_match_ratio",
 ]
 
 KEY_DICT = {
@@ -48,7 +55,7 @@ KEY_DICT = {
 def main(args):
     n = SimpleNamespace(**args)
 
-    data = preprocess(n.pcap_dir, n.pcap_list, n.cpu_count, n.extension)
+    data = preprocess(n.pcap_dir, None, n.cpu_count, n.extension)
     
     key, key_name, isall = KEY_DICT[n.group_type]
 
@@ -179,7 +186,7 @@ def main(args):
             for payload in X:
                 payload = payload[0]
                 group_unique_packet.add(payload)
-
+            
             summary_list.append(
                 [
                     key_name[key_idx] + group_info[0],
@@ -192,25 +199,48 @@ def main(args):
                     len(set(c_dict["decoded payload"])),
                     ret[0][1] if len(ret) > 0 else 0,
                     common_signatures[ci],
+                    sum([len(sig) for sig in common_signatures[ci]])/(sum([len(encode_hex(pay, n.israw)) for pay in c_dict["decoded payload"]])/len(c_dict["decoded AE"])),
+                    len(set(c_dict["decoded payload"]))/len(c_dict["decoded AE"])
                 ]
             )
 
     one_big_cluster_list = []
     keys = set(x[0] for x in summary_list)
     for key in keys:
+        summary_group = []
+        filtered_summary = []
+        remain = None
+        for s in summary_list:
+            if s[5] != -1:
+                filtered_summary.append(s)
+            else:
+                remain = s
+                summary_group.append(s)
         summary_group = list(filter(lambda x: x[0] == key, summary_list))
         filtered_summary = list(filter(lambda x: x[5] != -1, summary_group))
         if len(filtered_summary) > 0:
             one_big_cluster = max(filtered_summary, key=lambda x: x[4])
         else:
             one_big_cluster = max(summary_group, key=lambda x: x[4])
-
+        num_of_cluster = len(filtered_summary)
+        signature_match_ratio=  [clu[10] for clu in filtered_summary]
+        packet_match_ratio = [clu[11] for clu in filtered_summary]
+        signature_match_ratio_remain= remain[10]
+        packet_match_ratio_remain = remain[11]
+        
         one_big_cluster = (
-            one_big_cluster[:4] + [len(clusters[key])] + one_big_cluster[4:]
+            one_big_cluster[:4] +
+            [len(clusters[key])] +
+            one_big_cluster[4:] +
+            [num_of_cluster] +
+            [signature_match_ratio] +
+            [packet_match_ratio] +
+            [signature_match_ratio_remain] +
+            [packet_match_ratio_remain]
         )
         one_big_cluster[5], one_big_cluster[6] = one_big_cluster[6], one_big_cluster[5]
-        one_big_cluster_list.append(one_big_cluster)
-
+        one_big_cluster_list.append(one_big_cluster) # 클러스터 갯수 len(filtered_summary), 두개는 붙이기
+    
     write_csv(
         os.path.join(n.result_path, "all_cluster_signatures.csv"),
         ALL_CLUSTER_SIGNATURES_COLUMN,
@@ -223,11 +253,11 @@ def main(args):
         one_big_cluster_list,
     )
 
-    print("Making Summary Graph")
-    SummaryGraph(n.result_path)
+    # print("Making Summary Graph")
+    # SummaryGraph(n.result_path)
 
     print("Extracting PCAP for each cluster")
     extract(packet_idx_dict, n.pcap_dir, n.cpu_count)
 
-    print("Making Regex Matching Result")
-    match(n.result_path, n.regex_path)
+    # print("Making Regex Matching Result")
+    # match(n.result_path, n.regex_path)

@@ -26,6 +26,7 @@
     
     파라미터 목록
     - *pcap_dir* : 분석에 사용할 [`'.pcap'`, `'.done'`, `'.cap'`] 파일들이 위치한 폴더 경로
+    - *pcap_list* : 분석에 사용할 파일들의 이름 리스트
     - *regex_path* : 시그니처 라벨링에 사용할 정규표현식 파일이 위치한 경로
     - *cpu_count* : 전처리와 pcap추출 멀티프로세싱 과정에서 사용할 cpu_count 개수(False일 경우 현재 cpu 코어의 절반만 사용한다.)
     - *result_path* : 결과 폴더를 생성할 경로
@@ -53,11 +54,11 @@
     명령어 실행시에 작성한 실행 인자는 `config.ini`의 파라미터값을 덮어쓴다.<br>
     명령어 작성 방식은 다음과 같다. ( []는 선택 옵션 )
     ```bash
-    python Experiment.py [-pcap_dir <dir>] [-regex_path <regex_path>] [-cpu_count <cpu_count>] 
-    [-result_path <path>] [-result_dir <result_dir_name>] [-threshold <threshold>] [-card_th <card_th>] 
-    [-group <group_type>] [-israw] [-deduplication] [-count] [-earlystop] [-vector_size <vector_size>] 
-    [-window_size <window_size>] [-hh1_size <dhh_size>] [-hh2_size <dhh_size>] [-ratio <ratio>] 
-    [-extension <extension>]
+    python Experiment.py [-pcap_dir <dir>] [-pcap_list <pcap_name_list>] [-regex_path <regex_path>] 
+    [-cpu_count <cpu_count>] [-result_path <path>] [-result_dir <result_dir_name>] [-threshold <threshold>] 
+    [-card_th <card_th>] [-group <group_type>] [-israw] [-deduplication] [-count] [-earlystop] 
+    [-vector_size <vector_size>] [-window_size <window_size>] [-hh1_size <dhh_size>] [-hh2_size <dhh_size>] 
+    [-ratio <ratio>] [-extension <extension>]
     ```
 
     실행 인자 옵션 목록 (\*표시는 입력값이 없는 argument를 나타냄.)
@@ -65,6 +66,7 @@
     | Parameter                 | Data Type       | Description   |	
     | :------------------------ |:-------------:| :-------------|
     | -pcap_dir	       |	string           | 분석에 사용할 pcap의 파일 경로
+    | -pcap_list	       |	string           | 분석에 사용할 pcap의 이름 리스트
     | -regex_path	       |	string           | 시그니처 라벨링에 사용할 정규표현식 파일이 위치한 경로
     | -cpu_count          |   int           | 멀티프로세싱 과정에서 사용할 cpu_count 개수
     | -result_path	       |	string	            | 결과 폴더를 생성할 경로
@@ -101,8 +103,14 @@
     | cluster_packet         |     가장 큰 클러스터에 속한 패킷의 수       
     | cluster_unique_packet         |    가장 큰 클러스터에 속한 서로 다른 패킷의 수       
     | occurrence of most frequent signature     |   가장 많이나온 시그니처의 빈도 수      
-    | common signatures  | 가장 큰 클러스터에 속한 모든 패킷에 공통으로 등장한 시그니처        
-- `all_cluster_signatures.csv` : 모든 그룹의 모든 클러스터들 정보가 작성 된 파일
+    | common signatures  | 가장 큰 클러스터에 속한 모든 패킷에 공통으로 등장한 시그니처   
+    | num_of_clusters | 그룹 내 클러스터 별 갯수 리스트<br>하나인 경우, 리스트로 생성되지 않음
+    | signature_match_ratio | 클러스터 별 시그니처 일치율 (common_signature 길이의 합 / 패킷 길이 평균) 리스트 
+    | packet_match_ratio | 클러스터 별 가장 많은 동일한 패킷 수의 일치율 리스트 
+    | signature_match_ratio_-1 | 클러스터가 생성되지 않은 경우, 그룹 별 시그니처 일치율 리스트
+    | packet_match_ratio_-1 | 클러스터가 생성되지 않은 경우, 그룹 별 패킷 일치율 리스트
+    
+- `all_cluster_signatures.csv` : 모든 그룹의 모든 클러스터들의 정보, 정규표현식과 일치하는 시그니처의 정보가 작성 된 파일
 
     | Column                 | Explaination        
     | :------------------------ |:-------------:
@@ -114,14 +122,21 @@
     | cluster_packet	           |  클러스터에 속한 패킷의 수          
     | cluster_unique_packet	        |    그룹에 속한 서로 다른 패킷의 수           
     | occurrence of most frequent signature     |   가장 많이나온 시그니처의 빈도 수      
-    | common signatures  | 클러스터에 속한 모든 패킷에 공통으로 나타나는 시그니처   
+    | common signatures  | 클러스터에 속한 모든 패킷에 공통으로 나타나는 시그니처 
+    | signature_match_ratio | 클러스터에 속한 시그니처 일치율
+    | packet_match_ratio | 클러스터에 속한 가장 많은 동일한 패킷 수의 비율 
+    | labels_names  | 일치한 정규표현식이 들어있는 분류 (대분류.중분류.소분류) 리스트
+    | labels_hex  | 정규표현식과 일치한 시그니처 리스트
+    | labels_feq  | 정규표현식과 일치한 시그니처의 빈도 리스트 
+    | Num_labels  | 정규표현식과 일치한 시그니처의 수
+    
     
 - `group_summary_graph.png` : 그룹의 총 패킷 수와 가장 큰 클러스터에 포함된 패킷 수, 최빈 시그니처의 횟수를 그룹별로 표현한 막대 그래프
 - `<group type>_<group key>/` *card_th*만큼 생성된 그룹 별 클러스터 데이터를 저장한 폴더
   * `Clustering_result/`: 클러스터 별 common_string, 청킹된 패킷, payload원본을 저장한 파일들의 폴더
   * `pcaps/`: 클러스터에 속한 패킷들을 하나의 pcap으로 만든 파일들의 폴더
   * `DHH_result/`: 클러스터 별 시그니처와 등장 횟수가 적힌 파일들의 폴더
-  * `Match_result/`: 정규표현식을 통해 매칭된 시그니처를 각 라벨별로 저장한 파일들의 폴더
+  * `Labels/`: 정규표현식을 통해 매칭된 시그니처를 각 라벨별로 저장한 파일들의 폴더
   * `result_data_merge.pkl`	: raid 실행 결과 dictionary를 저장한 pickle파일 
   * `Cluster_summary_graph.png` : 클러스터의 총 패킷 개수와 cardinality를 그룹별로 표현한 막대 그래프
 
@@ -189,8 +204,9 @@ payload 데이터를 입력받아 AE청킹과 피처 해싱(`contents2count()`)�
 라벨 및 정규표현식 목록을 입력하여, 각 그룹별 시그니처와 매칭 되는 식이 있는지 탐색하는 모듈 
 
 - 라벨 및 정규표현식 목록 `config.yaml` 을 읽어 시그니처와 매칭 할 식을 불러온다. 
-- `group_signatures.csv`를 읽어 시그니처를 추출한 그룹을 탐색하고, 각 그룹마다 `DHH_result` 폴더 내에 있는 클러스터 별 시그니처 추출 결과를 불러온다. 
-- 각 그룹 별 시그니처와 매칭 되는 식이 있는지 탐색하여 라벨마다 클러스터 번호, 매칭 된 시그니처, 빈도수 정보를 `Match_result` 폴더에 저장한다. 매칭 된 시그니처가 존재하지 않으면 결과 폴더 및 파일을 생성하지 않는다.
+- `group_signatures.csv`를 읽어 시그니처를 추출한 그룹을 탐색하고, 각 그룹마다 `Labels` 폴더 내에 있는 클러스터 별 시그니처 추출 결과를 불러온다. 
+- 각 그룹 별 시그니처와 매칭 되는 식이 있는지 탐색하여 라벨마다 클러스터 번호, 매칭 된 시그니처, 빈도수 정보를 `Labels` 폴더에 저장한다. 매칭 된 시그니처가 존재하지 않으면 결과 폴더 및 파일을 생성하지 않는다.
+- 각 그룹의 클러스터 별 정규표현식과 일치한 시그니처들의 분류, 발생 빈도, 시그니처, 일치 수를 `all_cluster_signatures.csv`에 추가한다.
 
 ### RaidUtils
 Raid 관련 모듈

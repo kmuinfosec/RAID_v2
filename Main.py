@@ -23,7 +23,7 @@ GROUP_SIGNATURES_COLUMN = [
     "cluster_unique_packet",
     "occurrence of most frequent signature",
     "common signatures",
-    "num_of_clusters"
+    "num_of_clusters",
     "signature_match_ratio",
     "packet_match_ratio",
     "signature_match_ratio_-1",
@@ -231,7 +231,7 @@ def main(args):
         one_big_cluster = (
             one_big_cluster[:4] +
             [len(clusters[key])] +
-            one_big_cluster[4:] +
+            one_big_cluster[4:-2] +
             [num_of_cluster] +
             [signature_match_ratio] +
             [packet_match_ratio] +
@@ -253,11 +253,11 @@ def main(args):
         one_big_cluster_list,
     )
 
-    # print("Making Summary Graph")
-    # SummaryGraph(n.result_path)
+    print("Making Summary Graph")
+    SummaryGraph(n.result_path)
 
-    print("Extracting PCAP for each cluster")
-    extract(packet_idx_dict, n.pcap_dir, n.cpu_count)
+    # print("Extracting PCAP for each cluster")
+    # extract(packet_idx_dict, n.pcap_dir, n.cpu_count)
 
-    # print("Making Regex Matching Result")
-    # match(n.result_path, n.regex_path)
+    print("Making Regex Matching Result")
+    match(n.result_path, n.regex_path)

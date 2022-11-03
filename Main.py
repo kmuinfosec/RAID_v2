@@ -223,7 +223,7 @@ def main(args):
         else:
             one_big_cluster = max(summary_group, key=lambda x: x[4])
         num_of_cluster = len(filtered_summary)
-        signature_match_ratio=  [clu[10] for clu in filtered_summary]
+        signature_match_ratio = [clu[10] for clu in filtered_summary]
         packet_match_ratio = [clu[11] for clu in filtered_summary]
         signature_match_ratio_remain= remain[10]
         packet_match_ratio_remain = remain[11]

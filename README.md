@@ -89,7 +89,7 @@
 
 ## 2. 결과물 목록
 - `train_data.csv` : Pcap파일에서 추출한 데이터를 csv로 저장한 파일 (optional) 
-- `group_signatures.csv` : 그룹별 정보, 그룹별 가장 큰 클러스터 정보가 작성 된 파일
+- `group_signatures.csv` : 그룹별 정보, 그룹별 가장 큰 클러스터 정보, 클러스터의 summary 정보가 작성 된 파일
 
     | Column                 | Explaination        
     | :------------------------ |:------------------:

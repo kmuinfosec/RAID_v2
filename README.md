@@ -104,11 +104,11 @@
     | cluster_unique_packet         |    가장 큰 클러스터에 속한 서로 다른 패킷의 수       
     | occurrence of most frequent signature     |   가장 많이나온 시그니처의 빈도 수      
     | common signatures  | 가장 큰 클러스터에 속한 모든 패킷에 공통으로 등장한 시그니처   
-    | num_of_clusters | 그룹 내 클러스터 별 갯수 리스트<br>하나인 경우, 리스트로 생성되지 않음
-    | signature_match_ratio | 클러스터 별 시그니처 일치율 (common_signature 길이의 합 / 패킷 길이 평균) 리스트 
+    | num_of_clusters | 그룹 내 클러스터 개수
+    | signature_match_ratio | 클러스터 별 시그니처 일치율 리스트(일치율 : 모든 common_signatures 길이의 합 / 패킷 길이 평균)
     | packet_match_ratio | 클러스터 별 가장 많은 동일한 패킷 수의 일치율 리스트 
     | signature_match_ratio_-1 | 클러스터가 생성되지 않은 경우, 그룹 별 시그니처 일치율 리스트
-    | packet_match_ratio_-1 | 클러스터가 생성되지 않은 경우, 그룹 별 패킷 일치율 리스트
+    | packet_match_ratio_-1 | 클러스터가 생성되지 않은 경우, 그룹 별 패킷 비율 리스트
     
 - `all_cluster_signatures.csv` : 모든 그룹의 모든 클러스터들의 정보, 정규표현식과 일치하는 시그니처의 정보가 작성 된 파일
 
@@ -123,7 +123,7 @@
     | cluster_unique_packet	        |    그룹에 속한 서로 다른 패킷의 수           
     | occurrence of most frequent signature     |   가장 많이나온 시그니처의 빈도 수      
     | common signatures  | 클러스터에 속한 모든 패킷에 공통으로 나타나는 시그니처 
-    | signature_match_ratio | 클러스터에 속한 시그니처 일치율
+    | signature_match_ratio | 클러스터의 시그니처 일치율
     | packet_match_ratio | 클러스터에 속한 가장 많은 동일한 패킷 수의 비율 
     | labels_names  | 일치한 정규표현식이 들어있는 분류 (대분류.중분류.소분류) 리스트
     | labels_hex  | 정규표현식과 일치한 시그니처 리스트

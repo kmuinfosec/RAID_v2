@@ -1,6 +1,7 @@
 import os
 from tqdm.auto import tqdm
 from types import SimpleNamespace
+from collections import Counter
 
 from Utils import get_dir, write_csv, filter_null_payload, get_payloads_by_index, decode_ascii, encode_hex
 from Preprocess import preprocess
@@ -186,6 +187,8 @@ def main(args):
             for payload in X:
                 payload = payload[0]
                 group_unique_packet.add(payload)
+                
+            largest_number_of_packets = Counter(c_dict["decoded payload"]).most_common()[0][1]
             
             summary_list.append(
                 [
@@ -200,7 +203,7 @@ def main(args):
                     ret[0][1] if len(ret) > 0 else 0,
                     common_signatures[ci],
                     sum([len(sig) for sig in common_signatures[ci]])/(sum([len(encode_hex(pay, n.israw)) for pay in c_dict["decoded payload"]])/len(c_dict["decoded AE"])),
-                    len(set(c_dict["decoded payload"]))/len(c_dict["decoded AE"])
+                    largest_number_of_packets/len(c_dict["decoded AE"]),
                 ]
             )
 

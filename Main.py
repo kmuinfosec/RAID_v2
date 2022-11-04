@@ -256,8 +256,8 @@ def main(args):
     print("Making Summary Graph")
     SummaryGraph(n.result_path)
 
-    # print("Extracting PCAP for each cluster")
-    # extract(packet_idx_dict, n.pcap_dir, n.cpu_count)
+    print("Extracting PCAP for each cluster")
+    extract(packet_idx_dict, n.pcap_dir, n.cpu_count)
 
     print("Making Regex Matching Result")
     match(n.result_path, n.regex_path)

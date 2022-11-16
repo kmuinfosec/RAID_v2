@@ -56,7 +56,7 @@ KEY_DICT = {
 def main(args):
     n = SimpleNamespace(**args)
 
-    data = preprocess(n.pcap_dir, None, n.cpu_count, n.extension)
+    data = preprocess(n.pcap_dir, n.pcap_list, n.cpu_count, n.extension)
     
     key, key_name, isall = KEY_DICT[n.group_type]
 
@@ -80,7 +80,7 @@ def main(args):
 
         if len(X) == 0:
             print("Skip: No packet with application payload in this group")
-            continue
+            # continue
         if len(set(payloads)) == 1:
             print("Skip: All of payloads are same in this group")
             continue
@@ -190,6 +190,17 @@ def main(args):
                 
             largest_number_of_packets = Counter(c_dict["decoded payload"]).most_common()[0][1]
             
+            common_signatures_set = set(common_signatures[ci])
+
+            sorted_common_signatures = sorted(common_signatures[ci], key=lambda x: len(x), reverse=True)
+
+            for idx in range(len(sorted_common_signatures) - 1):
+                s = sorted_common_signatures[idx]
+                for s_p in sorted_common_signatures[idx+1:]:
+                    if s_p in common_signatures_set:
+                        if s_p in s:
+                            common_signatures_set.remove(s_p)
+
             summary_list.append(
                 [
                     key_name[key_idx] + group_info[0],
@@ -202,8 +213,8 @@ def main(args):
                     len(set(c_dict["decoded payload"])),
                     ret[0][1] if len(ret) > 0 else 0,
                     common_signatures[ci],
-                    sum([len(sig) for sig in common_signatures[ci]])/(sum([len(encode_hex(pay, n.israw)) for pay in c_dict["decoded payload"]])/len(c_dict["decoded AE"])),
-                    largest_number_of_packets/len(c_dict["decoded AE"]),
+                    round(sum([len(sig) for sig in common_signatures_set])/(sum([len(encode_hex(pay, n.israw)) for pay in c_dict["decoded payload"]])/len(c_dict["decoded AE"])), 3),
+                    round(largest_number_of_packets/len(c_dict["decoded AE"]), 3),
                 ]
             )
 
@@ -213,6 +224,9 @@ def main(args):
         summary_group = []
         filtered_summary = []
         remain = None
+
+        summary_list = sorted(summary_list, key=lambda x: x[5])
+
         for s in summary_list:
             if s[5] != -1:
                 filtered_summary.append(s)
@@ -228,6 +242,8 @@ def main(args):
         num_of_cluster = len(filtered_summary)
         signature_match_ratio = [clu[10] for clu in filtered_summary]
         packet_match_ratio = [clu[11] for clu in filtered_summary]
+        if remain == None:
+            remain = [0] * len(summary_list[0])
         signature_match_ratio_remain= remain[10]
         packet_match_ratio_remain = remain[11]
         
@@ -242,7 +258,7 @@ def main(args):
             [packet_match_ratio_remain]
         )
         one_big_cluster[5], one_big_cluster[6] = one_big_cluster[6], one_big_cluster[5]
-        one_big_cluster_list.append(one_big_cluster) # 클러스터 갯수 len(filtered_summary), 두개는 붙이기
+        one_big_cluster_list.append(one_big_cluster)
     
     write_csv(
         os.path.join(n.result_path, "all_cluster_signatures.csv"),

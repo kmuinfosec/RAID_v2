@@ -28,21 +28,24 @@ GROUP_SIGNATURES_COLUMN = [
     "common signatures", # 10
     "num_of_clusters", # 11
     "signature_match_ratio", # 12
-    "packet_match_ratio", # 13
-    "signature_match_ratio_-1", #14
-    "packet_match_ratio_-1", # 15
-    # add
-    "cs_str_list", #16
-    "cs_list_cnts", #17
-    "remain_cluster_cnts", #18
-    "uniq_src_ip_list_topN", #19
-    "uniq_src_ip_list_cnts", #20
-    "uniq_src_port_list_topN", #21
-    "uniq_src_port_list_cnts", #22
-    "uniq_dst_ip_list_topN", #23
-    "uniq_dst_ip_list_cnts", #24
-    "uniq_dst_port_list_topN", #25
-    "uniq_dst_port_list_cnts", #26
+    "match_ratio_sig_main_info", #13
+    "packet_match_ratio", # 14
+    "match_ratio_pkt_main_info", #15
+    "signature_match_ratio_-1", #16
+    "match_ratio_sig_main_info", #17
+    "packet_match_ratio_-1", #18
+    "match_ratio_pkt_main_info", #19
+    "cs_str_list", #20
+    "cs_list_cnts", #21
+    "remain_cluster_cnts", #22
+    "uniq_src_ip_list_topN", #23
+    "uniq_src_ip_list_cnts", #24
+    "uniq_src_port_list_topN", #25
+    "uniq_src_port_list_cnts", #26
+    "uniq_dst_ip_list_topN", #27
+    "uniq_dst_ip_list_cnts", #28
+    "uniq_dst_port_list_topN", #29
+    "uniq_dst_port_list_cnts", #30
 ]
 
 ALL_CLUSTER_SIGNATURES_COLUMN = [
@@ -58,9 +61,13 @@ ALL_CLUSTER_SIGNATURES_COLUMN = [
     "common signatures", # 9
     "signature_match_ratio", # 10
     "packet_match_ratio", # 11
-    # add
     "cs_str_list", # 12
     "cs_list_cnts", # 13
+    "match_ratio_sig_info", #14
+    "match_ratio_pkt_info", #15
+    "all_cs_len_sum", #16
+    "all_pkt_len_mean", #17
+    "pkt_unique_cnts", #18
 ]
 
 KEY_DICT = {
@@ -231,8 +238,6 @@ def main(args):
             for payload in X:
                 payload = payload[0]
                 group_unique_packet.add(payload)
-                
-            largest_number_of_packets = Counter(c_dict["decoded payload"]).most_common()[0][1]
             
             common_signatures_set = set(common_signatures[ci])
 
@@ -247,6 +252,10 @@ def main(args):
 
             lst_cs_str_list, cs_list_cnts = (
                     hex2PrintableByte(common_signatures[ci]))
+            cluster_all_pkts = len(c_dict["decoded AE"])
+            all_cs_len_sum = sum([len(sig) for sig in common_signatures_set])
+            all_pkt_len_mean = (sum([len(encode_hex(pay, n.israw)) for pay in c_dict["decoded payload"]])/len(c_dict["decoded AE"]))
+            most_freq_pkt_uniq_cnts = Counter(c_dict["decoded payload"]).most_common()[0][1]
             summary_list.append(
                 [
                     key_name[key_idx] + group_info[0],
@@ -255,13 +264,19 @@ def main(args):
                     len(group_unique_packet),
                     len(key_card) if n.group_type != 'all' else 0,
                     ci,
-                    len(c_dict["decoded AE"]),
+                    cluster_all_pkts,
                     len(set(c_dict["decoded payload"])),
                     ret[0][1] if len(ret) > 0 else 0,
                     common_signatures[ci],
-                    round(sum([len(sig) for sig in common_signatures_set])/(sum([len(encode_hex(pay, n.israw)) for pay in c_dict["decoded payload"]])/len(c_dict["decoded AE"])), 3),
-                    round(largest_number_of_packets/len(c_dict["decoded AE"]), 3),
+                    round(all_cs_len_sum/all_pkt_len_mean,3),
+                    round(most_freq_pkt_uniq_cnts/cluster_all_pkts, 3),
                     lst_cs_str_list, cs_list_cnts,
+                    (all_cs_len_sum,all_pkt_len_mean),
+                    (most_freq_pkt_uniq_cnts,cluster_all_pkts),
+                    all_cs_len_sum,
+                    all_pkt_len_mean,
+                    most_freq_pkt_uniq_cnts,
+                    
                 ]
             )
 
@@ -282,12 +297,18 @@ def main(args):
         else:
             one_big_cluster = max(summary_group, key=lambda x: x[4])
         num_of_cluster = len(filtered_summary)
+        
+
         signature_match_ratio = [(clu[5], clu[10]) for clu in filtered_summary[:5]]
         packet_match_ratio = [(clu[5], clu[11]) for clu in filtered_summary[:5]]
+        signature_match_ratio_info = [(clu[5], clu[13]) for clu in filtered_summary[:5]]
+        packet_match_ratio_info = [(clu[5], clu[14]) for clu in filtered_summary[:5]]
         if len(remain) == 0:
             remain = [0] * len(summary_list[0])
         signature_match_ratio_remain= remain[10]
         packet_match_ratio_remain = remain[11]
+        signature_match_ratio_remain_info= remain[13]
+        packet_match_ratio_remain_info = remain[14]
         
         remain_cluster_cnts = len(clusters[key]) - num_of_cluster
         one_big_cluster = (
@@ -302,18 +323,26 @@ def main(args):
             # 12
             [signature_match_ratio] +
             # 13
-            [packet_match_ratio] +
+            [signature_match_ratio_info] +
             # 14
-            [signature_match_ratio_remain] +
+            [packet_match_ratio] +
             # 15
+            [packet_match_ratio_info] +
+            # 16
+            [signature_match_ratio_remain] +
+            # 17
+            [signature_match_ratio_remain_info] +
+            # 18
             [packet_match_ratio_remain] +
-            # 16, 17 cs_str_list,cs_list_cnts
+            # 19
+            [packet_match_ratio_remain_info] +
+            # 20, 21 cs_str_list,cs_list_cnts
             [ one_big_cluster[12], one_big_cluster[13] ] +
-            # 18 remain_cluster_cnts
+            # 22 remain_cluster_cnts
             [remain_cluster_cnts] +
-            # 19 ~ 22
+            # 23 ~ 27
             [szUniqSrcIPList, nUniqSrcIPLen, szUniqSrcPortList, nUniqSrcPortLen] +
-            # 23~ 26
+            # 28~ 32
             [szUniqDstIPList, nUniqDstIPLen, szUniqDstPortList, nUniqDstPortLen]
         )
         one_big_cluster[5], one_big_cluster[6] = one_big_cluster[6], one_big_cluster[5]

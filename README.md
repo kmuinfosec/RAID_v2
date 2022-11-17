@@ -93,42 +93,56 @@
 
     | Column                 | Explaination        
     | :------------------------ |:------------------:
-    | group	       |	<그룹 키 종류\>-<그룹 키 값>          
-    | key_card	       |	 그룹과 통신한 ip 종류      
-    | group_packet          |   그룹에 속한 패킷의 수        
-    | group_unique_packet	       |	 그룹에 속한 서로 다른 패킷의 수          
-    | clusters 		       |  클러스터의 수          
-    | biggest_cluster	           |  가장 `cluster_key_card`가 높은 클러스터의 고유 인덱스 번호       
-    | cluster_key_card	        |    가장 큰 클러스터에서 기준과 통신한 ip 종류       
-    | cluster_packet         |     가장 큰 클러스터에 속한 패킷의 수       
-    | cluster_unique_packet         |    가장 큰 클러스터에 속한 서로 다른 패킷의 수       
-    | occurrence of most frequent signature     |   가장 많이나온 시그니처의 빈도 수      
-    | common signatures  | 가장 큰 클러스터에 속한 모든 패킷에 공통으로 등장한 시그니처   
-    | num_of_clusters | 그룹 내 클러스터 개수
-    | signature_match_ratio | 클러스터 별 시그니처 일치율 리스트(일치율 : 모든 common_signatures 길이의 합 / 패킷 길이 평균)
-    | packet_match_ratio | 클러스터 별 가장 많은 동일한 패킷 수의 일치율 리스트 
-    | signature_match_ratio_-1 | 클러스터가 생성되지 않은 경우, 그룹 별 시그니처 일치율 리스트
-    | packet_match_ratio_-1 | 클러스터가 생성되지 않은 경우, 그룹 별 패킷 비율 리스트
+    | group_info	       |	<그룹 키 종류\>-<그룹 키 값>          
+    | group_uniq_ip_cnts	       |	 그룹과 통신한 서로 다른 ip 수 <br>`group type`이 all인 경우 0     
+    | group_all_pkts          |   그룹에 속한 패킷의 수        
+    | group_uniq_pkts	       |	 그룹에 속한 서로 다른 패킷의 수          
+    | cluster_all_cnts 		       |  클러스터의 수 (remain 포함)      
+    | biggest_cluster_index	           |  가장 `cluster_key_card`가 높은 클러스터의 고유 인덱스 번호
+    | remain_cluster_cnts	        |    remain 클러스터 카운트 (0 or 1) 1이면 있음
+    | group_cluster_cnts         |     그룹 내 클러스터 개수 (remain 미포함)
+    | biggest_cluster_uniq_ip_cnts	        |    가장 큰 클러스터에서 기준과 통신한 서로 다른 ip 수 <br>`group type`이 all인 경우 0 
+    | biggest_all_pkts         |     가장 큰 클러스터에 속한 패킷의 수       
+    | biggest_cluster_uniq_pkts         |    가장 큰 클러스터에 속한 서로 다른 패킷의 수       
+    | occurrence_most_freq_sig_pkts     |   가장 많이나온 시그니처의 빈도 수      
+    | cs_hex_list  | 가장 큰 클러스터에 속한 모든 패킷에 공통으로 등장한 시그니처 
+    | cs_str_list  | cs_hex_list 를 utf8 베이스 hex2print 포맷으로 한 부분
+    | cs_list_cnts  | cs_hex_list 에 대한 엘리먼트 수
+    | match_ratio_sig_main  | 클러스터 별 시그니처 일치율 리스트(일치율 : 모든 common_signatures 길이의 합 / 패킷 길이 평균)
+    | match_ratio_pkt_main | 클러스터 별 가장 많은 동일한 패킷 수의 일치율 리스트
+    | match_ratio_sig_remain | 클러스터가 생성되지 않은 경우, 그룹 별 시그니처 일치율 리스트
+    | match_ratio_pkt_remain | 클러스터가 생성되지 않은 경우, 그룹 별 패킷 비율 리스트 
+    | uniq_src_ip_list_topN | 전체 패킷의 Unique SRC IP Top N
+    | uniq_src_ip_list_cnts | 전체 패킷의 Unique SRC IP 갯수
+    | uniq_src_port_list_topN | 전체 패킷의 Unique SRC Port Top N
+    | uniq_src_port_list_cnts | 전체 패킷의 Unique SRC Port 갯수
+    | uniq_dst_ip_list_topN | 전체 패킷의 Unique DST IP Top N
+    | uniq_dst_ip_list_cnts | 전체 패킷의 Unique DST IP 갯수
+    | uniq_dst_port_list_topN | 전체 패킷의 Unique DST Port Top N
+    | uniq_dst_port_list_cnts | 전체 패킷의 Unique DST Port 갯수
     
 - `all_cluster_signatures.csv` : 모든 그룹의 모든 클러스터들의 정보, 정규표현식과 일치하는 시그니처의 정보가 작성 된 파일
 
     | Column                 | Explaination        
     | :------------------------ |:-------------:
-    | group	       |	<그룹 키 종류\>-<그룹 키 값>          
-    | key_card	       |	 그룹과 통신한 ip 종류       
-    | group_packet          |   그룹에 속한 패킷의 수        
-    | group_unique_packet	       |	 그룹에 속한 서로 다른 패킷의 수           
-    | cluster 		       |  클러스터의 고유 인덱스 번호<br> (-1은 클러스터가 되지 않음을 의미)
-    | cluster_packet	           |  클러스터에 속한 패킷의 수          
-    | cluster_unique_packet	        |    그룹에 속한 서로 다른 패킷의 수           
-    | occurrence of most frequent signature     |   가장 많이나온 시그니처의 빈도 수      
-    | common signatures  | 클러스터에 속한 모든 패킷에 공통으로 나타나는 시그니처 
-    | signature_match_ratio | 클러스터의 시그니처 일치율
-    | packet_match_ratio | 클러스터에 속한 가장 많은 동일한 패킷 수의 비율 
-    | labels_names  | 일치한 정규표현식이 들어있는 분류 (대분류.중분류.소분류) 리스트
-    | labels_hex  | 정규표현식과 일치한 시그니처 리스트
-    | labels_feq  | 정규표현식과 일치한 시그니처의 빈도 리스트 
-    | Num_labels  | 정규표현식과 일치한 시그니처의 수
+    | group_info	       |	<그룹 키 종류\>-<그룹 키 값>          
+    | group_uniq_ip_cnts	       |	 그룹과 통신한 서로 다른 ip 수       
+    | group_all_pkts          |   그룹에 속한 패킷의 수        
+    | group_uniq_pkts	       |	 그룹에 속한 서로 다른 패킷의 수
+    | cluster_uniq_ip_cnts	       |	 클러스터에서 기준과 통신한 ip 종류
+    | cluster_index 		       |  클러스터의 고유 인덱스 번호<br> (-1은 클러스터가 되지 않음을 의미)
+    | cluster_all_pkts	           |  클러스터에 속한 패킷의 수          
+    | cluster_uniq_pkts	        |    그룹에 속한 서로 다른 패킷의 수           
+    | occurrence_most_freq_sig_pkts     |   가장 많이나온 시그니처의 빈도 수      
+    | cs_hex_list  | 클러스터에 속한 모든 패킷에 공통으로 나타나는 시그니처 
+    | cs_str_list  | cs_hex_list 를 utf8 베이스 hex2print 포맷으로 한 부분 
+    | cs_list_cnts  | cs_hex_list 에 대한 엘리먼트 수 
+    | match_ratio_sig | 클러스터의 시그니처 일치율
+    | match_ratio_pkt | 클러스터에 속한 가장 많은 동일한 패킷 수의 비율 
+    | labels_names_list | 일치한 정규표현식이 들어있는 분류 (대분류.중분류.소분류) 리스트
+    | labels_hex_list | 정규표현식과 일치한 시그니처 리스트
+    | labels_feq_list  | 정규표현식과 일치한 시그니처의 빈도 리스트
+    | labels_list_cnts  | 정규표현식과 일치한 시그니처의 수
     
     
 - `group_summary_graph.png` : 그룹의 총 패킷 수와 가장 큰 클러스터에 포함된 패킷 수, 최빈 시그니처의 횟수를 그룹별로 표현한 막대 그래프

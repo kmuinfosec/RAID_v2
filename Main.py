@@ -4,6 +4,8 @@ from types import SimpleNamespace
 from collections import Counter
 
 from Utils import get_dir, write_csv, filter_null_payload, get_payloads_by_index, decode_ascii, encode_hex
+from Utils import hex2PrintableByte
+from Utils import CUniqCounts
 from Preprocess import preprocess
 from Group import group
 from Raid import raid
@@ -13,37 +15,52 @@ from Extract import extract
 from Match import match
 
 GROUP_SIGNATURES_COLUMN = [
-    "group",
-    "key_card",
-    "group_packet",
-    "group_unique_packet",
-    "clusters",
-    "biggest_cluster",
-    "cluster_key_card",
-    "cluster_packet",
-    "cluster_unique_packet",
-    "occurrence of most frequent signature",
-    "common signatures",
-    "num_of_clusters",
-    "signature_match_ratio",
-    "packet_match_ratio",
-    "signature_match_ratio_-1",
-    "packet_match_ratio_-1",
+    "group", # 0
+    "key_card", # 1
+    "group_packet", # 2
+    "group_unique_packet", # 3
+    "clusters", # 4
+    "biggest_cluster", # 5
+    "cluster_key_card", # 6
+    "cluster_packet", # 7
+    "cluster_unique_packet", # 8
+    "occurrence of most frequent signature", # 9
+    "common signatures", # 10
+    "num_of_clusters", # 11
+    "signature_match_ratio", # 12
+    "packet_match_ratio", # 13
+    "signature_match_ratio_-1", #14
+    "packet_match_ratio_-1", # 15
+    # add
+    "cs_str_list", #16
+    "cs_list_cnts", #17
+    "remain_cluster_cnts", #18
+    "uniq_src_ip_list_topN", #19
+    "uniq_src_ip_list_cnts", #20
+    "uniq_src_port_list_topN", #21
+    "uniq_src_port_list_cnts", #22
+    "uniq_dst_ip_list_topN", #23
+    "uniq_dst_ip_list_cnts", #24
+    "uniq_dst_port_list_topN", #25
+    "uniq_dst_port_list_cnts", #26
 ]
 
 ALL_CLUSTER_SIGNATURES_COLUMN = [
-    "group",
-    "key_card",
-    "group_packet",
-    "group_unique_packet",
-    "cluster_key_card",
-    "cluster",
-    "cluster_packet",
-    "cluster_unique_packet",
-    "occurrence of most frequent signature",
-    "common signatures",
-    "signature_match_ratio",
-    "packet_match_ratio",
+    "group", # 0
+    "key_card", # 1
+    "group_packet", # 2
+    "group_unique_packet", # 3
+    "cluster_key_card", # 4
+    "cluster", # 5
+    "cluster_packet", # 6
+    "cluster_unique_packet", #7
+    "occurrence of most frequent signature", # 8
+    "common signatures", # 9
+    "signature_match_ratio", # 10
+    "packet_match_ratio", # 11
+    # add
+    "cs_str_list", # 12
+    "cs_list_cnts", # 13
 ]
 
 KEY_DICT = {
@@ -52,11 +69,38 @@ KEY_DICT = {
     'ip_dport': ([(0, 2), (1, 4)], ["dip_dport-", "sip_dport-"], False),
 }
 
+gDictIP_PortGroup = {
+        "uniq_src_ip_list": 2, # data index
+        "uniq_dst_ip_list": 4,
+        "uniq_src_port_list": 3,
+        "uniq_dst_port_list": 5,
+        }
+gTopNtIP_PortGroup = 5
 
 def main(args):
     n = SimpleNamespace(**args)
 
     data = preprocess(n.pcap_dir, n.pcap_list, n.cpu_count, n.extension)
+
+    # UniqCnt Calculate
+    instUniqCnt = CUniqCounts(data)
+    instUniqCnt.setSummaryGroup(gDictIP_PortGroup) 
+    instUniqCnt.calculate()
+    szUniqSrcIPList = str(instUniqCnt.getTopNList("uniq_src_ip_list",
+        gTopNtIP_PortGroup)) # GROUP-18
+    nUniqSrcIPLen = instUniqCnt.getLength("uniq_src_ip_list")
+    szUniqSrcPortList = str(instUniqCnt.getTopNList("uniq_src_port_list",
+        gTopNtIP_PortGroup))
+    nUniqSrcPortLen = instUniqCnt.getLength("uniq_src_port_list")
+
+    szUniqDstIPList = str(instUniqCnt.getTopNList("uniq_dst_ip_list",
+        gTopNtIP_PortGroup))
+    nUniqDstIPLen = instUniqCnt.getLength("uniq_dst_ip_list")
+    szUniqDstPortList = str(instUniqCnt.getTopNList("uniq_dst_port_list",
+        gTopNtIP_PortGroup))
+    # GROUP-26
+    nUniqDstPortLen = instUniqCnt.getLength("uniq_dst_port_list")
+
     
     key, key_name, isall = KEY_DICT[n.group_type]
 
@@ -83,7 +127,7 @@ def main(args):
             # continue
         if len(set(payloads)) == 1:
             print("Skip: All of payloads are same in this group")
-            continue
+#            continue
         if n.earlystop and len(X) > 1000 and raid(X, n.threshold, n.vector_size, n.window_size, earlystop=True) == False:
             print("Earlystop", group_dir)
             continue
@@ -201,6 +245,8 @@ def main(args):
                         if s_p in s:
                             common_signatures_set.remove(s_p)
 
+            lst_cs_str_list, cs_list_cnts = (
+                    hex2PrintableByte(common_signatures[ci]))
             summary_list.append(
                 [
                     key_name[key_idx] + group_info[0],
@@ -215,6 +261,7 @@ def main(args):
                     common_signatures[ci],
                     round(sum([len(sig) for sig in common_signatures_set])/(sum([len(encode_hex(pay, n.israw)) for pay in c_dict["decoded payload"]])/len(c_dict["decoded AE"])), 3),
                     round(largest_number_of_packets/len(c_dict["decoded AE"]), 3),
+                    lst_cs_str_list, cs_list_cnts,
                 ]
             )
 
@@ -235,6 +282,7 @@ def main(args):
                 summary_group.append(s)
         summary_group = list(filter(lambda x: x[0] == key, summary_list))
         filtered_summary = list(filter(lambda x: x[5] != -1, summary_group))
+
         if len(filtered_summary) > 0:
             one_big_cluster = max(filtered_summary, key=lambda x: x[4])
         else:
@@ -247,15 +295,32 @@ def main(args):
         signature_match_ratio_remain= remain[10]
         packet_match_ratio_remain = remain[11]
         
+        remain_cluster_cnts = len(clusters[key]) - num_of_cluster
         one_big_cluster = (
+            # 0~ 3
             one_big_cluster[:4] +
+            # 4
             [len(clusters[key])] +
-            one_big_cluster[4:-2] +
+            # 5,6,7,8,9,10
+            one_big_cluster[4:4+6] +
+            # 11
             [num_of_cluster] +
+            # 12
             [signature_match_ratio] +
+            # 13
             [packet_match_ratio] +
+            # 14
             [signature_match_ratio_remain] +
-            [packet_match_ratio_remain]
+            # 15
+            [packet_match_ratio_remain] +
+            # 16, 17 cs_str_list,cs_list_cnts
+            [ one_big_cluster[12], one_big_cluster[13] ] +
+            # 18 remain_cluster_cnts
+            [remain_cluster_cnts] +
+            # 19 ~ 22
+            [szUniqSrcIPList, nUniqSrcIPLen, szUniqSrcPortList, nUniqSrcPortLen] +
+            # 23~ 26
+            [szUniqDstIPList, nUniqDstIPLen, szUniqDstPortList, nUniqDstPortLen]
         )
         one_big_cluster[5], one_big_cluster[6] = one_big_cluster[6], one_big_cluster[5]
         one_big_cluster_list.append(one_big_cluster)

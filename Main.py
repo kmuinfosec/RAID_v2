@@ -271,25 +271,20 @@ def main(args):
     for key in keys:
         summary_group = []
         filtered_summary = []
-        remain = None
-
-        for s in summary_list:
-            if s[5] != -1:
-                filtered_summary.append(s)
-            else:
-                remain = s
-                summary_group.append(s)
         summary_group = list(filter(lambda x: x[0] == key, summary_list))
         filtered_summary = list(filter(lambda x: x[5] != -1, summary_group))
-        filtered_summary.sort(key = lambda x: x[4], reverse=True)
+        remain = list(filter(lambda x: x[5] == -1, summary_group))[0]
+
         if len(filtered_summary) > 0:
-            one_big_cluster = max(list(filter(lambda x: x[4] == filtered_summary[0][4], summary_group)), key=lambda x: x[6])
+            max_card = max([i[4] for i in filtered_summary])
+            one_big_cluster = max(list(filter(lambda x: x[4] == summary_group[0][4], summary_group)), key=lambda x: x[6])
+            filtered_summary.sort(key = lambda x: x[6], reverse=True)
         else:
             one_big_cluster = max(summary_group, key=lambda x: x[4])
         num_of_cluster = len(filtered_summary)
-        signature_match_ratio = [clu[10] for clu in filtered_summary]
-        packet_match_ratio = [clu[11] for clu in filtered_summary]
-        if remain == None:
+        signature_match_ratio = [(clu[5], clu[10]) for clu in filtered_summary[:5]]
+        packet_match_ratio = [(clu[5], clu[11]) for clu in filtered_summary[:5]]
+        if len(remain) == 0:
             remain = [0] * len(summary_list[0])
         signature_match_ratio_remain= remain[10]
         packet_match_ratio_remain = remain[11]
@@ -305,9 +300,9 @@ def main(args):
             # 11
             [num_of_cluster] +
             # 12
-            [signature_match_ratio[:5]] +
+            [signature_match_ratio] +
             # 13
-            [packet_match_ratio[:5]] +
+            [packet_match_ratio] +
             # 14
             [signature_match_ratio_remain] +
             # 15

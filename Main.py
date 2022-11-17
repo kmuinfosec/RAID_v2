@@ -301,8 +301,8 @@ def main(args):
 
         signature_match_ratio = [(clu[5], clu[10]) for clu in filtered_summary[:5]]
         packet_match_ratio = [(clu[5], clu[11]) for clu in filtered_summary[:5]]
-        signature_match_ratio_info = [(clu[5], clu[13]) for clu in filtered_summary[:5]]
-        packet_match_ratio_info = [(clu[5], clu[14]) for clu in filtered_summary[:5]]
+        signature_match_ratio_info = [clu[13] for clu in filtered_summary[:5]]
+        packet_match_ratio_info = [clu[14] for clu in filtered_summary[:5]]
         if len(remain) == 0:
             remain = [0] * len(summary_list[0])
         signature_match_ratio_remain= remain[10]

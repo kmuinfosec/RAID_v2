@@ -90,7 +90,7 @@
 ## 2. 결과물 목록
 - `train_data.csv` : Pcap파일에서 추출한 데이터를 csv로 저장한 파일 (optional) 
 - `group_signatures.csv` : 그룹별 정보, 그룹별 가장 큰 클러스터 정보, 클러스터의 summary 정보가 작성 된 파일
-- - `biggest` : 그룹 내 가장 패킷 수가 많은 클러스터에 관한 컬럼   
+- - `biggest` : 그룹 내에서 기준과 통신한 중복 제거된 ip 수가 가장 높은 클러스터(동순위일 경우 패킷 개수 순)
 
 | Column | Explaination |
 | :-- | :--: |
@@ -99,7 +99,7 @@
 | group_all_pkts | 그룹에 속한 패킷의 수 |
 | group_uniq_pkts | 그룹에 속한 중복 제거된 패킷의 수 |
 | cluster_all_cnts | 클러스터의 수 (remain 포함) |
-| biggest_cluster_index | 가장 cluster_key_card가 높은 클러스터의 고유 인덱스 번호 |
+| biggest_cluster_index | 가장 cluster_uniq_ip_cnts가 높은 클러스터의 고유 인덱스 번호 |
 | remain_cluster_cnts | remain 클러스터 카운트 ( 0 or 1) 1이면 있음 |
 | group_cluster_cnts | 그룹 내 클러스터 수 (remain 미포함) |
 | biggest_cluster_uniq_ip_cnts | 가장 큰 클러스터에서 기준과 통신한 중복 제거된 ip 수<br/>`group type`이 all인 경우 0 |

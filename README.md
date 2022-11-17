@@ -126,10 +126,10 @@
     | Column                 | Explaination        
     | :------------------------ |:-------------:
     | group_info	       |	<그룹 키 종류\>-<그룹 키 값>          
-    | group_uniq_ip_cnts	       |	 그룹과 통신한 중복 제거된 ip 수       
+    | group_uniq_ip_cnts	       |	 그룹과 통신한 중복 제거된 ip 수 <br>`group type`이 all인 경우 0     
     | group_all_pkts          |   그룹에 속한 패킷의 수        
     | group_uniq_pkts	       |	 그룹에 속한 중복 제거된 패킷의 수
-    | cluster_uniq_ip_cnts	       |	 클러스터에서 기준과 통신한 ip 수
+    | cluster_uniq_ip_cnts	       |	 클러스터에서 기준과 통신한 중복 제거된 ip 수 <br>`group type`이 all인 경우 0
     | cluster_index 		       |  클러스터의 고유 인덱스 번호<br> (-1은 클러스터가 되지 않음을 의미)
     | cluster_all_pkts	           |  클러스터에 속한 패킷의 수          
     | cluster_uniq_pkts	        |    그룹에 속한 중복 제거된 패킷의 수           

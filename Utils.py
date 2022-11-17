@@ -4,6 +4,49 @@ import ast
 
 from datetime import datetime
 
+class CUniqCounts:
+    def __init__(self, data):
+        self.m_data = data
+        self.m_dictSummary = { }
+    def setSummaryGroup(self, dict_groups):
+        self.m_dict_groups = dict_groups
+        for key in self.m_dict_groups:
+            self.m_dictSummary[key] = { }
+    def calculate(self):
+        for idx, cur_data in enumerate(self.m_data):
+            for dict_key, pos_data in self.m_dict_groups.items():
+                cur_key_value = cur_data[pos_data]
+                dict_work = self.m_dictSummary[dict_key]
+                if ( cur_key_value in dict_work):
+                    dict_work[cur_key_value] += 1
+                else:
+                    dict_work[cur_key_value] = 1
+    def dbg_print(self):
+        for key, value in self.m_dictSummary.items():
+            print(key, value)
+    def getTopNList(self, key, topN):
+        if key in self.m_dictSummary:
+            dict_work = self.m_dictSummary[key]
+            return sorted(dict_work.items(), reverse=True, key=lambda x: x[1])[:topN]
+        return [ ]
+    def getLength(self, key):
+        if key in self.m_dictSummary:
+            dict_work = self.m_dictSummary[key]
+            return len(dict_work)
+        return 0
+
+def hex2PrintableByte(lst_hex):
+    lst_ret = [ ]
+    len_lst_hex = len(lst_hex)
+    auto_odd_fix = 0
+    for cur_hex in lst_hex:
+        if ( auto_odd_fix ):
+            if (len(cur_hex) % 2 == 1):
+                cur_hex +="0"
+        out_str=bytes.fromhex(cur_hex)
+        lst_ret.append(str(out_str))
+    return lst_ret, len_lst_hex
+
 
 def get_dir(path, dir=False):
     if not os.path.exists(path):
@@ -43,6 +86,7 @@ def parse_config(cfgs, args):
     args_dict['hh2_size'] = int(args['hh2_size']) if args['hh2_size'] else int(cfgs["DEFAULT"]['hh2_size'])
     args_dict['ratio'] = float(args['ratio']) if args['ratio'] else float(cfgs["DEFAULT"]['ratio'])
     args_dict['extension'] = args['extension'] if args['extension'] else cfgs["DEFAULT"]['extension']
+    args_dict['summary_graph'] = eval(args['summary_graph']) if args['summary_graph'] else eval(cfgs["DEFAULT"]['summary_graph'])
     
     return args_dict
 
@@ -88,3 +132,6 @@ def encode_hex(payload, israw=False):
             else:
                 ans.append(hex(ord(char))[2:].rjust(2, '0'))
     return ''.join(ans)
+
+
+

@@ -301,14 +301,14 @@ def main(args):
 
         signature_match_ratio = [(clu[5], clu[10]) for clu in filtered_summary[:5]]
         packet_match_ratio = [(clu[5], clu[11]) for clu in filtered_summary[:5]]
-        signature_match_ratio_info = [clu[13] for clu in filtered_summary[:5]]
-        packet_match_ratio_info = [clu[14] for clu in filtered_summary[:5]]
+        signature_match_ratio_info = [clu[14] for clu in filtered_summary[:5]]
+        packet_match_ratio_info = [clu[15] for clu in filtered_summary[:5]]
         if len(remain) == 0:
             remain = [0] * len(summary_list[0])
         signature_match_ratio_remain= remain[10]
         packet_match_ratio_remain = remain[11]
-        signature_match_ratio_remain_info= remain[13]
-        packet_match_ratio_remain_info = remain[14]
+        signature_match_ratio_remain_info= remain[14]
+        packet_match_ratio_remain_info = remain[15]
         
         remain_cluster_cnts = len(clusters[key]) - num_of_cluster
         one_big_cluster = (
@@ -361,7 +361,8 @@ def main(args):
     )
 
     print("Making Summary Graph")
-    SummaryGraph(n.result_path)
+    if n.summary_graph:
+        SummaryGraph(n.result_path)
 
     print("Extracting PCAP for each cluster")
     extract(packet_idx_dict, n.pcap_dir, n.cpu_count)

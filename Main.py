@@ -250,10 +250,10 @@ def main(args):
             summary_list.append(
                 [
                     key_name[key_idx] + group_info[0],
-                    len(set(group_info[1][0])),
+                    len(set(group_info[1][0])) if n.group_type != 'all' else 0,
                     len(group_info[1][1]),
                     len(group_unique_packet),
-                    len(key_card),
+                    len(key_card) if n.group_type != 'all' else 0,
                     ci,
                     len(c_dict["decoded AE"]),
                     len(set(c_dict["decoded payload"])),
@@ -267,12 +267,11 @@ def main(args):
 
     one_big_cluster_list = []
     keys = set(x[0] for x in summary_list)
+    summary_list.sort(key=lambda x: x[4], reverse=True)
     for key in keys:
         summary_group = []
         filtered_summary = []
         remain = None
-
-        summary_list = sorted(summary_list, key=lambda x: x[5])
 
         for s in summary_list:
             if s[5] != -1:
@@ -282,9 +281,9 @@ def main(args):
                 summary_group.append(s)
         summary_group = list(filter(lambda x: x[0] == key, summary_list))
         filtered_summary = list(filter(lambda x: x[5] != -1, summary_group))
-
+        filtered_summary.sort(key = lambda x: x[4], reverse=True)
         if len(filtered_summary) > 0:
-            one_big_cluster = max(filtered_summary, key=lambda x: x[4])
+            one_big_cluster = max(list(filter(lambda x: x[4] == filtered_summary[0][4], summary_group)), key=lambda x: x[6])
         else:
             one_big_cluster = max(summary_group, key=lambda x: x[4])
         num_of_cluster = len(filtered_summary)
@@ -306,9 +305,9 @@ def main(args):
             # 11
             [num_of_cluster] +
             # 12
-            [signature_match_ratio] +
+            [signature_match_ratio[:5]] +
             # 13
-            [packet_match_ratio] +
+            [packet_match_ratio[:5]] +
             # 14
             [signature_match_ratio_remain] +
             # 15

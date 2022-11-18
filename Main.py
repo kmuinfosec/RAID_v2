@@ -32,9 +32,9 @@ GROUP_SIGNATURES_COLUMN = [
     "packet_match_ratio", # 14
     "match_ratio_pkt_main_info", #15
     "signature_match_ratio_-1", #16
-    "match_ratio_sig_main_info", #17
+    "match_ratio_sig_remain_info", #17
     "packet_match_ratio_-1", #18
-    "match_ratio_pkt_main_info", #19
+    "match_ratio_pkt_remain_info", #19
     "cs_str_list", #20
     "cs_list_cnts", #21
     "remain_cluster_cnts", #22

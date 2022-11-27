@@ -152,15 +152,25 @@ def main(args):
 
         X = filter_null_payload(group_info[1][1], key_name[key_idx] + group_info[0])
         payloads = [x[0] for x in X]
-
+        
+        flag_continue = False
         if len(X) == 0:
             print("Skip: No packet with application payload in this group")
-            # continue
+            flag_continue = True
         if len(set(payloads)) == 1:
             print("Skip: All of payloads are same in this group")
-#            continue
+            flag_continue = True
         if n.earlystop and len(X) > 1000 and raid(X, n.threshold, n.vector_size, n.window_size, earlystop=True) == False:
             print("Earlystop", group_dir)
+            flag_continue = True
+        if flag_continue == True:
+            summary_list.append([
+                    key_name[key_idx] + group_info[0],
+                    len(set(group_info[1][0])) if n.group_type != 'all' else 0,
+                    len(group_info[1][1]),
+                    None,None,None,None,None,None,None,None,None,None,None,
+                    None,None,None,None,None,None,None,None,None,None,None,None,
+            ])
             continue
 
         result_dict = raid(X, n.threshold, n.vector_size, n.window_size, group_dir, uniq_count_data)

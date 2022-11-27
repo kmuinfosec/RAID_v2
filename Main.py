@@ -68,6 +68,14 @@ ALL_CLUSTER_SIGNATURES_COLUMN = [
     "all_cs_len_sum", #16
     "all_pkt_len_mean", #17
     "pkt_unique_cnts", #18
+    "uniq_src_ip_list_topN", #19
+    "uniq_src_ip_list_cnts", #20
+    "uniq_src_port_list_topN", #21
+    "uniq_src_port_list_cnts", #22
+    "uniq_dst_ip_list_topN", #23
+    "uniq_dst_ip_list_cnts", #24
+    "uniq_dst_port_list_topN", #25
+    "uniq_dst_port_list_cnts", #26
 ]
 
 KEY_DICT = {
@@ -83,6 +91,14 @@ gDictIP_PortGroup = {
         "uniq_dst_port_list": 5,
         }
 gTopNtIP_PortGroup = 5
+
+cDictIP_PortGroup = {
+        "uniq_src_ip_list": 0, # data index
+        "uniq_dst_ip_list": 2,
+        "uniq_src_port_list": 1,
+        "uniq_dst_port_list": 3,
+        }
+cTopNtIP_PortGroup = 5
 
 def main(args):
     n = SimpleNamespace(**args)
@@ -126,6 +142,11 @@ def main(args):
         dhh_dir = get_dir(group_dir, "DHH_result")
         cluster_dir = get_dir(group_dir, "Clustering_result")
 
+        uniq_count_data = []
+        for i in group_info[1][2]:
+            if i:
+                uniq_count_data.append(i)
+
         X = filter_null_payload(group_info[1][1], key_name[key_idx] + group_info[0])
         payloads = [x[0] for x in X]
 
@@ -139,7 +160,7 @@ def main(args):
             print("Earlystop", group_dir)
             continue
 
-        result_dict = raid(X, n.threshold, n.vector_size, n.window_size, group_dir)
+        result_dict = raid(X, n.threshold, n.vector_size, n.window_size, group_dir, uniq_count_data)
 
         clusters[key_name[key_idx] + group_info[0]] = list(result_dict.keys())
 
@@ -155,6 +176,23 @@ def main(args):
         # per cluster
         for ci in list(result_dict.keys()):
             c_dict = result_dict[ci]
+
+            cluUniqCnt = CUniqCounts(c_dict["uniq_count"])
+            cluUniqCnt.setSummaryGroup(cDictIP_PortGroup) 
+            cluUniqCnt.calculate()
+            cluUniqSrcIPList = str(cluUniqCnt.getTopNList("uniq_src_ip_list",
+                cTopNtIP_PortGroup)) # GROUP-18
+            clunUniqSrcIPLen = cluUniqCnt.getLength("uniq_src_ip_list")
+            cluUniqSrcPortList = str(cluUniqCnt.getTopNList("uniq_src_port_list",
+                cTopNtIP_PortGroup))
+            clunUniqSrcPortLen = cluUniqCnt.getLength("uniq_src_port_list")
+            cluUniqDstIPList = str(cluUniqCnt.getTopNList("uniq_dst_ip_list",
+                cTopNtIP_PortGroup))
+            clunUniqDstIPLen = cluUniqCnt.getLength("uniq_dst_ip_list")
+            cluUniqDstPortList = str(cluUniqCnt.getTopNList("uniq_dst_port_list",
+                cTopNtIP_PortGroup))
+            clunUniqDstPortLen = cluUniqCnt.getLength("uniq_dst_port_list")
+
             common_signatures[ci] = set()
             # extracting signatures and writing on csv
             candidate_X = get_payloads_by_index(X, c_dict['index'])
@@ -276,7 +314,14 @@ def main(args):
                     all_cs_len_sum,
                     all_pkt_len_mean,
                     most_freq_pkt_uniq_cnts,
-                    
+                    cluUniqSrcIPList,
+                    clunUniqSrcIPLen,
+                    cluUniqSrcPortList,
+                    clunUniqSrcPortLen,
+                    cluUniqDstIPList,
+                    clunUniqDstIPLen,
+                    cluUniqDstPortList,
+                    clunUniqDstPortLen,
                 ]
             )
 

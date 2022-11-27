@@ -15,9 +15,10 @@ def get_topn_key(data, key, key_name, card_th):
         for k in key:
             card_key = pkt[k[0]]
             if not card_key in key_dict[k[0]]:
-                key_dict[k[0]][card_key] = [[], []]
+                key_dict[k[0]][card_key] = [[], [], []]
             key_dict[k[0]][card_key][0].append(pkt[k[1]])
             key_dict[k[0]][card_key][1].append([pkt[-1], pkt[-3], pkt[-2]])
+            key_dict[k[0]][card_key][2].append([pkt[2], pkt[3], pkt[4], pkt[5]])
 
     topn_data = [[] for _ in range(len(key))]
     for idx, k in enumerate(key):
@@ -30,7 +31,7 @@ def get_topn_key(data, key, key_name, card_th):
 
 
 def all_keys(data):
-    return [[("all", [{"all"}, [[i[-1],i[-3],i[-2]] for i in data]])]]
+    return [[("all", [{"all"}, [[i[-1],i[-3],i[-2]] for i in data], [[i[2], i[3], i[4], i[5]] if i[-1] != "" else [] for i in data]])]]
 
 
 def group(data, key, key_name, card_th, all):

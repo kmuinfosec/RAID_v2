@@ -85,10 +85,10 @@ KEY_DICT = {
 }
 
 gDictIP_PortGroup = {
-        "uniq_src_ip_list": 2, # data index
-        "uniq_dst_ip_list": 4,
-        "uniq_src_port_list": 3,
-        "uniq_dst_port_list": 5,
+        "uniq_src_ip_list": 0, # data index
+        "uniq_dst_ip_list": 2,
+        "uniq_src_port_list": 1,
+        "uniq_dst_port_list": 3,
         }
 gTopNtIP_PortGroup = 5
 
@@ -104,26 +104,6 @@ def main(args):
     n = SimpleNamespace(**args)
 
     data = preprocess(n.pcap_dir, n.pcap_list, n.cpu_count, n.extension)
-
-    # UniqCnt Calculate
-    instUniqCnt = CUniqCounts(data)
-    instUniqCnt.setSummaryGroup(gDictIP_PortGroup) 
-    instUniqCnt.calculate()
-    szUniqSrcIPList = str(instUniqCnt.getTopNList("uniq_src_ip_list",
-        gTopNtIP_PortGroup)) # GROUP-18
-    nUniqSrcIPLen = instUniqCnt.getLength("uniq_src_ip_list")
-    szUniqSrcPortList = str(instUniqCnt.getTopNList("uniq_src_port_list",
-        gTopNtIP_PortGroup))
-    nUniqSrcPortLen = instUniqCnt.getLength("uniq_src_port_list")
-
-    szUniqDstIPList = str(instUniqCnt.getTopNList("uniq_dst_ip_list",
-        gTopNtIP_PortGroup))
-    nUniqDstIPLen = instUniqCnt.getLength("uniq_dst_ip_list")
-    szUniqDstPortList = str(instUniqCnt.getTopNList("uniq_dst_port_list",
-        gTopNtIP_PortGroup))
-    # GROUP-26
-    nUniqDstPortLen = instUniqCnt.getLength("uniq_dst_port_list")
-
     
     key, key_name, isall = KEY_DICT[n.group_type]
 
@@ -132,6 +112,7 @@ def main(args):
     summary_list = []
     clusters = {}
     packet_idx_dict = dict()
+    group_uniq_count_dict = {}
 
     group_key_pair = []
     for key_idx in range(len(key)):
@@ -141,11 +122,33 @@ def main(args):
         group_dir = get_dir(n.result_path, key_name[key_idx] + group_info[0])
         dhh_dir = get_dir(group_dir, "DHH_result")
         cluster_dir = get_dir(group_dir, "Clustering_result")
-
+        
         uniq_count_data = []
         for i in group_info[1][2]:
             if i:
                 uniq_count_data.append(i)
+
+        # UniqCnt Calculate
+        instUniqCnt = CUniqCounts(uniq_count_data)
+        instUniqCnt.setSummaryGroup(gDictIP_PortGroup) 
+        instUniqCnt.calculate()
+        szUniqSrcIPList = str(instUniqCnt.getTopNList("uniq_src_ip_list",
+            gTopNtIP_PortGroup)) # GROUP-18
+        nUniqSrcIPLen = instUniqCnt.getLength("uniq_src_ip_list")
+        szUniqSrcPortList = str(instUniqCnt.getTopNList("uniq_src_port_list",
+            gTopNtIP_PortGroup))
+        nUniqSrcPortLen = instUniqCnt.getLength("uniq_src_port_list")
+
+        szUniqDstIPList = str(instUniqCnt.getTopNList("uniq_dst_ip_list",
+            gTopNtIP_PortGroup))
+        nUniqDstIPLen = instUniqCnt.getLength("uniq_dst_ip_list")
+        szUniqDstPortList = str(instUniqCnt.getTopNList("uniq_dst_port_list",
+            gTopNtIP_PortGroup))
+        # GROUP-26
+        nUniqDstPortLen = instUniqCnt.getLength("uniq_dst_port_list")
+        
+        group_uniq_count_dict[key_name[key_idx] + group_info[0]] = [szUniqSrcIPList, nUniqSrcIPLen, szUniqSrcPortList, nUniqSrcPortLen, \
+                                                                    szUniqDstIPList, nUniqDstIPLen, szUniqDstPortList, nUniqDstPortLen]
 
         X = filter_null_payload(group_info[1][1], key_name[key_idx] + group_info[0])
         payloads = [x[0] for x in X]
@@ -333,7 +336,10 @@ def main(args):
         filtered_summary = []
         summary_group = list(filter(lambda x: x[0] == key, summary_list))
         filtered_summary = list(filter(lambda x: x[5] != -1, summary_group))
-        remain = list(filter(lambda x: x[5] == -1, summary_group))[0]
+        remain = list(filter(lambda x: x[5] == -1, summary_group))
+
+        if remain:
+            remain = remain[0]
 
         if len(filtered_summary) > 0:
             max_card = max([i[4] for i in filtered_summary])
@@ -385,14 +391,12 @@ def main(args):
             [ one_big_cluster[12], one_big_cluster[13] ] +
             # 22 remain_cluster_cnts
             [remain_cluster_cnts] +
-            # 23 ~ 27
-            [szUniqSrcIPList, nUniqSrcIPLen, szUniqSrcPortList, nUniqSrcPortLen] +
-            # 28~ 32
-            [szUniqDstIPList, nUniqDstIPLen, szUniqDstPortList, nUniqDstPortLen]
+            # 23 ~ 32
+            group_uniq_count_dict[key_name[key_idx] + group_info[0]]
         )
         one_big_cluster[5], one_big_cluster[6] = one_big_cluster[6], one_big_cluster[5]
         one_big_cluster_list.append(one_big_cluster)
-    
+
     write_csv(
         os.path.join(n.result_path, "all_cluster_signatures.csv"),
         ALL_CLUSTER_SIGNATURES_COLUMN,

@@ -98,17 +98,14 @@
 | group_uniq_ip_cnts | 그룹과 통신한 중복 제거된 ip 수<br/>`group type`이 all인 경우 0 |
 | group_all_pkts | 그룹에 속한 패킷의 수 |
 | group_uniq_pkts | 그룹에 속한 중복 제거된 패킷의 수 |
-| cluster_all_cnts | 클러스터의 수 (remain 포함) |
 | biggest_cluster_index | 가장 cluster_uniq_ip_cnts가 높은 클러스터의 고유 인덱스 번호 |
-| remain_cluster_cnts | remain 클러스터 카운트 ( 0 or 1) 1이면 있음 |
 | group_cluster_cnts | 그룹 내 클러스터 수 (remain 미포함) |
 | biggest_cluster_uniq_ip_cnts | 가장 큰 클러스터에서 기준과 통신한 중복 제거된 ip 수<br/>`group type`이 all인 경우 0 |
 | biggest_all_pkts | 가장 큰 클러스터에 속한 패킷의 수 |
 | biggest_cluster_uniq_pkts | 가장 큰 클러스터에 속한 중복 제거된 패킷의 수 |
 | occurrence_most_freq_sig_pkts | 가장 많이 나온 시그니처의 빈도 |
 | cs_hex_list | 가장 큰 클러스터에 속한 모든 패킷에 공통으로 등장한 시그니처 |
-| cs_str_list | cs_hex_list 를 utf8 베이스 hex2print 포맷으로 한 부분 |
-| cs_list_cnts | cs_hex_list 에 대한 엘리먼트의 수 |
+| cluster_all_cnts | 클러스터의 수 (remain 포함) |
 | match_ratio_sig_main | 클러스터 별 시그니처 일치율 리스트(일치율 : 모든 common_signatures 길이의 합 / 패킷 길이 평균)<br/>(패킷 개수 top5 클러스터) |
 | match_ratio_sig_main_info | (모든 common_signatures 길이의 합 , 패킷 길이 평균) 리스트 |
 | match_ratio_pkt_main | 클러스터 별 가장 많은 동일한 패킷 수의 일치율 리스트<br/>(패킷 개수 top5 클러스터) |
@@ -117,16 +114,19 @@
 | match_ratio_sig_remain_info | match_ratio_sig의 (분자, 분모) : (all_cs_len_sum, all_pkt_len_mean) 리스트 |
 | match_ratio_pkt_remain | 클러스터가 생성되지 않은 경우, 그룹 별 패킷 비율 리스트 |
 | match_ratio_pkt_remain_info | match_ratio_pkt의 (분자, 분모) : ( most_freq_pkt_uniq_cnts, cluster_all_pkts) 리스트 |
-| uniq_src_ip_list_topN | 전체 패킷의 중복 제거된 SRC IP Top N |
-| uniq_src_ip_list_cnts | 전체 패킷의 중복 제거된 SRC IP 수 |
-| uniq_src_port_list_topN | 전체 패킷의 중복 제거된 SRC Port Top N |
-| uniq_src_port_list_cnts | 전체 패킷의 중복 제거된 SRC Port 수 |
-| uniq_dst_ip_list_topN | 전체 패킷의 중복 제거된 DST IP Top N |
-| uniq_dst_ip_list_cnts | 전체 패킷의 중복 제거된 DST IP 수 |
-| uniq_dst_port_list_topN | 전체 패킷의 중복 제거된 DST Port Top N |
-| uniq_dst_port_list_cnts | 전체 패킷의 중복 제거된 DST Port 수 |
+| cs_str_list | cs_hex_list 를 utf8 베이스 hex2print 포맷으로 한 부분 |
+| cs_list_cnts | cs_hex_list 에 대한 엘리먼트의 수 |
+| remain_cluster_cnts | remain 클러스터 카운트 ( 0 or 1) 1이면 있음 |
+| uniq_src_ip_list_topN | 그룹 내 전체 패킷의 중복 제거된 SRC IP Top N |
+| uniq_src_ip_list_cnts | 그룹 내 전체 패킷의 중복 제거된 SRC IP 수 |
+| uniq_src_port_list_topN | 그룹 내 전체 패킷의 중복 제거된 SRC Port Top N |
+| uniq_src_port_list_cnts | 그룹 내 전체 패킷의 중복 제거된 SRC Port 수 |
+| uniq_dst_ip_list_topN | 그룹 내 전체 패킷의 중복 제거된 DST IP Top N |
+| uniq_dst_ip_list_cnts | 그룹 내 전체 패킷의 중복 제거된 DST IP 수 |
+| uniq_dst_port_list_topN | 그룹 내 전체 패킷의 중복 제거된 DST Port Top N |
+| uniq_dst_port_list_cnts | 그룹 내 전체 패킷의 중복 제거된 DST Port 수 |
     
-- `all_cluster_signatures.csv` : 모든 그룹의 모든 클러스터들의 정보, 정규표현식과 일치하는 시그니처의 정보가 작성 된 파일ㅜㅜㅜ
+- `all_cluster_signatures.csv` : 모든 그룹의 모든 클러스터들의 정보, 정규표현식과 일치하는 시그니처의 정보가 작성 된 파일
 
 | Column | Explaination |
 | :-- | :--: |
@@ -140,19 +140,27 @@
 | cluster_uniq_pkts | 그룹에 속한 서로 다른 패킷의 수 |
 | occurrence_most_freq_sig_pkts | 가장 많이나온 시그니처의 빈도 |
 | cs_hex_list | 클러스터에 속한 모든 패킷에 공통으로 나타나는 시그니처 |
-| cs_str_list | cs_hex_list 를 utf8 베이스 hex2print 포맷으로 한 부분 |
-| cs_list_cnts | cs_hex_list 에 대한 엘리먼트 수 |
 | match_ratio_sig | 클러스터의 시그니처 일치율 |
 | match_ratio_pkt | 클러스터에 속한 가장 많은 동일한 패킷 수의 비율 |
-| labels_names_list | 일치한 정규표현식이 들어있는 분류 (대분류.중분류.소분류) 리스트 |
-| labels_hex_list | 정규표현식과 일치한 시그니처 리스트 |
-| labels_feq_list | 정규표현식과 일치한 시그니처의 빈도 리스트 |
-| labels_list_cnts | 정규표현식과 일치한 시그니처의 수 |
+| cs_str_list | cs_hex_list 를 utf8 베이스 hex2print 포맷으로 한 부분 |
+| cs_list_cnts | cs_hex_list 에 대한 엘리먼트 수 |
 | match_ratio_sig_info | match_ratio_sig의 (분자, 분모) : (all_cs_len_sum, all_pkt_len_mean) |
 | match_ratio_pkt_info | match_ratio_pkt의 (분자, 분모) : ( most_freq_pkt_uniq_cnts, cluster_all_pkts) |
 | all_cs_len_sum | 모든 common_signatures 길이의 합 |
 | all_pkt_len_mean | 모든 패킷 길이 평균 |
 | most_freq_pkt_uniq_cnts | 클러스터 내 가장 많은 동일한 패킷의 수 |
+| uniq_src_ip_list_topN | 클러스터 내 전체 패킷의 중복 제거된 SRC IP Top N |
+| uniq_src_ip_list_cnts | 클러스터 내 전체 패킷의 중복 제거된 SRC IP 수 |
+| uniq_src_port_list_topN | 클러스터 내 전체 패킷의 중복 제거된 SRC Port Top N |
+| uniq_src_port_list_cnts | 클러스터 내 전체 패킷의 중복 제거된 SRC Port 수 |
+| uniq_dst_ip_list_topN | 클러스터 내 전체 패킷의 중복 제거된 DST IP Top N |
+| uniq_dst_ip_list_cnts | 클러스터 내 전체 패킷의 중복 제거된 DST IP 수 |
+| uniq_dst_port_list_topN | 클러스터 내 전체 패킷의 중복 제거된 DST Port Top N |
+| uniq_dst_port_list_cnts | 클러스터 내 전체 패킷의 중복 제거된 DST Port 수 |
+| labels_names_list | 일치한 정규표현식이 들어있는 분류 (대분류.중분류.소분류) 리스트 |
+| labels_hex_list | 정규표현식과 일치한 시그니처 리스트 |
+| labels_feq_list | 정규표현식과 일치한 시그니처의 빈도 리스트 |
+| labels_list_cnts | 정규표현식과 일치한 시그니처의 수 |
 
 ```
 match_ratio_sig = all_cs_len_sum / all_pkt_len_mean

@@ -13,6 +13,7 @@ from DHHUtils import doubleHeavyHitters
 from SummaryGraph import SummaryGraph
 from Extract import extract
 from Match import match
+from collections import Counter
 
 GROUP_SIGNATURES_COLUMN = [
     "group", # 0
@@ -84,20 +85,7 @@ KEY_DICT = {
     'ip_dport': ([(0, 2), (1, 4)], ["dip_dport-", "sip_dport-"], False),
 }
 
-gDictIP_PortGroup = {
-        "uniq_src_ip_list": 0, # data index
-        "uniq_dst_ip_list": 2,
-        "uniq_src_port_list": 1,
-        "uniq_dst_port_list": 3,
-        }
 gTopNtIP_PortGroup = 5
-
-cDictIP_PortGroup = {
-        "uniq_src_ip_list": 0, # data index
-        "uniq_dst_ip_list": 2,
-        "uniq_src_port_list": 1,
-        "uniq_dst_port_list": 3,
-        }
 cTopNtIP_PortGroup = 5
 
 def main(args):
@@ -112,12 +100,12 @@ def main(args):
     summary_list = []
     clusters = {}
     packet_idx_dict = dict()
-    group_uniq_count_dict = {}
 
     group_key_pair = []
     for key_idx in range(len(key)):
         group_key_pair += [(key_idx, group_info) for group_info in topn_data[key_idx]]
     
+    group_counter = { }
     for key_idx, group_info in tqdm(group_key_pair, desc='Processing RAID and DHH'):
         group_dir = get_dir(n.result_path, key_name[key_idx] + group_info[0])
         dhh_dir = get_dir(group_dir, "DHH_result")
@@ -126,29 +114,7 @@ def main(args):
         uniq_count_data = []
         for i in group_info[1][2]:
             if i:
-                uniq_count_data.append(i)
-
-        # UniqCnt Calculate
-        instUniqCnt = CUniqCounts(uniq_count_data)
-        instUniqCnt.setSummaryGroup(gDictIP_PortGroup) 
-        instUniqCnt.calculate()
-        szUniqSrcIPList = str(instUniqCnt.getTopNList("uniq_src_ip_list",
-            gTopNtIP_PortGroup)) # GROUP-18
-        nUniqSrcIPLen = instUniqCnt.getLength("uniq_src_ip_list")
-        szUniqSrcPortList = str(instUniqCnt.getTopNList("uniq_src_port_list",
-            gTopNtIP_PortGroup))
-        nUniqSrcPortLen = instUniqCnt.getLength("uniq_src_port_list")
-
-        szUniqDstIPList = str(instUniqCnt.getTopNList("uniq_dst_ip_list",
-            gTopNtIP_PortGroup))
-        nUniqDstIPLen = instUniqCnt.getLength("uniq_dst_ip_list")
-        szUniqDstPortList = str(instUniqCnt.getTopNList("uniq_dst_port_list",
-            gTopNtIP_PortGroup))
-        # GROUP-26
-        nUniqDstPortLen = instUniqCnt.getLength("uniq_dst_port_list")
-        
-        group_uniq_count_dict[key_name[key_idx] + group_info[0]] = [szUniqSrcIPList, nUniqSrcIPLen, szUniqSrcPortList, nUniqSrcPortLen, \
-                                                                    szUniqDstIPList, nUniqDstIPLen, szUniqDstPortList, nUniqDstPortLen]
+                uniq_count_data.append(i)   
 
         X = filter_null_payload(group_info[1][1], key_name[key_idx] + group_info[0])
         payloads = [x[0] for x in X]
@@ -174,11 +140,16 @@ def main(args):
             ])
             continue
 
-        result_dict = raid(X, n.threshold, n.vector_size, n.window_size, group_dir, uniq_count_data)
+        result_dict = raid(X, n.threshold, n.vector_size, n.window_size, uniq_count_data, group_dir)
 
         clusters[key_name[key_idx] + group_info[0]] = list(result_dict.keys())
 
         packet_idx_dict[group_dir] = dict()
+
+        group_sip = Counter()
+        group_dip = Counter()
+        group_sport = Counter()
+        group_dport = Counter()
         for cluster_idx in result_dict.keys():
             if cluster_idx not in packet_idx_dict[group_dir].keys():
                 packet_idx_dict[group_dir][cluster_idx] = []
@@ -191,21 +162,24 @@ def main(args):
         for ci in list(result_dict.keys()):
             c_dict = result_dict[ci]
 
-            cluUniqCnt = CUniqCounts(c_dict["uniq_count"])
-            cluUniqCnt.setSummaryGroup(cDictIP_PortGroup) 
-            cluUniqCnt.calculate()
-            cluUniqSrcIPList = str(cluUniqCnt.getTopNList("uniq_src_ip_list",
-                cTopNtIP_PortGroup)) # GROUP-18
-            clunUniqSrcIPLen = cluUniqCnt.getLength("uniq_src_ip_list")
-            cluUniqSrcPortList = str(cluUniqCnt.getTopNList("uniq_src_port_list",
-                cTopNtIP_PortGroup))
-            clunUniqSrcPortLen = cluUniqCnt.getLength("uniq_src_port_list")
-            cluUniqDstIPList = str(cluUniqCnt.getTopNList("uniq_dst_ip_list",
-                cTopNtIP_PortGroup))
-            clunUniqDstIPLen = cluUniqCnt.getLength("uniq_dst_ip_list")
-            cluUniqDstPortList = str(cluUniqCnt.getTopNList("uniq_dst_port_list",
-                cTopNtIP_PortGroup))
-            clunUniqDstPortLen = cluUniqCnt.getLength("uniq_dst_port_list")
+            uniq_sip = Counter(c_dict['uniq_sip'])
+            uniq_sport = Counter(c_dict['uniq_sport'])
+            uniq_dip = Counter(c_dict['uniq_dip'])
+            uniq_dport = Counter(c_dict['uniq_dport'])
+
+            cluUniqSrcIPList = uniq_sip.most_common(cTopNtIP_PortGroup)
+            clunUniqSrcIPLen = len(uniq_sip.keys())
+            cluUniqSrcPortList = uniq_sport.most_common(cTopNtIP_PortGroup)
+            clunUniqSrcPortLen = len(uniq_sport.keys())
+            cluUniqDstIPList = uniq_dip.most_common(cTopNtIP_PortGroup)
+            clunUniqDstIPLen = len(uniq_dip.keys())
+            cluUniqDstPortList = uniq_dport.most_common(cTopNtIP_PortGroup)
+            clunUniqDstPortLen = len(uniq_dport.keys())
+
+            group_sip += uniq_sip
+            group_sport += uniq_sport
+            group_dip += uniq_dip
+            group_dport += uniq_dport
 
             common_signatures[ci] = set()
             # extracting signatures and writing on csv
@@ -338,7 +312,8 @@ def main(args):
                     clunUniqDstPortLen,
                 ]
             )
-
+        group_counter[key_name[key_idx] + group_info[0]] = [group_sip, group_sport, group_dip, group_dport]
+        
     one_big_cluster_list = []
     keys = set(x[0] for x in summary_list)
     summary_list.sort(key=lambda x: x[4], reverse=True)
@@ -402,8 +377,22 @@ def main(args):
             [ one_big_cluster[12], one_big_cluster[13] ] +
             # 22 remain_cluster_cnts
             [remain_cluster_cnts] +
-            # 23 ~ 32
-            group_uniq_count_dict[key]
+            # 23
+            [list(group_counter[key][0].most_common(gTopNtIP_PortGroup)), \
+            # 24
+            len(group_counter[key][0].keys()), \
+            # 25
+            list(group_counter[key][1].most_common(gTopNtIP_PortGroup)), \
+            # 26
+            len(group_counter[key][1].keys()), \
+            # 27
+            list(group_counter[key][2].most_common(gTopNtIP_PortGroup)), \
+            # 28
+            len(group_counter[key][2].keys()), \
+            # 29
+            list(group_counter[key][3].most_common(gTopNtIP_PortGroup)), \
+            # 30
+            len(group_counter[key][3].keys())]
         )
         one_big_cluster[5], one_big_cluster[6] = one_big_cluster[6], one_big_cluster[5]
         one_big_cluster_list.append(one_big_cluster)

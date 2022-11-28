@@ -18,8 +18,8 @@ def raid(
     th,
     vec_size,
     win_size,
+    uniq_count_data,
     save_path=False,
-    uniq_count_data = False,
     earlystop=False,
     sample=1000,
     detect_rate=0.4,
@@ -52,7 +52,10 @@ def raid(
                     "decoded payload": [],
                     "index": [],
                     "idx": [[], []],
-                    "uniq_count": [],
+                    "uniq_sip": [],
+                    "uniq_sport" : [],
+                    "uniq_dip" : [],
+                    "uniq_dport" : []
                 }
 
             ans[label]["raw payload"].append(payloads[idx])
@@ -62,7 +65,11 @@ def raid(
             ans[label]["index"].append(idx)
             ans[label]["idx"][1].append(data[idx][2])
             ans[label]["idx"][0].append(data[idx][1])
-            ans[label]["uniq_count"].append(uniq_count_data[idx])
+            ans[label]["uniq_sip"].append(uniq_count_data[idx][0])
+            ans[label]["uniq_sport"].append(uniq_count_data[idx][1])
+            ans[label]["uniq_dip"].append(uniq_count_data[idx][2])
+            ans[label]["uniq_dport"].append(uniq_count_data[idx][3])
+            
 
         if save_path:
             with open(os.path.join(save_path, "result_data_merge.pkl"), "wb") as f:

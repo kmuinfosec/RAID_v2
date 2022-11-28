@@ -170,6 +170,7 @@ def main(args):
                     len(group_info[1][1]),
                     None,None,None,None,None,None,None,None,None,None,None,
                     None,None,None,None,None,None,None,None,None,None,None,None,
+                    None,None,None,None,None,None,None,None
             ])
             continue
 

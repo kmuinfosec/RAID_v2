@@ -392,7 +392,7 @@ def main(args):
             # 22 remain_cluster_cnts
             [remain_cluster_cnts] +
             # 23 ~ 32
-            group_uniq_count_dict[key_name[key_idx] + group_info[0]]
+            group_uniq_count_dict[key]
         )
         one_big_cluster[5], one_big_cluster[6] = one_big_cluster[6], one_big_cluster[5]
         one_big_cluster_list.append(one_big_cluster)

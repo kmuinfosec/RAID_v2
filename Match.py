@@ -87,6 +87,15 @@ def match(result_path, regex_path):
     for idx in range(len(all_cluster['group'])):
         g = all_cluster['group'][idx]
         c = str(all_cluster['cluster'][idx])
+        
+        if c == '-1' or g==-1:
+            
+            all_cluster['labels_names'].append(None)
+            all_cluster['labels_hex'].append(None)
+            all_cluster['labels_feq'].append(None)
+            all_cluster['Num_labels'].append(None)
+            continue
+        
         all_cluster['labels_names'].append(str(total[g][c][0]))
         all_cluster['labels_hex'].append(str(total[g][c][1]))
         all_cluster['labels_feq'].append(str(total[g][c][2]))

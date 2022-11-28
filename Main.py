@@ -106,6 +106,7 @@ def main(args):
         group_key_pair += [(key_idx, group_info) for group_info in topn_data[key_idx]]
     
     group_counter = { }
+    
     for key_idx, group_info in tqdm(group_key_pair, desc='Processing RAID and DHH'):
         group_dir = get_dir(n.result_path, key_name[key_idx] + group_info[0])
         dhh_dir = get_dir(group_dir, "DHH_result")
@@ -119,28 +120,35 @@ def main(args):
         X = filter_null_payload(group_info[1][1], key_name[key_idx] + group_info[0])
         payloads = [x[0] for x in X]
         
-        flag_continue = False
+        group_sip = Counter()
+        group_dip = Counter()
+        group_sport = Counter()
+        group_dport = Counter()
+        
+        continue_flag = False
         if len(X) == 0:
             print("Skip: No packet with application payload in this group")
-            flag_continue = True
-        # elif (payloads_card := len(set(payloads))) == 1:
+            continue_flag = True
+        #elif (payloads_card := len(set(payloads))) == 1:
         #     print("Skip: All of payloads are same in this group")
             # flag_continue = True
         elif earlystop_flag := (n.earlystop and len(X) > 1000 and raid(X, n.threshold, n.vector_size, n.window_size, earlystop=True) == False):
             print("Earlystop", group_dir)
-            flag_continue = True
-        if flag_continue == True:
+            continue_flag = True
+        #continue_flag=True # 지워라 
+        if continue_flag == True:
+            clusters[key_name[key_idx] + group_info[0]] = [] # 오류 나서 넣는거 
             summary_list.append([
                     key_name[key_idx] + group_info[0],
                     len(set(group_info[1][0])) if n.group_type != 'all' else 0,
                     len(group_info[1][1]),
-                    1,None,None,None,None,None,None,None,None,None,None,
-                    None,None,None,None,None,None,None,None,None,None,None,None,
-                    None,None,None,None,None,None,None,None
-            ])
+                    None,0,-1]+[None]*(len(ALL_CLUSTER_SIGNATURES_COLUMN)-6)
+            )
+            group_counter[key_name[key_idx] + group_info[0]] = [Counter(),Counter(),Counter(),Counter()]
             if earlystop_flag:
                 summary_list[-1][3] = len(set(group_info[1][1])) # group unique packets for earlystop
             continue
+        
         payloads_card = len(set(payloads))
         result_dict = raid(X, n.threshold, n.vector_size, n.window_size, uniq_count_data, group_dir, payloads_card = payloads_card)
 
@@ -148,10 +156,7 @@ def main(args):
 
         packet_idx_dict[group_dir] = dict()
 
-        group_sip = Counter()
-        group_dip = Counter()
-        group_sport = Counter()
-        group_dport = Counter()
+        
         for cluster_idx in result_dict.keys():
             if cluster_idx not in packet_idx_dict[group_dir].keys():
                 packet_idx_dict[group_dir][cluster_idx] = []

@@ -60,10 +60,10 @@ ALL_CLUSTER_SIGNATURES_COLUMN = [
     "cluster_unique_packet", #7
     "occurrence of most frequent signature", # 8
     "common signatures", # 9
-    "signature_match_ratio", # 10
-    "packet_match_ratio", # 11
-    "cs_str_list", # 12
-    "cs_list_cnts", # 13
+    "cs_str_list", # 10
+    "cs_list_cnts", # 11
+    "signature_match_ratio", # 12
+    "packet_match_ratio", # 13
     "match_ratio_sig_info", #14
     "match_ratio_pkt_info", #15
     "all_cs_len_sum", #16
@@ -123,10 +123,10 @@ def main(args):
         if len(X) == 0:
             print("Skip: No packet with application payload in this group")
             flag_continue = True
-        if len(set(payloads)) == 1:
-            print("Skip: All of payloads are same in this group")
-            flag_continue = True
-        if n.earlystop and len(X) > 1000 and raid(X, n.threshold, n.vector_size, n.window_size, earlystop=True) == False:
+        # elif (payloads_card := len(set(payloads))) == 1:
+        #     print("Skip: All of payloads are same in this group")
+            # flag_continue = True
+        elif earlystop_flag := (n.earlystop and len(X) > 1000 and raid(X, n.threshold, n.vector_size, n.window_size, earlystop=True) == False):
             print("Earlystop", group_dir)
             flag_continue = True
         if flag_continue == True:
@@ -134,13 +134,15 @@ def main(args):
                     key_name[key_idx] + group_info[0],
                     len(set(group_info[1][0])) if n.group_type != 'all' else 0,
                     len(group_info[1][1]),
-                    None,None,None,None,None,None,None,None,None,None,None,
+                    1,None,None,None,None,None,None,None,None,None,None,
                     None,None,None,None,None,None,None,None,None,None,None,None,
                     None,None,None,None,None,None,None,None
             ])
+            if earlystop_flag:
+                summary_list[-1][3] = len(set(group_info[1][1])) # group unique packets for earlystop
             continue
-
-        result_dict = raid(X, n.threshold, n.vector_size, n.window_size, uniq_count_data, group_dir)
+        payloads_card = len(set(payloads))
+        result_dict = raid(X, n.threshold, n.vector_size, n.window_size, uniq_count_data, group_dir, payloads_card = payloads_card)
 
         clusters[key_name[key_idx] + group_info[0]] = list(result_dict.keys())
 
@@ -157,7 +159,7 @@ def main(args):
 
         # has common signatures for each cluster
         common_signatures = dict()
-        max_card = -1
+
         # per cluster
         for ci in list(result_dict.keys()):
             c_dict = result_dict[ci]
@@ -186,7 +188,7 @@ def main(args):
             candidate_X = get_payloads_by_index(X, c_dict['index'])
             decode_X = [decode_ascii(x) for x in candidate_X]
             dhh_result = doubleHeavyHitters(
-                decode_X, hh1_size=n.hh1_size, hh2_size=n.hh2_size, ratio=n.ratio, deduplication=n.deduplication
+                decode_X, hh1_size=n.hh1_size, hh2_size=n.hh2_size, ratio=n.ratio, deduplication=n.deduplication, packets_card=len(set(decode_X))
             )
             ret = [
                 [encode_hex(x[0], n.israw), x[1]]
@@ -294,9 +296,9 @@ def main(args):
                     len(set(c_dict["decoded payload"])),
                     ret[0][1] if len(ret) > 0 else 0,
                     common_signatures[ci],
+                    lst_cs_str_list, cs_list_cnts,
                     round(all_cs_len_sum/all_pkt_len_mean,3),
                     round(most_freq_pkt_uniq_cnts/cluster_all_pkts, 3),
-                    lst_cs_str_list, cs_list_cnts,
                     (all_cs_len_sum,all_pkt_len_mean),
                     (most_freq_pkt_uniq_cnts,cluster_all_pkts),
                     all_cs_len_sum,

@@ -68,10 +68,15 @@ def doubleHeavyHitters(
     hh1_size: int = 512,
     hh2_size: int = 512,
     ratio: float = 0.8,
-    deduplication: bool = False
+    deduplication: bool = False,
+    packets_card = None
 ) -> dict:
     heavy_hitter1, heavy_hitter2 = HeavyHitter(hh1_size), HeavyHitter(hh2_size)
+    if not packets_card:
+        packets_card = len(set(packets))
 
+    if packets_card == 1:
+        return {packets[0] : len(packets)}
     for packet in tqdm(packets):
 
         signset = set()

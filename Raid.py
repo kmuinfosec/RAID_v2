@@ -23,16 +23,23 @@ def raid(
     earlystop=False,
     sample=1000,
     detect_rate=0.4,
+    payloads_card = None
 ):
     payloads = [i[0] for i in data]
-
+    if not payloads_card:
+        payloads_card = len(set(payloads))
     if earlystop:
         X = random.sample(X, sample)
+        if payloads_card == 1:
+            return False
+    
+    if payloads_card != 1:
+        X = contents2count(payloads, vec_size=vec_size, win_size=win_size)
 
-    X = contents2count(payloads, vec_size=vec_size, win_size=win_size)
-
-    prev_label_list = prototypeClustering(X, th, opt1=False)
-    label_list = hierarchicalClustering(X, prev_label_list, th)
+        prev_label_list = prototypeClustering(X, th, opt1=False)
+        label_list = hierarchicalClustering(X, prev_label_list, th)
+    else:
+        label_list = [0] * len(X)
 
     if not earlystop:
         chunks_list = []

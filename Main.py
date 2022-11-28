@@ -322,10 +322,12 @@ def main(args):
         filtered_summary = []
         summary_group = list(filter(lambda x: x[0] == key, summary_list))
         filtered_summary = list(filter(lambda x: x[5] != -1, summary_group))
-        remain = list(filter(lambda x: x[5] == -1, summary_group))
+        remain_list = list(filter(lambda x: x[5] == -1, summary_group))
 
-        if remain:
-            remain = remain[0]
+        if (len(remain_list) > 0):
+            remain = list(filter(lambda x: x[5] == -1, summary_group))[0]
+        else:
+            remain = []
 
         if len(filtered_summary) > 0:
             max_card = max([i[4] for i in filtered_summary])
@@ -409,9 +411,11 @@ def main(args):
         one_big_cluster_list,
     )
 
-    print("Making Summary Graph")
     if n.summary_graph:
+        print("Making Summary Graph")
         SummaryGraph(n.result_path)
+    else:
+        print("Skip Summary Graph")
 
     print("Extracting PCAP for each cluster")
     extract(packet_idx_dict, n.pcap_dir, n.cpu_count)

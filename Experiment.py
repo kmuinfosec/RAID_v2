@@ -6,7 +6,7 @@ from Utils import parse_config
 
 ARG_STORE = ["pcap_dir", "pcap_list", "regex_path", "cpu_count", "result_path", 'result_dir',\
         "threshold", "card_th", "group", "vector_size", "window_size", "hh1_size",\
-        "hh2_size", "ratio", "extension", "summary_graph"]
+        "hh2_size", "ratio", "extension", "summary_graph", "sig_th"]
 
 ARG_STORE_TRUE = ["israw", "deduplication", "count", "earlystop"]
 

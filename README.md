@@ -84,6 +84,8 @@
     | -hh2_size		      | int     	   | DHH의 2번째 HeavyHitter의 크기
     | -ratio            | float       | DHH의 n-garm을 concat하여 시그니처로 만드는 강도
     | -extension            | string       | 분석을 진행할 파일의 확장자
+    | -summary_graph    | float       | 그래프 출력 여부
+    | - sig_th      | float     | 사용자 지정 공통 시그니처 비율(cs_th_hex_list에 반영)
 
 
 
@@ -125,6 +127,8 @@
 | uniq_dst_ip_list_cnts | 그룹 내 전체 패킷의 중복 제거된 DST IP 수 |
 | uniq_dst_port_list_topN | 그룹 내 전체 패킷의 중복 제거된 DST Port Top N |
 | uniq_dst_port_list_cnts | 그룹 내 전체 패킷의 중복 제거된 DST Port 수 |
+| cs_th_str_list | 
+    "cs_th_list_cnts", # 33
     
 - `all_cluster_signatures.csv` : 모든 그룹의 모든 클러스터들의 정보, 정규표현식과 일치하는 시그니처의 정보가 작성 된 파일
 
@@ -161,6 +165,9 @@
 | labels_hex_list | 정규표현식과 일치한 시그니처 리스트 |
 | labels_feq_list | 정규표현식과 일치한 시그니처의 빈도 리스트 |
 | labels_list_cnts | 정규표현식과 일치한 시그니처의 수 |
+| cs_th_hex_list | 클러스터에서 `sig_th`이상의 패킷 비율에서 공통으로 나타나는 시그니처 |
+| cs_th_str_list | cs_th_hex_list 를 utf8 베이스 hex2print 포맷으로 한 부분 |
+| cs_th_list_cnts | cs_th_hex_list 에 대한 엘리먼트 수 |
 
 ```
 match_ratio_sig = all_cs_len_sum / all_pkt_len_mean

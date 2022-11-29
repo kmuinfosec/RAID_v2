@@ -87,8 +87,7 @@ def match(result_path, regex_path):
     for idx in range(len(all_cluster['group'])):
         g = all_cluster['group'][idx]
         c = str(all_cluster['cluster'][idx])
-        
-        if c == '-1' or g==-1:
+        if c == 'nan':
             
             all_cluster['labels_names'].append(None)
             all_cluster['labels_hex'].append(None)

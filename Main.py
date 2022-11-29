@@ -5,7 +5,7 @@ from collections import Counter
 
 from Utils import get_dir, write_csv, filter_null_payload, get_payloads_by_index, decode_ascii, encode_hex
 from Utils import hex2PrintableByte
-from Utils import CUniqCounts
+# from Utils import CUniqCounts
 from Preprocess import preprocess
 from Group import group
 from Raid import raid
@@ -47,6 +47,9 @@ GROUP_SIGNATURES_COLUMN = [
     "uniq_dst_ip_list_cnts", #28
     "uniq_dst_port_list_topN", #29
     "uniq_dst_port_list_cnts", #30
+    "th_common signatures", # 31
+    "cs_th_str_list", # 32
+    "cs_th_list_cnts", # 33
 ]
 
 ALL_CLUSTER_SIGNATURES_COLUMN = [
@@ -77,6 +80,9 @@ ALL_CLUSTER_SIGNATURES_COLUMN = [
     "uniq_dst_ip_list_cnts", #24
     "uniq_dst_port_list_topN", #25
     "uniq_dst_port_list_cnts", #26
+    "th_common signatures", # 27
+    "cs_th_str_list", # 28
+    "cs_th_list_cnts", # 29
 ]
 
 KEY_DICT = {
@@ -129,20 +135,16 @@ def main(args):
         if len(X) == 0:
             print("Skip: No packet with application payload in this group")
             continue_flag = True
-        #elif (payloads_card := len(set(payloads))) == 1:
-        #     print("Skip: All of payloads are same in this group")
-            # flag_continue = True
         elif earlystop_flag := (n.earlystop and len(X) > 1000 and raid(X, n.threshold, n.vector_size, n.window_size, earlystop=True) == False):
             print("Earlystop", group_dir)
             continue_flag = True
-        #continue_flag=True # 지워라 
         if continue_flag == True:
-            clusters[key_name[key_idx] + group_info[0]] = [] # 오류 나서 넣는거 
+            clusters[key_name[key_idx] + group_info[0]] = []
             summary_list.append([
                     key_name[key_idx] + group_info[0],
                     len(set(group_info[1][0])) if n.group_type != 'all' else 0,
                     len(group_info[1][1]),
-                    None,0,-1]+[None]*(len(ALL_CLUSTER_SIGNATURES_COLUMN)-6)
+                    0,-1,None]+[None]*(len(ALL_CLUSTER_SIGNATURES_COLUMN)-6)
             )
             group_counter[key_name[key_idx] + group_info[0]] = [Counter(),Counter(),Counter(),Counter()]
             if earlystop_flag:
@@ -223,15 +225,19 @@ def main(args):
                 ["signature", "frequency"],
                 ret,
             )
-
+            th_common_signatures = []
+            # ?
             for x, _ in ret:
-                flag = True
+                count = 0
+                pkt_count = len(c_dict[compare_key])
                 for payload in c_dict[compare_key]:
-                    if x not in payload:
-                        flag = False
-                        break
-                if flag:
+                    if x in payload:
+                        count += 1
+                
+                if count == pkt_count:
                     common_signatures[ci].add(x)
+                if count/pkt_count >= n.sig_th:
+                    th_common_signatures.append(x)
 
             indices = dict()
             anchor_packet = c_dict["decoded payload"][0]
@@ -246,7 +252,6 @@ def main(args):
             )
 
             common_signatures[ci] = list(indices.keys())
-
             csv_data = [
                 [
                     list(c_dict["common string"]),
@@ -285,10 +290,15 @@ def main(args):
 
             lst_cs_str_list, cs_list_cnts = (
                     hex2PrintableByte(common_signatures[ci]))
+            lst_cs_th_str_list, cs_th_list_cnts = (
+                    hex2PrintableByte(th_common_signatures)
+            )
+
             cluster_all_pkts = len(c_dict["decoded AE"])
             all_cs_len_sum = sum([len(sig) for sig in common_signatures_set])
             all_pkt_len_mean = (sum([len(encode_hex(pay, n.israw)) for pay in c_dict["decoded payload"]])/len(c_dict["decoded AE"]))
             most_freq_pkt_uniq_cnts = Counter(c_dict["decoded payload"]).most_common()[0][1]
+            
             summary_list.append(
                 [
                     key_name[key_idx] + group_info[0],
@@ -317,6 +327,9 @@ def main(args):
                     clunUniqDstIPLen,
                     cluUniqDstPortList,
                     clunUniqDstPortLen,
+                    th_common_signatures,
+                    lst_cs_th_str_list,
+                    cs_th_list_cnts
                 ]
             )
         group_counter[key_name[key_idx] + group_info[0]] = [group_sip, group_sport, group_dip, group_dport]
@@ -328,11 +341,11 @@ def main(args):
         summary_group = []
         filtered_summary = []
         summary_group = list(filter(lambda x: x[0] == key, summary_list))
-        filtered_summary = list(filter(lambda x: x[5] != -1, summary_group))
-        remain_list = list(filter(lambda x: x[5] == -1, summary_group))
+        filtered_summary = list(filter(lambda x: (x[5] != -1 and x[5] != None), summary_group))
+        remain_list = list(filter(lambda x: (x[5] == -1 or x[5] == None), summary_group))
 
         if (len(remain_list) > 0):
-            remain = list(filter(lambda x: x[5] == -1, summary_group))[0]
+            remain = list(filter(lambda x: (x[5] == -1 or x[5] == None), summary_group))[0]
         else:
             remain = []
 
@@ -383,7 +396,7 @@ def main(args):
             # 19
             [packet_match_ratio_remain_info] +
             # 20, 21 cs_str_list,cs_list_cnts
-            [ one_big_cluster[12], one_big_cluster[13] ] +
+            [ one_big_cluster[10], one_big_cluster[11] ] +
             # 22 remain_cluster_cnts
             [remain_cluster_cnts] +
             # 23
@@ -401,7 +414,9 @@ def main(args):
             # 29
             list(group_counter[key][3].most_common(gTopNtIP_PortGroup)), \
             # 30
-            len(group_counter[key][3].keys())]
+            len(group_counter[key][3].keys())] + 
+            # 31~33
+            one_big_cluster[27:30]
         )
         one_big_cluster[5], one_big_cluster[6] = one_big_cluster[6], one_big_cluster[5]
         one_big_cluster_list.append(one_big_cluster)

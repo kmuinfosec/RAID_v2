@@ -87,6 +87,7 @@ def parse_config(cfgs, args):
     args_dict['ratio'] = float(args['ratio']) if args['ratio'] else float(cfgs["DEFAULT"]['ratio'])
     args_dict['extension'] = args['extension'] if args['extension'] else cfgs["DEFAULT"]['extension']
     args_dict['summary_graph'] = eval(args['summary_graph']) if args['summary_graph'] else eval(cfgs["DEFAULT"]['summary_graph'])
+    args_dict['sig_th'] = float(args['sig_th']) if args['sig_th'] else float(cfgs["DEFAULT"]['sig_th'])
     
     return args_dict
 

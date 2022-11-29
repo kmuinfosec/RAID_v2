@@ -127,8 +127,9 @@
 | uniq_dst_ip_list_cnts | 그룹 내 전체 패킷의 중복 제거된 DST IP 수 |
 | uniq_dst_port_list_topN | 그룹 내 전체 패킷의 중복 제거된 DST Port Top N |
 | uniq_dst_port_list_cnts | 그룹 내 전체 패킷의 중복 제거된 DST Port 수 |
-| cs_th_str_list | 
-    "cs_th_list_cnts", # 33
+| cs_th_hex_list | 가장 큰 클러스터에서 `sig_th`이상의 패킷 비율에서 공통으로 나타나는 시그니처 |
+| cs_th_str_list | cs_th_hex_list 를 utf8 베이스 hex2print 포맷으로 한 부분 |
+| cs_th_list_cnts | cs_th_hex_list 에 대한 엘리먼트 수 |
     
 - `all_cluster_signatures.csv` : 모든 그룹의 모든 클러스터들의 정보, 정규표현식과 일치하는 시그니처의 정보가 작성 된 파일
 

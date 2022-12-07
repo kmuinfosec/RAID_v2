@@ -49,16 +49,22 @@ def match(result_path, regex_path):
         for (category1, category2, category3), match_list in regex_dict.items():
             
             result = []
-            for regex in match_list:
-                pattern = re.compile(regex)
+            for cluster_num in signature_dict.keys():
+                for signature, frequency in signature_dict[cluster_num]:
 
-                for cluster_num in signature_dict.keys():
-                    for signature, frequency in signature_dict[cluster_num]:
-                        if pattern.search(signature) != None:
-                            total[group][cluster_num][0].append('.'.join([category1, category2, category3]))
-                            total[group][cluster_num][1].append(signature)
-                            total[group][cluster_num][2].append(frequency)
-                            result.append((cluster_num, signature, frequency))
+                    is_matched = True
+                    for regex in match_list:
+                        pattern = re.compile(regex)
+
+                        if pattern.search(signature) == None:
+                            is_matched = False
+                            break
+
+                    if is_matched:
+                        total[group][cluster_num][0].append('.'.join([category1, category2, category3]))
+                        total[group][cluster_num][1].append(signature)
+                        total[group][cluster_num][2].append(frequency)
+                        result.append((cluster_num, signature, frequency))
             
             if len(result)==0:
                 continue

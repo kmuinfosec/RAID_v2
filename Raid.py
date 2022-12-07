@@ -39,7 +39,7 @@ def raid(
         prev_label_list = prototypeClustering(X, th, opt1=False)
         label_list = hierarchicalClustering(X, prev_label_list, th)
     else:
-        label_list = [0] * len(X)
+        label_list = [0] * len(payloads)
 
     if not earlystop:
         chunks_list = []

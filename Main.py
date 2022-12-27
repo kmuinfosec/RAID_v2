@@ -111,7 +111,7 @@ def main(args):
     for key_idx in range(len(key)):
         group_key_pair += [(key_idx, group_info) for group_info in topn_data[key_idx]]
     
-    group_counter = { }
+    group_counter = {}
     
     for key_idx, group_info in tqdm(group_key_pair, desc='Processing RAID and DHH'):
         group_dir = get_dir(n.result_path, key_name[key_idx] + group_info[0])
@@ -229,15 +229,9 @@ def main(args):
                 ret,
             )
             th_common_signatures = []
-            # ?
-            for x, _ in ret:
-                count = 0
-                pkt_count = len(c_dict[compare_key])
-                for payload in c_dict[compare_key]:
-                    if x in payload:
-                        count += 1
-                
-                if count == pkt_count:
+            pkt_count = len(c_dict[compare_key])
+            for x, count in ret:
+                if count >= pkt_count:
                     common_signatures[ci].add(x)
                 if count/pkt_count >= n.sig_th:
                     th_common_signatures.append(x)

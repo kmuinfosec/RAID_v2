@@ -135,9 +135,12 @@ def main(args):
         if len(X) == 0:
             print("Skip: No packet with application payload in this group")
             continue_flag = True
-        elif earlystop_flag := (n.earlystop and len(X) > 1000 and raid(X, n.threshold, n.vector_size, n.window_size, earlystop=True) == False):
+
+        earlystop_flag = (n.earlystop and len(X) > 1000 and raid(X, n.threshold, n.vector_size, n.window_size, earlystop=True) == False)
+        if earlystop_flag:
             print("Earlystop", group_dir)
             continue_flag = True
+            
         if continue_flag == True:
             clusters[key_name[key_idx] + group_info[0]] = []
             summary_list.append([

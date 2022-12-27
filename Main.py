@@ -317,7 +317,7 @@ def main(args):
                     (all_cs_len_sum,all_pkt_len_mean),
                     (most_freq_pkt_uniq_cnts,cluster_all_pkts),
                     all_cs_len_sum,
-                    all_pkt_len_mean,
+                    round(all_pkt_len_mean, 3),
                     most_freq_pkt_uniq_cnts,
                     cluUniqSrcIPList,
                     clunUniqSrcIPLen,
